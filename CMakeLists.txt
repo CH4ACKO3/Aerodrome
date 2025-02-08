@@ -19,6 +19,24 @@ if(NOT pybind11_POPULATED)
     add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
 endif()
 
-# 生成 Python 模块
-pybind11_add_module(simulator src/simulator/simulator.cpp)
-install(TARGETS simulator LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/Lib/site-packages)
+include_directories(src/simulator)
+
+file(GLOB ENV_FILES "src/simulator/envs/*.cpp")
+
+# 2. 为每个 .cpp 文件生成单独的 .pyd 文件
+foreach(ENV_FILE ${ENV_FILES})
+    # 获取文件名（去除路径）
+    get_filename_component(ENV_NAME ${ENV_FILE} NAME_WE)
+
+    # 使用 pybind11_add_module 生成模块
+    pybind11_add_module(${ENV_NAME} ${ENV_FILE})
+
+    # 设置输出目录（可选，指定最终 .pyd 文件的输出位置）
+    set_target_properties(${ENV_NAME} PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
+    )
+
+    # 安装模块到 Python 的 site-packages 目录
+    install(TARGETS ${ENV_NAME}
+            LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/simulator)
+endforeach()

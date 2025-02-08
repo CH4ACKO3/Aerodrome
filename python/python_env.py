@@ -1,16 +1,13 @@
 import os
 import sys
-
 pyd_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../build/Release'))
 sys.path.append(pyd_path)
 
-import simulator
+import DerivedEnv
 
 class PythonEnv:
     def __init__(self):
-
-        self.env = simulator.SimulatorEnv()
-
+        self.env = DerivedEnv.Env()
 
     def interact(self):
         while True:
@@ -24,8 +21,8 @@ class PythonEnv:
                     },
                     "other_info": [1, 2, 3]
                 }
-                result_dict = self.env.process_input(input_dict)
-                print("result: ", result_dict)
+                result = self.env.step(input_dict)
+                print(result)
             except ValueError:
                 print("input a valid integer")
 
