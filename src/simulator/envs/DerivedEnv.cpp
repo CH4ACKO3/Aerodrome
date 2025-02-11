@@ -7,20 +7,21 @@ namespace py = pybind11;
 
 class Env : public BaseEnv {
 public:
-    Env() : state(0) {}
+    Env() {
+        inner_state = 0;
+    }
 
     ~Env() {}
 
     py::object reset() override {
-        state = 0;
         py::dict result;
-        result["state"] = state;
+        inner_state = 0;
         return result;
     }
 
-
     py::object step(const py::object& input_dict) override {
-        py::dict result;
+        inner_state ++;
+        py::dict result = input_dict;
         if (input_dict.contains("value"))
         {
             try {
@@ -29,19 +30,19 @@ public:
             } catch (const std::exception &e) {
                 result["error"] = std::string("failed to convert value to int: ") + e.what();
             }
-
         }
         else
         {
             result["error"] = "error: input_dict is not a dict";
         }
         
-        result["state"] = state;
+        result["inner_state"] = inner_state;
         return result;
     }
 
 private:
-    int state;
+    int inner_state = 0;
+
 };
 
 PYBIND11_MODULE(DerivedEnv, m) {

@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "aerodrome"
+version = "0.1.0"
+description = "An init version"
+authors = ["Chack <ch4acko3@outlook.com>"]  # 作者格式为字符串
+license = "MIT"  # 许可证格式为字符串
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []  # 可以根据需要添加依赖
+
+# 配置包的位置
+packages = [
+    { include = "aerodrome", from = "python" }
+]
+
+[build-system]
+requires = ["setuptools", "wheel", "poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

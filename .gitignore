@@ -4,7 +4,7 @@
 __pycache__/
 venv/
 env/
-*.pyd
+# *.pyd
 *.db
 *.log
 
@@ -29,3 +29,4 @@ cmake_install.cmake
 # misc
 todo_for_cursor.txt
 src/simulator_info.txt
+.vscode/

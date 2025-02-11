@@ -5,21 +5,16 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 include(FetchContent)
-
-# 拉取并设置 pybind11
 FetchContent_Declare(
-    pybind11
-    GIT_REPOSITORY https://github.com/pybind/pybind11.git
-    GIT_TAG v2.10.0
+  pybind11
+  GIT_REPOSITORY https://github.com/pybind/pybind11.git
+  GIT_TAG v2.10.0
 )
-
-FetchContent_GetProperties(pybind11)
-if(NOT pybind11_POPULATED)
-    FetchContent_Populate(pybind11)
-    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
-endif()
+FetchContent_MakeAvailable(pybind11)
 
 include_directories(src/simulator)
+
+set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/python/aerodrome/envs/c_envs")
 
 file(GLOB ENV_FILES "src/simulator/envs/*.cpp")
 
@@ -33,10 +28,28 @@ foreach(ENV_FILE ${ENV_FILES})
 
     # 设置输出目录（可选，指定最终 .pyd 文件的输出位置）
     set_target_properties(${ENV_NAME} PROPERTIES
-        LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
+        LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+        RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+        ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}
     )
 
+    set_target_properties(${ENV_NAME} PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIR}
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR}
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIR}
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR}
+        ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIR}
+        ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR}
+    )
+
+    add_custom_command(TARGET ${ENV_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${ENV_NAME}.lib
+        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${ENV_NAME}.exp
+        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${ENV_NAME}.pdb
+    )
+
+
     # 安装模块到 Python 的 site-packages 目录
-    install(TARGETS ${ENV_NAME}
-            LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/simulator)
+    # install(TARGETS ${ENV_NAME}
+    #         LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/simulator)
 endforeach()
