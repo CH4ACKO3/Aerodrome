@@ -1,17 +1,18 @@
 #include "BaseEnv.h"
+#include "BaseEnv.cpp"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <string>
 
 namespace py = pybind11;
 
-class Env : public BaseEnv {
+class DerivedEnv : public BaseEnv {
 public:
-    Env() {
+    DerivedEnv() {
         inner_state = 0;
     }
 
-    ~Env() {}
+    ~DerivedEnv() {}
 
     py::object reset() override {
         py::dict result;
@@ -46,12 +47,8 @@ private:
 };
 
 PYBIND11_MODULE(DerivedEnv, m) {
-    py::class_<BaseEnv>(m, "BaseEnv")
-        .def("reset", &BaseEnv::reset)
-        .def("step", &BaseEnv::step);
-
-    py::class_<Env, BaseEnv>(m, "Env")
+    py::class_<DerivedEnv, BaseEnv>(m, "DerivedEnv")
         .def(py::init<>())
-        .def("reset", &Env::reset)
-        .def("step", &Env::step);
+        .def("reset", &DerivedEnv::reset)
+        .def("step", &DerivedEnv::step);
 }

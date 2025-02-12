@@ -3,7 +3,7 @@
 from abc import ABC
 from aerodrome.registration import registry
 
-class BaseEnv(ABC):
+class Env(ABC):
     def __init__(self):
         pass
 
