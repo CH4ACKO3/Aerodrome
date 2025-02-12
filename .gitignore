@@ -30,3 +30,4 @@ cmake_install.cmake
 todo_for_cursor.txt
 src/simulator_info.txt
 .vscode/
+*.old
