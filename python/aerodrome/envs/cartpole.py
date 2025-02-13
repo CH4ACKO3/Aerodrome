@@ -1,10 +1,10 @@
 from aerodrome.core import Env
 from aerodrome.registration import register
-from aerodrome.envs.c_envs import BaseEnv, CartPoleEnv
+from aerodrome.envs.c_envs.CartPoleEnv import CartPoleEnv
 
 class CartPole(Env):
     def __init__(self):
-        self.env = CartPoleEnv.CartPoleEnv()
+        self.env = CartPoleEnv()
 
     def reset(self):
         output_dict = self.env.reset()

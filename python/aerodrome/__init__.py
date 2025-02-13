@@ -2,6 +2,7 @@ import importlib
 import os
 
 from aerodrome.core import *
+from aerodrome.envs.c_envs import BaseEnv
 
 envs_dir = os.path.join(os.path.dirname(__file__), "envs")
 

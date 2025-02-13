@@ -15,4 +15,4 @@ python/aerodrome/envs/example.py
 python/aerodrome/envs/c_envs/BaseEnv.cp39-win_amd64.pyd
 python/aerodrome/envs/c_envs/CartPoleEnv.cp39-win_amd64.pyd
 python/aerodrome/envs/c_envs/DerivedEnv.cp39-win_amd64.pyd
-test/test.py
+python/aerodrome/envs/c_envs/Space3D.cp39-win_amd64.pyd

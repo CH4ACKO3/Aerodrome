@@ -8,6 +8,7 @@ obs, info = env.reset()
 print(obs, info)
 for i in range(100):
     obs, reward, terminated, truncated, info = env.step(1)
+    print(obs, reward, terminated, truncated, info)
     if terminated or truncated:
         break
-    print(obs, reward, terminated, truncated, info)
+    
