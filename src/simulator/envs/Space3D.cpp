@@ -156,9 +156,11 @@ class Space3D : public BaseEnv
 {
 protected:
     std::vector<Object3D> objects;
-    double dt;
-    double eps;
-    std::string integrator;
+    double tau; // 时间步长
+    double dt; // 积分步长
+    double eps; // 自洽性容差
+    std::string integrator; // 积分器类型
+    int integrate_steps; // 每步积分次数
 
     Object3D d(const Object3D& object)
     {
@@ -211,7 +213,10 @@ protected:
     }
 
 public:
-    Space3D(double dt = 1e-2, double eps = 1e-6, std::string integrator = "euler") : dt(dt), eps(eps), integrator(integrator) {}
+    Space3D(double tau = 1e-2, double eps = 1e-6, std::string integrator = "euler", int integrate_steps = 1) : tau(tau), eps(eps), integrator(integrator), integrate_steps(integrate_steps)
+    {
+        dt = tau / integrate_steps;
+    }
 
     void add_object(const Object3D& object)
     {
@@ -245,23 +250,33 @@ public:
 
     void kinematics_step()
     {
-        for (auto& object : objects)
+        for (int i = 0; i < integrate_steps; ++i)
         {
-            if (integrator == "euler")
+            for (auto& object : objects)
             {
-                object = object + d(object) * dt;
-            }
-            else if (integrator == "midpoint")
-            {
-                object = object + d(object + d(object) * dt * 0.5) * dt;
-            }
-            else if (integrator == "rk45")
-            {
-                Object3D k1 = d(object);
-                Object3D k2 = d(object + k1 * dt * 0.5);
-                Object3D k3 = d(object + k2 * dt * 0.5);
-                Object3D k4 = d(object + k3 * dt);
-                object = object + (k1 + k2 * 2 + k3 * 2 + k4) * dt / 6;
+                if (integrator == "euler")
+                {
+                    object = object + d(object) * dt;
+                }
+                else if (integrator == "midpoint")
+                {
+                    object = object + d(object + d(object) * dt * 0.5) * dt;
+                }
+                else if (integrator == "rk23")
+                {
+                    Object3D k1 = d(object);
+                    Object3D k2 = d(object + k1 * dt * 0.5);
+                    Object3D k3 = d(object + k2 * dt * 0.5);
+                    object = object + (k1 + k2 * 2 + k3) * dt / 4;
+                }
+                else if (integrator == "rk45")
+                {
+                    Object3D k1 = d(object);
+                    Object3D k2 = d(object + k1 * dt * 0.5);
+                    Object3D k3 = d(object + k2 * dt * 0.5);
+                    Object3D k4 = d(object + k3 * dt);
+                    object = object + (k1 + k2 * 2 + k3 * 2 + k4) * dt / 6;
+                }
             }
         }
     }
@@ -278,7 +293,7 @@ PYBIND11_MODULE(Space3D, m)
         .def("__truediv__", &Object3D::operator/);
 
     py::class_<Space3D, BaseEnv>(m, "Space3D")
-        .def(py::init<double, double, std::string>(), pybind11::arg("dt") = 0.01, pybind11::arg("eps") = 0.000001, pybind11::arg("integrator") = "euler")
+        .def(py::init<double, double, std::string, int>(), pybind11::arg("tau") = 0.01, pybind11::arg("eps") = 0.000001, pybind11::arg("integrator") = "euler", pybind11::arg("integrate_steps") = 1)
         .def("add_object", &Space3D::add_object)
         .def("check_consistency", &Space3D::check_consistency)
         .def("to_dict", &Space3D::to_dict)

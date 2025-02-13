@@ -3,7 +3,7 @@ from aerodrome.registration import register
 from aerodrome.envs.c_envs.Space3D import Space3D, Object3D
 from math import *
 
-env = Space3D(0.01, 0.001, "euler")
+env = Space3D(0.01, 0.001, "rk45", 1)
 object_dict = {
     "name": "test",
     "pos": [0.0, 0.0, 0.0],
@@ -27,6 +27,6 @@ print(object.to_dict())
 env.add_object(object)
 print(env.to_dict())
 
-for i in range(100):
+for i in range(1000):
     env.kinematics_step()
 print(env.to_dict())
