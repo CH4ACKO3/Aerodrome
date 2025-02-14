@@ -40,6 +40,7 @@ public:
         if (!input_dict.contains("action"))
         {
             info["error"] = "input_dict does not contain 'action'";
+            result["info"] = info;
             return result;
         }
 
@@ -51,12 +52,14 @@ public:
         catch (const std::exception &e)
         {
             info["error"] = std::string("failed to convert action to int: ") + e.what();
+            result["info"] = info;
             return result;
         }
 
         if (action != 0 && action != 1)
         {
             info["error"] = "action must be either 0 or 1";
+            result["info"] = info;
             return result;
         }
 
@@ -87,6 +90,7 @@ public:
         else
         {
             info["error"] = "unknown kinematic integrator";
+            result["info"] = info;
             return result;
         }
 

@@ -19,6 +19,7 @@ env/
 *.so
 build/
 dist/
+bui
 
 # CMake
 CMakeFiles/

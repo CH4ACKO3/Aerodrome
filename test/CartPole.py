@@ -1,5 +1,5 @@
 import aerodrome
-import aerodrome.registration
+# import aerodrome.registration
 # print(aerodrome.registry)
 # aerodrome.registration.register("example-v0", "aerodrome.envs.example:ExampleEnv")
 
