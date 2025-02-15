@@ -33,3 +33,4 @@ src/simulator_info.txt
 .vscode/
 *.old
 ref/
+temp.*

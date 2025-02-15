@@ -17,3 +17,4 @@ python/aerodrome/simulator/envs/CartPoleEnv.cp39-win_amd64.pyd
 python/aerodrome/simulator/envs/DerivedEnv.cp39-win_amd64.pyd
 python/aerodrome/simulator/envs/Space3D.cp39-win_amd64.pyd
 python/aerodrome/simulator/objects/Object3D.cp39-win_amd64.pyd
+python/aerodrome/simulator/objects/WingedCone2D.cp39-win_amd64.pyd
