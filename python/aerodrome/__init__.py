@@ -2,8 +2,20 @@ import importlib
 import os
 
 from aerodrome.core import *
-from aerodrome.envs.c_envs import BaseEnv
+# from aerodrome.envs.c_envs import BaseEnv
 
+# C++ envs
+envs_dir = os.path.join(os.path.dirname(__file__), "simulator")
+
+for root, dirs, files in os.walk(envs_dir):
+    for file in files:
+        if file.endswith(".pyd"):
+            relative_path = os.path.relpath(os.path.join(root, file), os.path.dirname(__file__))[:-4].replace('\\', '.')
+            module_name = f"aerodrome.{relative_path}"
+            importlib.import_module(module_name)
+
+
+# Python envs
 envs_dir = os.path.join(os.path.dirname(__file__), "envs")
 
 for file in os.listdir(envs_dir):

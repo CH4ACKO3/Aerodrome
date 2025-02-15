@@ -1,6 +1,3 @@
-#ifndef BASE_ENV_H
-#define BASE_ENV_H
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <string>
@@ -16,4 +13,8 @@ public:
     virtual py::object step(const py::object& action) = 0;
 };
 
-#endif // BASE_ENV_H
+PYBIND11_MODULE(BaseEnv, m) {
+    py::class_<BaseEnv>(m, "BaseEnv")
+        .def("reset", &BaseEnv::reset)
+        .def("step", &BaseEnv::step);
+}

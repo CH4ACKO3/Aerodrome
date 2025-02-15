@@ -1,6 +1,7 @@
 from aerodrome.core import Env
 from aerodrome.registration import register
-from aerodrome.envs.c_envs.Space3D import Space3D, Object3D
+from aerodrome.simulator.objects.Object3D import Object3D
+from aerodrome.simulator.envs.Space3D import Space3D
 from math import *
 
 env = Space3D(0.01, 0.001, "rk45", 1)

@@ -9,27 +9,46 @@ set(PYBIND11_DIR include/pybind11)
 add_subdirectory(${PYBIND11_DIR} EXCLUDE_FROM_ALL)
 
 include_directories(src/simulator)
+include_directories(src/simulator/envs)
+include_directories(src/simulator/objects)
 
-set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/python/aerodrome/envs/c_envs")
+set(OUTPUT_BASE_DIR "${CMAKE_SOURCE_DIR}/python/aerodrome/simulator")
 
+# 1. 收集需要处理的源文件
 file(GLOB ENV_FILES "src/simulator/envs/*.cpp")
+file(GLOB OBJECT_FILES "src/simulator/objects/*.cpp")
+file(GLOB BASE_ENV_FILES "src/simulator/BaseEnv.cpp")
 
-# 2. 为每个 .cpp 文件生成单独的 .pyd 文件
-foreach(ENV_FILE ${ENV_FILES})
-    # 获取文件名（去除路径）
-    get_filename_component(ENV_NAME ${ENV_FILE} NAME_WE)
+# 2. 合并所有文件
+list(APPEND ALL_FILES ${ENV_FILES} ${OBJECT_FILES} ${BASE_ENV_FILES})
 
-    # 使用 pybind11_add_module 生成模块
-    pybind11_add_module(${ENV_NAME} ${ENV_FILE})
+# 3. 为每个 .cpp 文件生成对应的 .pyd 文件
+foreach(FILE ${ALL_FILES})
+    # 获取文件的基本名称，不带路径
+    get_filename_component(FILE_NAME ${FILE} NAME_WE)
 
-    # 设置输出目录（可选，指定最终 .pyd 文件的输出位置）
-    set_target_properties(${ENV_NAME} PROPERTIES
+    # 提取文件的相对路径
+    get_filename_component(FILE_DIR ${FILE} DIRECTORY)
+
+    message(STATUS "FILE_DIR: ${FILE_DIR}")
+    string(REPLACE "src/simulator" "python/aerodrome/simulator" FILE_OUTPUT_DIR ${FILE_DIR})
+
+    # 创建输出目录
+    set(OUTPUT_DIR "${FILE_OUTPUT_DIR}")
+    file(MAKE_DIRECTORY ${OUTPUT_DIR})
+
+    # 使用 pybind11_add_module 来生成模块
+    pybind11_add_module(${FILE_NAME} ${FILE})
+
+    # 设置生成的 .pyd 文件的输出路径
+    set_target_properties(${FILE_NAME} PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}
         RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}
         ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}
     )
 
-    set_target_properties(${ENV_NAME} PROPERTIES
+    # 处理调试/发布版的输出路径
+    set_target_properties(${FILE_NAME} PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIR}
         LIBRARY_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR}
         RUNTIME_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIR}
@@ -38,14 +57,10 @@ foreach(ENV_FILE ${ENV_FILES})
         ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR}
     )
 
-    add_custom_command(TARGET ${ENV_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${ENV_NAME}.lib
-        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${ENV_NAME}.exp
-        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${ENV_NAME}.pdb
+    # 删除不需要的文件后缀
+    add_custom_command(TARGET ${FILE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${FILE_NAME}.lib
+        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${FILE_NAME}.exp
+        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${FILE_NAME}.pdb
     )
-
-
-    # 安装模块到 Python 的 site-packages 目录
-    # install(TARGETS ${ENV_NAME}
-    #         LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/simulator)
 endforeach()

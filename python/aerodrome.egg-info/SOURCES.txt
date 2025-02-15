@@ -12,7 +12,8 @@ python/aerodrome.egg-info/dependency_links.txt
 python/aerodrome.egg-info/top_level.txt
 python/aerodrome/envs/cartpole.py
 python/aerodrome/envs/example.py
-python/aerodrome/envs/c_envs/BaseEnv.cp39-win_amd64.pyd
-python/aerodrome/envs/c_envs/CartPoleEnv.cp39-win_amd64.pyd
-python/aerodrome/envs/c_envs/DerivedEnv.cp39-win_amd64.pyd
-python/aerodrome/envs/c_envs/Space3D.cp39-win_amd64.pyd
+python/aerodrome/simulator/BaseEnv.cp39-win_amd64.pyd
+python/aerodrome/simulator/envs/CartPoleEnv.cp39-win_amd64.pyd
+python/aerodrome/simulator/envs/DerivedEnv.cp39-win_amd64.pyd
+python/aerodrome/simulator/envs/Space3D.cp39-win_amd64.pyd
+python/aerodrome/simulator/objects/Object3D.cp39-win_amd64.pyd
