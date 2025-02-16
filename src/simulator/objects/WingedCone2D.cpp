@@ -1,24 +1,22 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <y_atmosphere.h>
-#include <utils.h>
-#include <Object3D.cpp>
+#include <Object3D.h>
 #include <vector>
 #include <string>
 #include <array>
 #include <cmath>
 
 using namespace yAtmosphere;
-using namespace utils;
 namespace py = pybind11;
 
 class WingedCone2D : public Object3D
 {
 public:
-    static const double S = 3603; // 参考面积
-    static const double c = 80; // 特征长度
-    static const double m0 = 9375; // 质量
-    static const double Iyy = 7 * 10^6; // 俯仰转动惯量
+    inline static const double S = 3603; // 参考面积
+    inline static const double c = 80; // 特征长度
+    inline static const double m0 = 9375; // 质量
+    inline static const double Iyy = 7 * 10e6; // 俯仰转动惯量
 
     double V; // 速度
     double h; // 高度
@@ -41,7 +39,7 @@ public:
     WingedCone2D();
     WingedCone2D(py::dict input_dict) : Object3D(input_dict)
     {
-        V = norm(vel);
+        V = std::sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
         h = pos[1];
         m = m0;
 
@@ -68,7 +66,7 @@ public:
         return L;
     };
 
-    double _T()
+    virtual double _T()
     {
         T = 4.959e3;
         return T;
@@ -83,9 +81,10 @@ public:
         return M;
     };
 
-    void step(py::dict input_dict)
+    virtual py::object step(py::dict input_dict)
     {
-        delta_e = input_dict["delta_e"];
+        py::dict obs;
+        delta_e = input_dict["delta_e"].cast<double>();
         
         // 计算气动力
         D = _D();
@@ -102,6 +101,7 @@ public:
         ang_acc[2] = M / Iyy;
         ang_acc[1] = 0;
         ang_acc[2] = 0;
+        return obs;
     };
 };
 

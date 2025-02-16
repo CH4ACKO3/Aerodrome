@@ -17,7 +17,7 @@ set(OUTPUT_BASE_DIR "${CMAKE_SOURCE_DIR}/python/aerodrome/simulator")
 # 1. 收集需要处理的源文件
 file(GLOB ENV_FILES "src/simulator/envs/*.cpp")
 file(GLOB OBJECT_FILES "src/simulator/objects/*.cpp")
-file(GLOB BASE_ENV_FILES "src/simulator/BaseEnv.cpp")
+file(GLOB BASE_ENV_FILES "src/simulator/*.cpp")
 
 # 2. 合并所有文件
 list(APPEND ALL_FILES ${ENV_FILES} ${OBJECT_FILES} ${BASE_ENV_FILES})
@@ -30,10 +30,8 @@ foreach(FILE ${ALL_FILES})
     # 提取文件的相对路径
     get_filename_component(FILE_DIR ${FILE} DIRECTORY)
 
-    message(STATUS "FILE_DIR: ${FILE_DIR}")
-    string(REPLACE "src/simulator" "python/aerodrome/simulator" FILE_OUTPUT_DIR ${FILE_DIR})
-
     # 创建输出目录
+    string(REPLACE "src/simulator" "python/aerodrome/simulator" FILE_OUTPUT_DIR ${FILE_DIR})
     set(OUTPUT_DIR "${FILE_OUTPUT_DIR}")
     file(MAKE_DIRECTORY ${OUTPUT_DIR})
 
@@ -57,7 +55,6 @@ foreach(FILE ${ALL_FILES})
         ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR}
     )
 
-    # 删除不需要的文件后缀
     add_custom_command(TARGET ${FILE_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${FILE_NAME}.lib
         COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${FILE_NAME}.exp
