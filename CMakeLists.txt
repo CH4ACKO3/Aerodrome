@@ -8,9 +8,9 @@ set(PYBIND11_DIR include/pybind11)
 
 add_subdirectory(${PYBIND11_DIR} EXCLUDE_FROM_ALL)
 
-include_directories(src/simulator)
-include_directories(src/simulator/envs)
-include_directories(src/simulator/objects)
+include_directories("${CMAKE_SOURCE_DIR}/src/simulator")
+include_directories("${CMAKE_SOURCE_DIR}/src/simulator/envs")
+include_directories("${CMAKE_SOURCE_DIR}/src/simulator/objects")
 
 set(OUTPUT_BASE_DIR "${CMAKE_SOURCE_DIR}/python/aerodrome/simulator")
 
@@ -22,7 +22,7 @@ file(GLOB BASE_ENV_FILES "src/simulator/*.cpp")
 # 2. 合并所有文件
 list(APPEND ALL_FILES ${ENV_FILES} ${OBJECT_FILES} ${BASE_ENV_FILES})
 
-# 3. 为每个 .cpp 文件生成对应的 .pyd 文件
+# 3. 为每个 .h 文件生成对应的 .pyd 文件
 foreach(FILE ${ALL_FILES})
     # 获取文件的基本名称，不带路径
     get_filename_component(FILE_NAME ${FILE} NAME_WE)

@@ -2,7 +2,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <y_atmosphere.h>
+#include "y_atmosphere.h"
 #include "Object3D.h"
 #include <vector>
 #include <string>
@@ -38,12 +38,75 @@ public:
 
     double delta_e; // 升降舵偏角
     
-    WingedCone2D();
-    WingedCone2D(py::dict input_dict);
+    WingedCone2D()
+    {
+        // Default constructor implementation (if needed)
+    }
 
-    double _D();
-    double _L();
-    virtual double _T();
-    double _M();
-    virtual py::object step(py::dict input_dict);
+    WingedCone2D(py::dict input_dict) : Object3D(input_dict)
+    {
+        V = std::sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
+        h = pos[1];
+        m = m0;
+
+        Tem = Temperature(h);
+        Pres = Pressure(h);
+        Rho = Density(Tem, Pres);
+        a = SpeedofSound(Tem);
+        g = Gravity(h);
+        
+        q = 0.5 * Rho * V * V;
+    }
+
+    double _D()
+    {
+        double CD = 0.645 * alpha * alpha + 0.0043378 * alpha + 0.003772;
+        D = q * S * CD;
+        return D;
+    }
+
+    double _L()
+    {
+        double CL = 0.6203 * alpha + 2.4 * sin(0.08 * alpha);
+        L = q * S * CL;
+        return L;
+    }
+
+    double WingedCone2D::_T()
+    {
+        T = 4.959e3;
+        return T;
+    }
+
+    double WingedCone2D::_M()
+    {
+        double CM1 = -0.035 * alpha * alpha + 0.036617 * alpha + 5.3261e-6;
+        double CM2 = ang_vel[2] * c * (-6.796 * alpha * alpha + 0.3015 * alpha - 0.2289) / (2 * V);
+        double CM3 = 0.0292 * (delta_e - alpha);
+        M = q * S * c * (CM1 + CM2 + CM3);
+        return M;
+    }
+
+    py::object WingedCone2D::step(py::dict input_dict)
+    {
+        py::dict obs;
+        delta_e = input_dict["delta_e"].cast<double>();
+        
+        // 计算气动力
+        D = _D();
+        L = _L();
+        T = _T();
+        M = _M();
+
+        // 计算加速度
+        acc[0] = (T * cos(alpha) - D) / m;
+        acc[1] = (L + T * sin(alpha)) / m;
+        acc[2] = 0;
+
+        // 计算角加速度
+        ang_acc[2] = M / Iyy;
+        ang_acc[1] = 0;
+        ang_acc[2] = 0;
+        return obs;
+    }
 };

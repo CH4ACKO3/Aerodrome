@@ -6,9 +6,6 @@
 #include <pybind11/stl.h>
 #include <vector>
 #include <string>
-#include <array>
-#include <cmath>
-#include <memory>
 
 namespace py = pybind11;
 
@@ -74,6 +71,7 @@ protected:
     }
 
 public:
+
     Space3D(double tau, double eps, std::string integrator, int integrate_steps)
         : tau(tau), eps(eps), integrator(integrator), integrate_steps(integrate_steps)
     {

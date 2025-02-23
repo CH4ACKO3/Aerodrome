@@ -1,3 +1,5 @@
+#pragma once
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "WingedCone2D.h"
@@ -30,23 +32,12 @@ public:
     double eV_prev; // 速度误差前值
 
     WingedCone2D_control();
-    WingedCone2D_control(py::dict input_dict) : WingedCone2D(input_dict)
-    {
-        Kiz = input_dict["Kiz"].cast<double>();
-        Kwz = input_dict["Kwz"].cast<double>();
-        Kaz = input_dict["Kaz"].cast<double>();
-        Kpz = input_dict["Kpz"].cast<double>();
 
-        Kp_V = input_dict["Kp_V"].cast<double>();
-        Ki_V = input_dict["Ki_V"].cast<double>();
-        Kd_V = input_dict["Kd_V"].cast<double>();
-    };
-
-    double _T() override
+    double _T()
     {
         T = 4.959e3;
         return T;
-    };
+    }
 
     double V_controller(double Vc, double V, double dt)
     {
@@ -57,7 +48,10 @@ public:
         eV_prev = eV;
 
         double u1a = Kp_V * eV + Ki_V * i_V + Kd_V * d_eV;
-        if (u1a < 0) u1a = 0;
+        if (u1a < 0) 
+        {
+            u1a = 0;
+        }
 
         return u1a;
     }
@@ -83,7 +77,7 @@ public:
         return eDamp;
     }
 
-    py::object step(py::dict input_dict) override
+    py::object step(py::dict input_dict)
     {
         py::dict obs;
         double Nyc = input_dict["Nyc"].cast<double>();
@@ -115,6 +109,5 @@ public:
         ang_acc[2] = 0;
 
         return obs;
-    };
+    }
 };
-

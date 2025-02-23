@@ -1,15 +1,12 @@
-#include "Space3D.h"
-#include "Object3D.h"
+#pragma once
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include "Space3D.h"
 #include <vector>
 #include <string>
-#include <array>
-#include <cmath>
 
 namespace py = pybind11;
-
-
 
 PYBIND11_MODULE(Space3D, m)
 {
