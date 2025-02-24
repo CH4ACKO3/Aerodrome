@@ -55,9 +55,9 @@ foreach(FILE ${ALL_FILES})
         ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR}
     )
 
-    add_custom_command(TARGET ${FILE_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${FILE_NAME}.lib
-        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${FILE_NAME}.exp
-        COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${FILE_NAME}.pdb
-    )
+    # add_custom_command(TARGET ${FILE_NAME} POST_BUILD
+    #     COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${FILE_NAME}.lib
+    #     COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${FILE_NAME}.exp
+    #     COMMAND ${CMAKE_COMMAND} -E remove ${OUTPUT_DIR}/${FILE_NAME}.pdb
+    # )
 endforeach()

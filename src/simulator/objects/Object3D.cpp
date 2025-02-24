@@ -14,8 +14,5 @@ PYBIND11_MODULE(Object3D, m)
         .def(py::init<py::dict>(), py::arg("input_dict") = py::dict())
         .def(py::init<py::dict>())
         .def("to_dict", &Object3D::to_dict)
-        .def("__add__", &Object3D::operator+)
-        .def("__sub__", &Object3D::operator-)
-        .def("__mul__", &Object3D::operator*)
-        .def("__truediv__", &Object3D::operator/);
+        .def("step", &Object3D::step);
 }

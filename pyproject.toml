@@ -1,6 +1,6 @@
 [project]
 name = "aerodrome"
-version = "0.2.0"
+version = "0.3.0"
 description = "A lightweight aircraft reinforcement learning environment"
 authors = [
     {name = "郑祯睿",email = "ch4acko3@outlook.com"}

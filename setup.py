@@ -6,7 +6,7 @@ from setuptools.command.build_ext import build_ext
 # 扩展模块设置
 setup(
     name="aerodrome",
-    version="0.1.0",
+    version="0.3.0",
     description="A lightweight aircraft reinforcement learning environment",
     author="Chack",
     author_email="ch4acko3@outlook.com",

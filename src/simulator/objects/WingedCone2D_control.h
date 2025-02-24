@@ -31,12 +31,34 @@ public:
     double d_eV; // 速度微分项
     double eV_prev; // 速度误差前值
 
-    WingedCone2D_control();
+    double Vy_prev; // 速度前值
+    double Ny; // 当前过载
+    double wz; // 当前滚转角速度
 
-    double _T()
+    WingedCone2D_control() {}
+
+    WingedCone2D_control(py::dict input_dict) : WingedCone2D(input_dict)
     {
-        T = 4.959e3;
-        return T;
+        Kiz = input_dict["Kiz"].cast<double>();
+        Kwz = input_dict["Kwz"].cast<double>();
+        Kaz = input_dict["Kaz"].cast<double>();
+        Kpz = input_dict["Kpz"].cast<double>();
+
+        Kp_V = input_dict["Kp_V"].cast<double>();
+        Ki_V = input_dict["Ki_V"].cast<double>();
+        Kd_V = input_dict["Kd_V"].cast<double>();
+
+        eNy = 0;
+        i_eNy = 0;
+        p_eNy = 0;
+        i_eSAC = 0;
+        i_V = 0;
+        d_eV = 0;
+        eV_prev = 0;
+
+        Vy_prev = vel[1];
+        Ny = 0;
+        wz = ang_vel[2];
     }
 
     double V_controller(double Vc, double V, double dt)
@@ -77,15 +99,22 @@ public:
         return eDamp;
     }
 
-    py::object step(py::dict input_dict)
+    virtual py::dict to_dict() override
     {
-        py::dict obs;
-        double Nyc = input_dict["Nyc"].cast<double>();
-        double Vc = input_dict["Vc"].cast<double>();
-        double dt = input_dict["dt"].cast<double>();
+        py::dict output_dict = WingedCone2D::to_dict();
+        output_dict["Ny"] = Ny;
+        return output_dict;
+    }
 
-        double Ny = acc[1] / g;
-        double wz = ang_acc[2];
+    virtual py::object step(py::dict action) override
+    {
+        double Nyc = action["Nyc"].cast<double>();
+        double Vc = action["Vc"].cast<double>();
+        double dt = action["dt"].cast<double>();
+
+        Ny = (vel[1] - Vy_prev) / dt;
+        Vy_prev = vel[1];
+        wz = ang_vel[2];
 
         delta_e = Ny_controller(Nyc, Ny, wz, dt);
         delta_e = std::clamp(delta_e, -25 / 57.3, 25 / 57.3);
@@ -93,21 +122,14 @@ public:
         double Phi = V_controller(Vc, V, dt);
         
         // 计算气动力
-        D = _D();
-        L = _L();
-        T = _T();
-        M = _M();
+        _D();
+        _L();
+        _T();
+        _M();
 
-        // 计算加速度
-        acc[0] = (T * cos(alpha) - D) / m;
-        acc[1] = (L + T * sin(alpha)) / m;
-        acc[2] = 0;
+        kinematics_step(action["dt"].cast<double>());
+        update(action["dt"].cast<double>());
 
-        // 计算角加速度
-        ang_acc[2] = M / Iyy;
-        ang_acc[1] = 0;
-        ang_acc[2] = 0;
-
-        return obs;
+        return to_dict();
     }
 };
