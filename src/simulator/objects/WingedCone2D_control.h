@@ -112,7 +112,7 @@ public:
         double Vc = action["Vc"].cast<double>();
         double dt = action["dt"].cast<double>();
 
-        Ny = (vel[1] - Vy_prev) / dt;
+        Ny = (vel[1] - Vy_prev) / dt / g;
         Vy_prev = vel[1];
         wz = ang_vel[2];
 

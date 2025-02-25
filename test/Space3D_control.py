@@ -16,13 +16,13 @@ object_dict = {
     "vel": [4590.29, 0.0, 0.0],
     "ang_vel": [0.0, 0.0, 0.0],
     "J": [1.0, 7*10**6, 7*10**6],
-    "theta": 0.0,
+    "theta": 0.0/180*pi,
     "phi": 0.0,
     "gamma": 0.0,   
     "theta_v": 0.0,
     "phi_v": 0.0,
     "gamma_v": 0.0,
-    "alpha": 0.0,
+    "alpha": 0.0/180*pi,
     "beta": 0.0,
 
     "Kiz": 0.2597,
@@ -40,16 +40,18 @@ print(object.to_dict())
 env.add_object(object)
 # print(env.to_dict())
 
-print("----------------------------------")
-print(env.get_d())
-print("----------------------------------")
+# print("----------------------------------")
+# print(env.get_d())
+# print("----------------------------------")
 
 import numpy as np
 import matplotlib.pyplot as plt
-x = np.zeros(200)
-y = np.zeros(200)
 
-for i in range(2000):
+cnt = 10000
+x = np.zeros(cnt)
+y = np.zeros(cnt)
+
+for i in range(cnt*10):
     action = {"test": {"Nyc":0.0, "Vc":3000}}
     result = env.step(action)
     if i % 10 == 0:
@@ -57,6 +59,12 @@ for i in range(2000):
         y[i//10] = result["test"]["Ny"]
 
 plt.plot(x, y)
+# plt.ylim(0, 40000)
+# plt.gca().set_aspect('equal', adjustable='box')
+
 plt.show()
 
+print("----------------------------------")
+print(env.get_d())
+print("----------------------------------")
 print(env.to_dict())

@@ -19,7 +19,8 @@ env/
 *.so
 build/
 dist/
-bui
+*.pdb
+*.exp
 
 # CMake
 CMakeFiles/
