@@ -4,7 +4,7 @@ from aerodrome.simulator.objects.WingedCone2D_control import WingedCone2D_contro
 from aerodrome.simulator.envs.Space3D import Space3D
 from math import *
 
-for dt in [0.01]:
+for dt in [0.05]:
 
     env = Space3D(dt, 0.001, 1)
     object_dict = {
@@ -49,7 +49,7 @@ for dt in [0.01]:
     import numpy as np
     import matplotlib.pyplot as plt
 
-    cnt = 8
+    cnt = 1000
     x = np.zeros(cnt)
     y = np.zeros(cnt)
 
@@ -57,14 +57,14 @@ for dt in [0.01]:
         action = {"test": {"Nyc":0.0, "Vc":3000}}
         result = env.step(action)
         x[i] = result["test"]["pos"][0]
-        y[i] = result["test"]["pos"][1]
+        y[i] = result["test"]["Ny"]
 
     plt.plot(x, y, label=f"dt={dt}")
     # plt.ylim(0, 40000)
     # plt.gca().set_aspect('equal', adjustable='box')
 
 plt.legend()
-# plt.show()
+plt.show()
 
 print("----------------------------------")
 print(env.get_d())

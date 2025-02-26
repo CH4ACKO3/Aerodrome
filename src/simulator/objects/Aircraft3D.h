@@ -121,13 +121,13 @@ public:
         next_object->phi = phi + derivative->phi * delta;
         next_object->gamma = gamma + derivative->gamma * delta;
 
-        next_object->beta = cos(next_object->theta_v) * (cos(next_object->gamma) * sin(next_object->phi - next_object->phi_v) + sin(next_object->theta) * sin(next_object->gamma) * cos(next_object->phi - next_object->phi_v)) - sin(next_object->theta_v) * cos(next_object->theta) * sin(next_object->gamma);
-        next_object->alpha = (cos(next_object->theta_v) * (sin(next_object->theta) * cos(next_object->gamma) * cos(next_object->phi - next_object->phi_v) - sin(next_object->gamma) * sin(next_object->phi - next_object->phi_v)) - sin(next_object->theta_v) * cos(next_object->theta) * cos(next_object->gamma)) / cos(next_object->beta);
-        next_object->gamma_v = (cos(next_object->alpha) * sin(next_object->beta) * sin(next_object->theta) - sin(next_object->alpha) * sin(next_object->beta) * cos(next_object->gamma) * cos(next_object->theta) + cos(next_object->beta) * sin(next_object->gamma) * cos(next_object->theta)) / cos(next_object->theta_v);
+        // next_object->beta = cos(next_object->theta_v) * (cos(next_object->gamma) * sin(next_object->phi - next_object->phi_v) + sin(next_object->theta) * sin(next_object->gamma) * cos(next_object->phi - next_object->phi_v)) - sin(next_object->theta_v) * cos(next_object->theta) * sin(next_object->gamma);
+        // next_object->alpha = (cos(next_object->theta_v) * (sin(next_object->theta) * cos(next_object->gamma) * cos(next_object->phi - next_object->phi_v) - sin(next_object->gamma) * sin(next_object->phi - next_object->phi_v)) - sin(next_object->theta_v) * cos(next_object->theta) * cos(next_object->gamma)) / cos(next_object->beta);
+        // next_object->gamma_v = (cos(next_object->alpha) * sin(next_object->beta) * sin(next_object->theta) - sin(next_object->alpha) * sin(next_object->beta) * cos(next_object->gamma) * cos(next_object->theta) + cos(next_object->beta) * sin(next_object->gamma) * cos(next_object->theta)) / cos(next_object->theta_v);
 
-        derivative->beta = (next_object->beta - beta) / delta;
-        derivative->alpha = (next_object->alpha - alpha) / delta;
-        derivative->gamma_v = (next_object->gamma_v - gamma_v) / delta;
+        // derivative->beta = (next_object->beta - beta) / delta;
+        // derivative->alpha = (next_object->alpha - alpha) / delta;
+        // derivative->gamma_v = (next_object->gamma_v - gamma_v) / delta;
 
         derivative->pos[0] = V * cos(theta_v) * cos(phi_v);
         derivative->pos[1] = V * sin(theta_v);
@@ -147,6 +147,10 @@ public:
     virtual void update(double dt) override
     {
         // V = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
+        beta = cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma);
+        alpha = (cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta);
+        gamma_v = (cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v);
+
         vel[0] = V * cos(theta_v) * cos(phi_v);
         vel[1] = V * sin(theta_v);
         vel[2] = -V * cos(theta_v) * sin(phi_v);
