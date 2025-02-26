@@ -53,12 +53,12 @@ public:
         return output_dict;
     }
 
-    py::dict get_d(double dt)
+    py::dict get_d()
     {
         py::dict output_dict;
         for (auto& object : objects)
         {
-            output_dict[py::str(object->name)] = (object->d(dt))->to_dict();
+            output_dict[py::str(object->name)] = (object->d())->to_dict();
         }
         return output_dict;
     }

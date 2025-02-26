@@ -18,7 +18,6 @@ public:
     double c; // 特征长度
     double m; // 质量
 
-    double V; // 速度
     double h; // 高度
     double q; // 动压
 
@@ -94,8 +93,9 @@ public:
         return to_dict();
     }
 
-    virtual std::shared_ptr<Object3D> d(double dt) override
-    {
+    virtual std::shared_ptr<Object3D> d() override
+    {   
+        double delta = 0.0001;
         auto next_object = std::make_shared<Aircraft3D>(*this);
         auto derivative = std::make_shared<Aircraft3D>(*this);
         
@@ -113,40 +113,43 @@ public:
         derivative->phi = (ang_vel[1] * cos(gamma) - ang_vel[2] * sin(gamma)) / cos(theta);
         derivative->gamma = ang_vel[0] * - tan(theta) * (ang_vel[1] * cos(gamma) - ang_vel[2] * sin(gamma));
 
-        next_object->V = V + derivative->V * dt;
-        next_object->theta_v = theta_v + derivative->theta_v * dt;
-        next_object->phi_v = phi_v + derivative->phi_v * dt;
+        next_object->V = V + derivative->V * delta;
+        next_object->theta_v = theta_v + derivative->theta_v * delta;
+        next_object->phi_v = phi_v + derivative->phi_v * delta;
 
-        next_object->theta = theta + derivative->theta * dt;
-        next_object->phi = phi + derivative->phi * dt;
-        next_object->gamma = gamma + derivative->gamma * dt;
+        next_object->theta = theta + derivative->theta * delta;
+        next_object->phi = phi + derivative->phi * delta;
+        next_object->gamma = gamma + derivative->gamma * delta;
 
         next_object->beta = cos(next_object->theta_v) * (cos(next_object->gamma) * sin(next_object->phi - next_object->phi_v) + sin(next_object->theta) * sin(next_object->gamma) * cos(next_object->phi - next_object->phi_v)) - sin(next_object->theta_v) * cos(next_object->theta) * sin(next_object->gamma);
         next_object->alpha = (cos(next_object->theta_v) * (sin(next_object->theta) * cos(next_object->gamma) * cos(next_object->phi - next_object->phi_v) - sin(next_object->gamma) * sin(next_object->phi - next_object->phi_v)) - sin(next_object->theta_v) * cos(next_object->theta) * cos(next_object->gamma)) / cos(next_object->beta);
         next_object->gamma_v = (cos(next_object->alpha) * sin(next_object->beta) * sin(next_object->theta) - sin(next_object->alpha) * sin(next_object->beta) * cos(next_object->gamma) * cos(next_object->theta) + cos(next_object->beta) * sin(next_object->gamma) * cos(next_object->theta)) / cos(next_object->theta_v);
 
-        derivative->beta = (next_object->beta - beta) / dt;
-        derivative->alpha = (next_object->alpha - alpha) / dt;
-        derivative->gamma_v = (next_object->gamma_v - gamma_v) / dt;
+        derivative->beta = (next_object->beta - beta) / delta;
+        derivative->alpha = (next_object->alpha - alpha) / delta;
+        derivative->gamma_v = (next_object->gamma_v - gamma_v) / delta;
 
         derivative->pos[0] = V * cos(theta_v) * cos(phi_v);
         derivative->pos[1] = V * sin(theta_v);
         derivative->pos[2] = -V * cos(theta_v) * sin(phi_v);
 
-        next_object->vel[0] = next_object->V * cos(next_object->theta_v) * cos(next_object->phi_v);
-        next_object->vel[1] = next_object->V * sin(next_object->theta_v);
-        next_object->vel[2] = -next_object->V * cos(next_object->theta_v) * sin(next_object->phi_v);
+        // next_object->vel[0] = next_object->V * cos(next_object->theta_v) * cos(next_object->phi_v);
+        // next_object->vel[1] = next_object->V * sin(next_object->theta_v);
+        // next_object->vel[2] = -next_object->V * cos(next_object->theta_v) * sin(next_object->phi_v);
 
-        derivative->vel[0] = (next_object->vel[0] - vel[0]) / dt;
-        derivative->vel[1] = (next_object->vel[1] - vel[1]) / dt;
-        derivative->vel[2] = (next_object->vel[2] - vel[2]) / dt;
+        // derivative->vel[0] = (next_object->vel[0] - vel[0]) / delta;
+        // derivative->vel[1] = (next_object->vel[1] - vel[1]) / delta;
+        // derivative->vel[2] = (next_object->vel[2] - vel[2]) / delta;
 
         return derivative;
     }
 
     virtual void update(double dt) override
     {
-        V = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
+        // V = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
+        vel[0] = V * cos(theta_v) * cos(phi_v);
+        vel[1] = V * sin(theta_v);
+        vel[2] = -V * cos(theta_v) * sin(phi_v);
         h = pos[1];
 
         Tem = Temperature(h);

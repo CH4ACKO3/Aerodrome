@@ -26,6 +26,8 @@ public:
     // 转动惯量
     std::array<double, 3> J;
 
+    double V; // 速度
+
     // 描述刚体姿态的八个角度
     double theta;    // 俯仰角
     double phi;      // 偏航角
@@ -38,7 +40,7 @@ public:
 
     Object3D() 
         : name(""), integrator("euler"), pos{0.0, 0.0, 0.0}, vel{0.0, 0.0, 0.0}, ang_vel{0.0, 0.0, 0.0}, J{0.0, 0.0, 0.0},
-          theta(0.0), phi(0.0), gamma(0.0), theta_v(0.0), phi_v(0.0),
+          V(0.0), theta(0.0), phi(0.0), gamma(0.0), theta_v(0.0), phi_v(0.0),
             alpha(0.0), beta(0.0), gamma_v(0.0) {}
         
     Object3D(py::dict input_dict)
@@ -49,6 +51,8 @@ public:
         vel = input_dict["vel"].cast<std::array<double, 3>>();
         ang_vel = input_dict["ang_vel"].cast<std::array<double, 3>>();
         J = input_dict["J"].cast<std::array<double, 3>>();
+        // V = input_dict["V"].cast<double>();
+        V = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
         theta = input_dict["theta"].cast<double>();
         phi = input_dict["phi"].cast<double>();
         gamma = input_dict["gamma"].cast<double>();
@@ -66,6 +70,7 @@ public:
         output_dict["vel"] = vel;
         output_dict["ang_vel"] = ang_vel;
         output_dict["J"] = J;
+        output_dict["V"] = V;
         output_dict["theta"] = theta;
         output_dict["phi"] = phi;
         output_dict["gamma"] = gamma;
@@ -84,6 +89,8 @@ public:
         vel = action["vel"].cast<std::array<double, 3>>();
         ang_vel = action["ang_vel"].cast<std::array<double, 3>>();
         J = action["J"].cast<std::array<double, 3>>();
+        // V = action["V"].cast<double>();
+        V = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
         theta = action["theta"].cast<double>();
         phi = action["phi"].cast<double>();
         gamma = action["gamma"].cast<double>();
@@ -102,37 +109,37 @@ public:
     {
         if (integrator == "euler")
         {
-            *this = *(*this + *(*(this->d(dt)) * dt));
+            *this = *(*this + *(*(this->d()) * dt));
         }
         else if (integrator == "midpoint")
         {
-            auto temp1 = *this + *(*(this->d(dt)) * (0.5 * dt));
-            auto k1 = temp1->d(dt);
+            auto temp1 = *this + *(*(this->d()) * (0.5 * dt));
+            auto k1 = temp1->d();
             *this = *(*this + *(*k1 * dt));
         }
         else if (integrator == "rk23")
         {
-            auto k1 = this->d(dt);
+            auto k1 = this->d();
             auto temp1 = *this + *(*k1 * (0.5 * dt));
-            auto k2 = temp1->d(dt);
+            auto k2 = temp1->d();
             auto temp2 = *this + *(*k2 * (0.5 * dt));
-            auto k3 = temp2->d(dt);
+            auto k3 = temp2->d();
             *this = *(*this + *(*(*(*k1 + *(*k2 * 2)) + *k3) * (dt / 4)));
         }
         else if (integrator == "rk45")
         {
-            auto k1 = this->d(dt);
+            auto k1 = this->d();
             auto temp1 = *this + *(*k1 * (0.5 * dt));
-            auto k2 = temp1->d(dt);
+            auto k2 = temp1->d();
             auto temp2 = *this + *(*k2 * (0.5 * dt));
-            auto k3 = temp2->d(dt);
+            auto k3 = temp2->d();
             auto temp3 = *this + *(*k3 * dt);
-            auto k4 = temp3->d(dt);
+            auto k4 = temp3->d();
             *this = *(*this + *(*(*(*(*k1 + *(*k2 * 2)) + *(*k3 * 2)) + *k4) * (dt / 6)));
         }
     }
 
-    virtual std::shared_ptr<Object3D> d(double dt)
+    virtual std::shared_ptr<Object3D> d()
     {
         // auto next_object = std::make_shared<Object3D>(*this);
         auto derivative = std::make_shared<Object3D>(*this);
@@ -171,6 +178,8 @@ public:
         beta = cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma);
         alpha = (cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta);
         gamma_v = (cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v);
+
+        V = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
     }
     
     template<typename T, typename P>
@@ -185,6 +194,7 @@ public:
             result->ang_vel[i] = lop.ang_vel[i] + rop.ang_vel[i];
         }   
 
+        result->V = lop.V + rop.V;
         result->theta = lop.theta + rop.theta;
         result->phi = lop.phi + rop.phi;
         result->gamma = lop.gamma + rop.gamma;
@@ -209,6 +219,7 @@ public:
             result->ang_vel[i] = lop.ang_vel[i] - rop.ang_vel[i];
         }
 
+        result->V = lop.V - rop.V;
         result->theta = lop.theta - rop.theta;
         result->phi = lop.phi - rop.phi;
         result->gamma = lop.gamma - rop.gamma;
@@ -233,6 +244,7 @@ public:
             result->ang_vel[i] = lop.ang_vel[i] * rop;
         }   
 
+        result->V = lop.V * rop;
         result->theta = lop.theta * rop;
         result->phi = lop.phi * rop;
         result->gamma = lop.gamma * rop;
@@ -257,6 +269,7 @@ public:
             result->ang_vel[i] = lop.ang_vel[i] / rop;
         }   
 
+        result->V = lop.V / rop;
         result->theta = lop.theta / rop;
         result->phi = lop.phi / rop;
         result->gamma = lop.gamma / rop;
