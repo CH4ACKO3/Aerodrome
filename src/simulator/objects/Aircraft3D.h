@@ -157,4 +157,9 @@ public:
 
         q = 0.5 * Rho * V * V;
     }
+
+    virtual Aircraft3D* clone() const override
+    {
+        return new Aircraft3D(*this);
+    }
 };

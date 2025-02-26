@@ -132,4 +132,9 @@ public:
 
         return to_dict();
     }
+
+    virtual WingedCone2D_control* clone() const override
+    {
+        return new WingedCone2D_control(*this);
+    }
 };

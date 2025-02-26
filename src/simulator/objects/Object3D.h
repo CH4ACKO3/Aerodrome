@@ -102,38 +102,39 @@ public:
     {
         if (integrator == "euler")
         {
-            *this = *this + *this->d(dt) * dt;
+            *this = *(*this + *(*(this->d(dt)) * dt));
         }
         else if (integrator == "midpoint")
         {
-            auto temp1 = std::make_shared<Object3D>(*this + *this->d(dt * 0.5));
-            *this = *this + *temp1->d(dt) * dt;
+            auto temp1 = *this + *(*(this->d(dt)) * (0.5 * dt));
+            auto k1 = temp1->d(dt);
+            *this = *(*this + *(*k1 * dt));
         }
         else if (integrator == "rk23")
         {
             auto k1 = this->d(dt);
-            auto temp1 = std::make_shared<Object3D>(*this + *k1 * dt * 0.5);
+            auto temp1 = *this + *(*k1 * (0.5 * dt));
             auto k2 = temp1->d(dt);
-            auto temp2 = std::make_shared<Object3D>(*this + *k2 * dt * 0.5);
+            auto temp2 = *this + *(*k2 * (0.5 * dt));
             auto k3 = temp2->d(dt);
-            *this = *this + (*k1 + *k2 * 2 + *k3) * dt / 4;
+            *this = *(*this + *(*(*(*k1 + *(*k2 * 2)) + *k3) * (dt / 4)));
         }
         else if (integrator == "rk45")
         {
             auto k1 = this->d(dt);
-            auto temp1 = std::make_shared<Object3D>(*this + *k1 * dt * 0.5);
+            auto temp1 = *this + *(*k1 * (0.5 * dt));
             auto k2 = temp1->d(dt);
-            auto temp2 = std::make_shared<Object3D>(*this + *k2 * dt * 0.5);
+            auto temp2 = *this + *(*k2 * (0.5 * dt));
             auto k3 = temp2->d(dt);
-            auto temp3 = std::make_shared<Object3D>(*this + *k3 * dt);
+            auto temp3 = *this + *(*k3 * dt);
             auto k4 = temp3->d(dt);
-            *this = *this + (*k1 + *k2 * 2 + *k3 * 2 + *k4) * dt / 6;
+            *this = *(*this + *(*(*(*(*k1 + *(*k2 * 2)) + *(*k3 * 2)) + *k4) * (dt / 6)));
         }
     }
 
     virtual std::shared_ptr<Object3D> d(double dt)
     {
-        auto next_object = std::make_shared<Object3D>(*this);
+        // auto next_object = std::make_shared<Object3D>(*this);
         auto derivative = std::make_shared<Object3D>(*this);
 
         derivative->pos[0] = vel[0];
@@ -171,97 +172,105 @@ public:
         alpha = (cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta);
         gamma_v = (cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v);
     }
-
-    virtual Object3D operator+(const Object3D& other) const
+    
+    template<typename T, typename P>
+    friend std::unique_ptr<T> operator+(const T& lop, const P& rop)
     {
-        Object3D result = *this;
+        auto result = lop.clone();
 
         for (int i = 0; i < 3; ++i)
         {   
-            result.pos[i] = pos[i] + other.pos[i];
-            result.vel[i] = vel[i] + other.vel[i];
-            result.ang_vel[i] = ang_vel[i] + other.ang_vel[i];
+            result->pos[i] = lop.pos[i] + rop.pos[i];
+            result->vel[i] = lop.vel[i] + rop.vel[i];
+            result->ang_vel[i] = lop.ang_vel[i] + rop.ang_vel[i];
         }   
 
-        result.theta = theta + other.theta;
-        result.phi = phi + other.phi;
-        result.gamma = gamma + other.gamma;
-        result.theta_v = theta_v + other.theta_v;
-        result.phi_v = phi_v + other.phi_v; 
-        result.alpha = alpha + other.alpha;
-        result.beta = beta + other.beta;
-        result.gamma_v = gamma_v + other.gamma_v;
+        result->theta = lop.theta + rop.theta;
+        result->phi = lop.phi + rop.phi;
+        result->gamma = lop.gamma + rop.gamma;
+        result->theta_v = lop.theta_v + rop.theta_v;
+        result->phi_v = lop.phi_v + rop.phi_v; 
+        result->alpha = lop.alpha + rop.alpha;
+        result->beta = lop.beta + rop.beta;
+        result->gamma_v = lop.gamma_v + rop.gamma_v;
 
-
-        return result;
+        return std::unique_ptr<T>(result);
     }
 
-    virtual Object3D operator-(const Object3D& other) const
+    template<typename T, typename P>
+    friend std::unique_ptr<T> operator-(const T& lop, const P& rop)
     {
-        Object3D result = *this;
+        auto result = lop.clone();
 
         for (int i = 0; i < 3; ++i)
         {
-            result.pos[i] = pos[i] - other.pos[i];
-            result.vel[i] = vel[i] - other.vel[i];
-            result.ang_vel[i] = ang_vel[i] - other.ang_vel[i];
+            result->pos[i] = lop.pos[i] - rop.pos[i];
+            result->vel[i] = lop.vel[i] - rop.vel[i];
+            result->ang_vel[i] = lop.ang_vel[i] - rop.ang_vel[i];
         }
 
-        result.theta = theta - other.theta;
-        result.phi = phi - other.phi;
-        result.gamma = gamma - other.gamma;
-        result.theta_v = theta_v - other.theta_v;
-        result.phi_v = phi_v - other.phi_v;
-        result.alpha = alpha - other.alpha;
-        result.beta = beta - other.beta;
-        result.gamma_v = gamma_v - other.gamma_v;
+        result->theta = lop.theta - rop.theta;
+        result->phi = lop.phi - rop.phi;
+        result->gamma = lop.gamma - rop.gamma;
+        result->theta_v = lop.theta_v - rop.theta_v;
+        result->phi_v = lop.phi_v - rop.phi_v;
+        result->alpha = lop.alpha - rop.alpha;
+        result->beta = lop.beta - rop.beta;
+        result->gamma_v = lop.gamma_v - rop.gamma_v;
 
-        return result;
+        return std::unique_ptr<T>(result);
     }
 
-    virtual Object3D operator*(const double& other) const
+    template<typename T>
+    friend std::unique_ptr<T> operator*(const T& lop, const double& rop)
     {
-        Object3D result = *this;
+        auto result = lop.clone();
 
         for (int i = 0; i < 3; ++i)
         {
-            result.pos[i] = pos[i] * other; 
-            result.vel[i] = vel[i] * other;
-            result.ang_vel[i] = ang_vel[i] * other;
+            result->pos[i] = lop.pos[i] * rop; 
+            result->vel[i] = lop.vel[i] * rop;
+            result->ang_vel[i] = lop.ang_vel[i] * rop;
         }   
 
-        result.theta = theta * other;
-        result.phi = phi * other;
-        result.gamma = gamma * other;
-        result.theta_v = theta_v * other;
-        result.phi_v = phi_v * other;
-        result.alpha = alpha * other;
-        result.beta = beta * other;
-        result.gamma_v = gamma_v * other;
+        result->theta = lop.theta * rop;
+        result->phi = lop.phi * rop;
+        result->gamma = lop.gamma * rop;
+        result->theta_v = lop.theta_v * rop;
+        result->phi_v = lop.phi_v * rop;
+        result->alpha = lop.alpha * rop;
+        result->beta = lop.beta * rop;
+        result->gamma_v = lop.gamma_v * rop;
 
-        return result;
+        return std::unique_ptr<T>(result);
     }
     
-    virtual Object3D operator/(const double& other) const
+    template<typename T>
+    friend std::unique_ptr<T> operator/(const T& lop, const double& rop)
     {
-        Object3D result = *this;
+        auto result = lop.clone();
 
         for (int i = 0; i < 3; ++i)
         {
-            result.pos[i] = pos[i] / other; 
-            result.vel[i] = vel[i] / other;
-            result.ang_vel[i] = ang_vel[i] / other;
+            result->pos[i] = lop.pos[i] / rop; 
+            result->vel[i] = lop.vel[i] / rop;
+            result->ang_vel[i] = lop.ang_vel[i] / rop;
         }   
 
-        result.theta = theta / other;
-        result.phi = phi / other;
-        result.gamma = gamma / other;
-        result.theta_v = theta_v / other;
-        result.phi_v = phi_v / other;   
-        result.alpha = alpha / other;
-        result.beta = beta / other;
-        result.gamma_v = gamma_v / other;
+        result->theta = lop.theta / rop;
+        result->phi = lop.phi / rop;
+        result->gamma = lop.gamma / rop;
+        result->theta_v = lop.theta_v / rop;
+        result->phi_v = lop.phi_v / rop;   
+        result->alpha = lop.alpha / rop;
+        result->beta = lop.beta / rop;
+        result->gamma_v = lop.gamma_v / rop;
 
-        return result;
+        return std::unique_ptr<T>(result);
+    }
+
+    virtual Object3D* clone() const
+    {
+        return new Object3D(*this);
     }
 };

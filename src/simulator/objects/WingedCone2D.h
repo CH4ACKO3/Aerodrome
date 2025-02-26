@@ -71,4 +71,9 @@ public:
 
         return to_dict();
     }
+
+    virtual WingedCone2D* clone() const override
+    {
+        return new WingedCone2D(*this);
+    }
 };

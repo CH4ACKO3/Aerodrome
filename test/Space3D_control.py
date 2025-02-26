@@ -40,23 +40,22 @@ print(object.to_dict())
 env.add_object(object)
 # print(env.to_dict())
 
-# print("----------------------------------")
-# print(env.get_d())
-# print("----------------------------------")
+print("----------------------------------")
+print(env.get_d(0.001))
+print("----------------------------------")
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-cnt = 10000
+cnt = 1000
 x = np.zeros(cnt)
 y = np.zeros(cnt)
 
-for i in range(cnt*10):
+for i in range(cnt):
     action = {"test": {"Nyc":0.0, "Vc":3000}}
     result = env.step(action)
-    if i % 10 == 0:
-        x[i//10] = result["test"]["pos"][0]
-        y[i//10] = result["test"]["Ny"]
+    x[i] = result["test"]["pos"][0]
+    y[i] = result["test"]["Ny"]
 
 plt.plot(x, y)
 # plt.ylim(0, 40000)
@@ -65,6 +64,6 @@ plt.plot(x, y)
 plt.show()
 
 print("----------------------------------")
-print(env.get_d())
+print(env.get_d(0.001))
 print("----------------------------------")
 print(env.to_dict())
