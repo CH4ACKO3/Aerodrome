@@ -85,6 +85,8 @@ public:
 
     virtual py::object step(py::dict action)
     {
+        double dt = action["dt"].cast<double>();
+        
         pos = action["pos"].cast<std::array<double, 3>>();
         vel = action["vel"].cast<std::array<double, 3>>();
         ang_vel = action["ang_vel"].cast<std::array<double, 3>>();
@@ -100,78 +102,37 @@ public:
         alpha = action["alpha"].cast<double>();
         beta = action["beta"].cast<double>();
 
-        kinematics_step(action["dt"].cast<double>());
-        update(action["dt"].cast<double>());
-        return to_dict();
-    }
-
-    virtual void kinematics_step(double dt)
-    {
         if (integrator == "euler")
         {
-            *this = *(*this + *(*(this->d()) * dt));
+            *this = *this + this->d() * dt;
         }
         else if (integrator == "midpoint")
         {
-            auto temp1 = *this + *(*(this->d()) * (0.5 * dt));
-            auto k1 = temp1->d();
-            *this = *(*this + *(*k1 * dt));
+            auto temp1 = *this + this->d() * (0.5 * dt);
+            auto k1 = temp1.d();
+            *this = *this + k1 * dt;
         }
         else if (integrator == "rk23")
         {
             auto k1 = this->d();
-            auto temp1 = *this + *(*k1 * (0.5 * dt));
-            auto k2 = temp1->d();
-            auto temp2 = *this + *(*k2 * (0.5 * dt));
-            auto k3 = temp2->d();
-            *this = *(*this + *(*(*(*k1 + *(*k2 * 2)) + *k3) * (dt / 4)));
+            auto temp1 = *this + k1 * (0.5 * dt);
+            auto k2 = temp1.d();
+            auto temp2 = *this + k2 * (0.5 * dt);
+            auto k3 = temp2.d();
+            *this = *this + (k1 + k2 * 2 + k3) * (dt / 4);
         }
         else if (integrator == "rk45")
         {
             auto k1 = this->d();
-            auto temp1 = *this + *(*k1 * (0.5 * dt));
-            auto k2 = temp1->d();
-            auto temp2 = *this + *(*k2 * (0.5 * dt));
-            auto k3 = temp2->d();
-            auto temp3 = *this + *(*k3 * dt);
-            auto k4 = temp3->d();
-            *this = *(*this + *(*(*(*(*k1 + *(*k2 * 2)) + *(*k3 * 2)) + *k4) * (dt / 6)));
+            auto temp1 = *this + k1 * (0.5 * dt);
+            auto k2 = temp1.d();
+            auto temp2 = *this + k2 * (0.5 * dt);
+            auto k3 = temp2.d();
+            auto temp3 = *this + k3 * dt;
+            auto k4 = temp3.d();
+            *this = *this + (k1 + k2 * 2 + k3 * 2 + k4) * (dt / 6);
         }
-    }
 
-    virtual std::shared_ptr<Object3D> d()
-    {
-        // auto next_object = std::make_shared<Object3D>(*this);
-        auto derivative = std::make_shared<Object3D>(*this);
-
-        derivative->pos[0] = vel[0];
-        derivative->pos[1] = vel[1];
-        derivative->pos[2] = vel[2];
-
-        derivative->vel[0] = 0;
-        derivative->vel[1] = 0;
-        derivative->vel[2] = 0;
-
-        derivative->ang_vel[0] = 0;
-        derivative->ang_vel[1] = 0;
-        derivative->ang_vel[2] = 0;
-
-        derivative->theta = ang_vel[1] * sin(gamma) + ang_vel[2] * cos(gamma);
-        derivative->phi = (ang_vel[1] * cos(gamma) - ang_vel[2] * sin(gamma)) / cos(theta);
-        derivative->gamma = ang_vel[0] * - tan(theta) * (ang_vel[1] * cos(gamma) - ang_vel[2] * sin(gamma));
-
-        derivative->theta_v = 0;
-        derivative->phi_v = 0;
-        derivative->gamma_v = 0;
-
-        derivative->alpha = 0;
-        derivative->beta = 0;
-
-        return derivative;
-    }
-    
-    virtual void update(double dt)
-    {
         theta_v = atan2(vel[1], sqrt(vel[0] * vel[0] + vel[2] * vel[2]));
         phi_v = atan2(-vel[2], vel[0]);
         
@@ -180,110 +141,136 @@ public:
         gamma_v = (cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v);
 
         V = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
+        return to_dict();
+    }
+
+    virtual Object3D d()
+    {
+        auto derivative = *this;
+
+        derivative.pos[0] = vel[0];
+        derivative.pos[1] = vel[1];
+        derivative.pos[2] = vel[2];
+
+        derivative.vel[0] = 0;
+        derivative.vel[1] = 0;
+        derivative.vel[2] = 0;
+
+        derivative.ang_vel[0] = 0;
+        derivative.ang_vel[1] = 0;
+        derivative.ang_vel[2] = 0;
+
+        derivative.theta = ang_vel[1] * sin(gamma) + ang_vel[2] * cos(gamma);
+        derivative.phi = (ang_vel[1] * cos(gamma) - ang_vel[2] * sin(gamma)) / cos(theta);
+        derivative.gamma = ang_vel[0] * - tan(theta) * (ang_vel[1] * cos(gamma) - ang_vel[2] * sin(gamma));
+
+        derivative.theta_v = 0;
+        derivative.phi_v = 0;
+        derivative.gamma_v = 0;
+
+        derivative.alpha = 0;
+        derivative.beta = 0;
+
+        return derivative;
     }
     
     template<typename T, typename P>
-    friend std::unique_ptr<T> operator+(const T& lop, const P& rop)
+    friend T operator+(const T& lop, const P& rop)
     {
-        auto result = lop.clone();
+        auto result = lop;
 
         for (int i = 0; i < 3; ++i)
         {   
-            result->pos[i] = lop.pos[i] + rop.pos[i];
-            result->vel[i] = lop.vel[i] + rop.vel[i];
-            result->ang_vel[i] = lop.ang_vel[i] + rop.ang_vel[i];
+            result.pos[i] = lop.pos[i] + rop.pos[i];
+            result.vel[i] = lop.vel[i] + rop.vel[i];
+            result.ang_vel[i] = lop.ang_vel[i] + rop.ang_vel[i];
         }   
 
-        result->V = lop.V + rop.V;
-        result->theta = lop.theta + rop.theta;
-        result->phi = lop.phi + rop.phi;
-        result->gamma = lop.gamma + rop.gamma;
-        result->theta_v = lop.theta_v + rop.theta_v;
-        result->phi_v = lop.phi_v + rop.phi_v; 
-        result->alpha = lop.alpha + rop.alpha;
-        result->beta = lop.beta + rop.beta;
-        result->gamma_v = lop.gamma_v + rop.gamma_v;
+        result.V = lop.V + rop.V;
+        result.theta = lop.theta + rop.theta;
+        result.phi = lop.phi + rop.phi;
+        result.gamma = lop.gamma + rop.gamma;
+        result.theta_v = lop.theta_v + rop.theta_v;
+        result.phi_v = lop.phi_v + rop.phi_v; 
+        result.alpha = lop.alpha + rop.alpha;
+        result.beta = lop.beta + rop.beta;
+        result.gamma_v = lop.gamma_v + rop.gamma_v;
 
-        return std::unique_ptr<T>(result);
+        return result;
     }
 
     template<typename T, typename P>
-    friend std::unique_ptr<T> operator-(const T& lop, const P& rop)
+    friend T operator-(const T& lop, const P& rop)
     {
-        auto result = lop.clone();
+        auto result = lop;
 
         for (int i = 0; i < 3; ++i)
         {
-            result->pos[i] = lop.pos[i] - rop.pos[i];
-            result->vel[i] = lop.vel[i] - rop.vel[i];
-            result->ang_vel[i] = lop.ang_vel[i] - rop.ang_vel[i];
+            result.pos[i] = lop.pos[i] - rop.pos[i];
+            result.vel[i] = lop.vel[i] - rop.vel[i];
+            result.ang_vel[i] = lop.ang_vel[i] - rop.ang_vel[i];
         }
 
-        result->V = lop.V - rop.V;
-        result->theta = lop.theta - rop.theta;
-        result->phi = lop.phi - rop.phi;
-        result->gamma = lop.gamma - rop.gamma;
-        result->theta_v = lop.theta_v - rop.theta_v;
-        result->phi_v = lop.phi_v - rop.phi_v;
-        result->alpha = lop.alpha - rop.alpha;
-        result->beta = lop.beta - rop.beta;
-        result->gamma_v = lop.gamma_v - rop.gamma_v;
+        result.V = lop.V - rop.V;
+        result.theta = lop.theta - rop.theta;
+        result.phi = lop.phi - rop.phi;
+        result.gamma = lop.gamma - rop.gamma;
+        result.theta_v = lop.theta_v - rop.theta_v;
+        result.phi_v = lop.phi_v - rop.phi_v;
+        result.alpha = lop.alpha - rop.alpha;
+        result.beta = lop.beta - rop.beta;
+        result.gamma_v = lop.gamma_v - rop.gamma_v;
 
-        return std::unique_ptr<T>(result);
+        return result;
     }
 
     template<typename T>
-    friend std::unique_ptr<T> operator*(const T& lop, const double& rop)
+    friend T operator*(const T& lop, const double& rop)
     {
-        auto result = lop.clone();
+        auto result = lop;
 
         for (int i = 0; i < 3; ++i)
         {
-            result->pos[i] = lop.pos[i] * rop; 
-            result->vel[i] = lop.vel[i] * rop;
-            result->ang_vel[i] = lop.ang_vel[i] * rop;
+            result.pos[i] = lop.pos[i] * rop; 
+            result.vel[i] = lop.vel[i] * rop;
+            result.ang_vel[i] = lop.ang_vel[i] * rop;
         }   
 
-        result->V = lop.V * rop;
-        result->theta = lop.theta * rop;
-        result->phi = lop.phi * rop;
-        result->gamma = lop.gamma * rop;
-        result->theta_v = lop.theta_v * rop;
-        result->phi_v = lop.phi_v * rop;
-        result->alpha = lop.alpha * rop;
-        result->beta = lop.beta * rop;
-        result->gamma_v = lop.gamma_v * rop;
+        result.V = lop.V * rop;
+        result.theta = lop.theta * rop;
+        result.phi = lop.phi * rop;
+        result.gamma = lop.gamma * rop;
+        result.theta_v = lop.theta_v * rop;
+        result.phi_v = lop.phi_v * rop;
+        result.alpha = lop.alpha * rop;
+        result.beta = lop.beta * rop;
+        result.gamma_v = lop.gamma_v * rop;
 
-        return std::unique_ptr<T>(result);
+        return result;
     }
     
     template<typename T>
-    friend std::unique_ptr<T> operator/(const T& lop, const double& rop)
+    friend T operator/(const T& lop, const double& rop)
     {
-        auto result = lop.clone();
+        auto result = lop;
 
         for (int i = 0; i < 3; ++i)
         {
-            result->pos[i] = lop.pos[i] / rop; 
-            result->vel[i] = lop.vel[i] / rop;
-            result->ang_vel[i] = lop.ang_vel[i] / rop;
+            result.pos[i] = lop.pos[i] / rop; 
+            result.vel[i] = lop.vel[i] / rop;
+            result.ang_vel[i] = lop.ang_vel[i] / rop;
         }   
 
-        result->V = lop.V / rop;
-        result->theta = lop.theta / rop;
-        result->phi = lop.phi / rop;
-        result->gamma = lop.gamma / rop;
-        result->theta_v = lop.theta_v / rop;
-        result->phi_v = lop.phi_v / rop;   
-        result->alpha = lop.alpha / rop;
-        result->beta = lop.beta / rop;
-        result->gamma_v = lop.gamma_v / rop;
+        result.V = lop.V / rop;
+        result.theta = lop.theta / rop;
+        result.phi = lop.phi / rop;
+        result.gamma = lop.gamma / rop;
+        result.theta_v = lop.theta_v / rop;
+        result.phi_v = lop.phi_v / rop;   
+        result.alpha = lop.alpha / rop;
+        result.beta = lop.beta / rop;
+        result.gamma_v = lop.gamma_v / rop;
 
-        return std::unique_ptr<T>(result);
-    }
-
-    virtual Object3D* clone() const
-    {
-        return new Object3D(*this);
+        return result;
     }
 };

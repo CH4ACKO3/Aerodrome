@@ -6,7 +6,7 @@ from math import *
 
 for integrator in ["euler", "midpoint", "rk23", "rk45"]:
 
-    env = Space3D(0.001, 0.001, 1)
+    env = Space3D(0.01, 0.001, 2)
     object_dict = {
         "name": "test",
         "integrator": integrator,
@@ -49,7 +49,7 @@ for integrator in ["euler", "midpoint", "rk23", "rk45"]:
     import numpy as np
     import matplotlib.pyplot as plt
 
-    cnt = 10000
+    cnt = 1000
     x = np.zeros(cnt)
     y = np.zeros(cnt)
 

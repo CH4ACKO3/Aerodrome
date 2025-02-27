@@ -58,7 +58,7 @@ public:
         py::dict output_dict;
         for (auto& object : objects)
         {
-            output_dict[py::str(object->name)] = (object->d())->to_dict();
+            output_dict[py::str(object->name)] = (object->d()).to_dict();
         }
         return output_dict;
     }
