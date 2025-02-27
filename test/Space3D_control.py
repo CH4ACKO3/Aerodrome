@@ -4,12 +4,12 @@ from aerodrome.simulator.objects.WingedCone2D_control import WingedCone2D_contro
 from aerodrome.simulator.envs.Space3D import Space3D
 from math import *
 
-for dt in [0.05]:
+for integrator in ["euler", "midpoint", "rk23", "rk45"]:
 
-    env = Space3D(dt, 0.001, 1)
+    env = Space3D(0.001, 0.001, 1)
     object_dict = {
         "name": "test",
-        "integrator": "euler",
+        "integrator": integrator,
         "S": 3603.0,
         "c": 80.0,
         "m": 9375.0,
@@ -49,7 +49,7 @@ for dt in [0.05]:
     import numpy as np
     import matplotlib.pyplot as plt
 
-    cnt = 1000
+    cnt = 10000
     x = np.zeros(cnt)
     y = np.zeros(cnt)
 
@@ -59,7 +59,7 @@ for dt in [0.05]:
         x[i] = result["test"]["pos"][0]
         y[i] = result["test"]["Ny"]
 
-    plt.plot(x, y, label=f"dt={dt}")
+    plt.plot(x, y, label=f"{integrator}")
     # plt.ylim(0, 40000)
     # plt.gca().set_aspect('equal', adjustable='box')
 

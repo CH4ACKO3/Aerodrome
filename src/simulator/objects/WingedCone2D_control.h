@@ -56,8 +56,14 @@ public:
         d_eV = 0;
         eV_prev = 0;
 
+        _D();
+        _L();
+        _T();
+        _M();
+
+        Ny = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
+                                + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * g);
         Vy_prev = vel[1];
-        Ny = 0;
         wz = ang_vel[2];
     }
 
@@ -112,15 +118,15 @@ public:
         double Vc = action["Vc"].cast<double>();
         double dt = action["dt"].cast<double>();
 
-        Ny = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
-                                + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * g);
-        Vy_prev = vel[1];
-        wz = ang_vel[2];
-
         delta_e = Ny_controller(Nyc, Ny, wz, dt);
         delta_e = std::clamp(delta_e, -25 / 57.3, 25 / 57.3);
 
         double Phi = V_controller(Vc, V, dt);
+
+        Ny = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
+                                + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * g);
+        Vy_prev = vel[1];
+        wz = ang_vel[2];
         
         // 计算气动力
         _D();
