@@ -1,12 +1,12 @@
 from aerodrome.core import Env
 from aerodrome.registration import register
-from aerodrome.simulator.objects.WingedCone2D_control import WingedCone2D_control
-from aerodrome.simulator.envs.Space3D import Space3D
+from aerodrome.simulator.CanonicalAircraftEnv.objects.WingedCone2D_control import WingedCone2D_control
+from aerodrome.simulator.Core.envs.Space3D import Space3D
 from math import *
 
 for integrator in ["euler", "midpoint", "rk23", "rk45"]:
 
-    env = Space3D(0.01, 0.001, 2)
+    env = Space3D(0.01, 0.001, 5)
     object_dict = {
         "name": "test",
         "integrator": integrator,

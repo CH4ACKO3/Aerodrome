@@ -8,24 +8,28 @@ set(PYBIND11_DIR include/pybind11)
 
 add_subdirectory(${PYBIND11_DIR} EXCLUDE_FROM_ALL)
 
-include_directories("${CMAKE_SOURCE_DIR}/src/simulator")
-include_directories("${CMAKE_SOURCE_DIR}/src/simulator/envs")
-include_directories("${CMAKE_SOURCE_DIR}/src/simulator/objects")
+# Start of Selection
+file(GLOB_RECURSE FILES_TO_REMOVE "${CMAKE_SOURCE_DIR}/python/aerodrome/simulator/*")
+foreach(FILE ${FILES_TO_REMOVE})
+    file(REMOVE ${FILE})
+endforeach()
 
 set(OUTPUT_BASE_DIR "${CMAKE_SOURCE_DIR}/python/aerodrome/simulator")
 
-# 1. 收集需要处理的源文件
-file(GLOB ENV_FILES "src/simulator/envs/*.cpp")
-file(GLOB OBJECT_FILES "src/simulator/objects/*.cpp")
-file(GLOB BASE_ENV_FILES "src/simulator/*.cpp")
+file(GLOB_RECURSE SUB_DIRS LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/src/simulator*")
+foreach(SUB_DIR ${SUB_DIRS})
+    if(IS_DIRECTORY "${SUB_DIR}")
+        include_directories(${SUB_DIR})
+    endif()
+endforeach()
+include_directories(${CMAKE_SOURCE_DIR}/src/simulator)
 
-# 2. 合并所有文件
-list(APPEND ALL_FILES ${ENV_FILES} ${OBJECT_FILES} ${BASE_ENV_FILES})
+file(GLOB_RECURSE ALL_FILES "${CMAKE_SOURCE_DIR}/src/simulator/**/*.cpp")
 
-# 3. 为每个 .h 文件生成对应的 .pyd 文件
 foreach(FILE ${ALL_FILES})
     # 获取文件的基本名称，不带路径
     get_filename_component(FILE_NAME ${FILE} NAME_WE)
+    message("${FILE_NAME}")
 
     # 提取文件的相对路径
     get_filename_component(FILE_DIR ${FILE} DIRECTORY)

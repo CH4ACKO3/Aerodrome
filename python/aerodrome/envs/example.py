@@ -1,6 +1,6 @@
 from aerodrome.core import Env
 from aerodrome.registration import register
-from aerodrome.simulator.envs.DerivedEnv import DerivedEnv
+from aerodrome.simulator.MinimalExample.envs import DerivedEnv
 
 class ExampleEnv(Env):
     def __init__(self):

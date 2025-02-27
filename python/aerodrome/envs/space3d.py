@@ -1,7 +1,7 @@
 from aerodrome.core import Env
 from aerodrome.registration import register
-from aerodrome.simulator.envs.Space3D import Space3D
-from aerodrome.simulator.objects.Object3D import Object3D
+from aerodrome.simulator.Core.envs import Space3D
+from aerodrome.simulator.Core.objects import Object3D
 
 class Space3D_control(Env):
     def __init__(self):
