@@ -10,7 +10,7 @@
 
 namespace py = pybind11;
 
-class WingedCone2D_control : public WingedCone2D
+class WingedCone2D_RL : public WingedCone2D
 {
 public:
     // 俯仰角增稳过载驾驶仪控制参数
@@ -20,8 +20,9 @@ public:
     double Kpz;   // 比例增益
 
     double eNy; // 过载跟踪误差
+    double eNy_prev; // 过载误差前值
     double i_eNy; // 过载积分项
-    double p_eNy; // 过载比例项
+    double d_eNy; // 过载比例项
 
     double i_eSAC; // 增稳回路积分项
 
@@ -34,9 +35,9 @@ public:
     double Ny; // 当前过载
     double wz; // 当前滚转角速度
 
-    WingedCone2D_control() {}
+    WingedCone2D_RL() {}
 
-    WingedCone2D_control(py::dict input_dict) : WingedCone2D(input_dict)
+    WingedCone2D_RL(py::dict input_dict) : WingedCone2D(input_dict)
     {
         Kiz = input_dict["Kiz"].cast<double>();
         Kwz = input_dict["Kwz"].cast<double>();
@@ -48,8 +49,9 @@ public:
         Kd_V = input_dict["Kd_V"].cast<double>();
 
         eNy = 0;
+        eNy_prev = 0;
         i_eNy = 0;
-        p_eNy = 0;
+        d_eNy = 0;
         i_eSAC = 0;
         i_V = 0;
         d_eV = 0;
@@ -82,19 +84,10 @@ public:
         return u1a;
     }
 
-    double Ny_controller(double Nyc, double Ny, double wz, double dt)
+    double Ny_controller(double nn_control, double wz, double dt)
     {
-        // 过载跟踪误差
-        eNy = Nyc - Ny;
-
-        // PI校正环节
-        i_eNy += eNy * dt;
-        p_eNy = eNy;
-
-        double pi_eNy = Kiz * i_eNy + Kpz * p_eNy;
-
-        // 增稳回路
-        double eSAC = pi_eNy - Kaz * wz;
+        // 增稳回路，使用神经网络输出代替PI环节
+        double eSAC = nn_control - Kaz * wz;
         i_eSAC += eSAC * dt;
 
         // 阻尼回路
@@ -107,6 +100,10 @@ public:
     {
         py::dict output_dict = WingedCone2D::to_dict();
         output_dict["Ny"] = Ny;
+        output_dict["eNy"] = eNy;
+        output_dict["i_eNy"] = i_eNy;
+        output_dict["d_eNy"] = d_eNy;
+
         return output_dict;
     }
 
@@ -116,15 +113,12 @@ public:
 
         double Nyc = action["Nyc"].cast<double>();
         double Vc = action["Vc"].cast<double>();
+        double nn_control = action["nn_control"].cast<double>();
 
-        delta_e = Ny_controller(Nyc, Ny, wz, dt*0.1);
+        delta_e = Ny_controller(nn_control, wz, dt*0.1);
         delta_e = std::clamp(delta_e, -25 / 57.3, 25 / 57.3);
 
         double Phi = V_controller(Vc, V, dt*0.1);
-
-        Ny = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
-                                + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * g);
-        wz = ang_vel[2];
 
         // 计算气动力
         _D();
@@ -179,6 +173,16 @@ public:
         g = Gravity(h);
 
         q = 0.5 * Rho * V * V;
+
+        Ny = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
+                                + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * g);
+        wz = ang_vel[2];
+
+        eNy = Nyc - Ny;
+        i_eNy += eNy * dt;
+        d_eNy = (eNy - eNy_prev) / dt;
+        eNy_prev = eNy;
+
         return to_dict();
     }
 };

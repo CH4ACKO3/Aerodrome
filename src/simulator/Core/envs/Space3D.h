@@ -12,8 +12,7 @@ namespace py = pybind11;
 
 class Space3D : public BaseEnv
 {
-protected:
-    std::vector<std::shared_ptr<Object3D>> memento;
+private:
     double tau;
     double dt;
     double eps;
@@ -38,11 +37,6 @@ public:
         return true;
     }
 
-    void save()
-    {
-        memento = objects;
-    }
-
     py::dict to_dict()
     {
         py::dict output_dict;
@@ -61,12 +55,6 @@ public:
             output_dict[py::str(object->name)] = (object->d()).to_dict();
         }
         return output_dict;
-    }
-
-    py::object reset()
-    {   
-        objects = memento;
-        return to_dict();
     }
 
     py::object step(const py::object& actions)

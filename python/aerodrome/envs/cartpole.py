@@ -18,4 +18,4 @@ class CartPole(Env):
         output_dict = self.env.step(input_dict)
         return output_dict["observation"], output_dict["reward"], output_dict["terminated"], output_dict["truncated"], output_dict["info"]
     
-register("cartpole-v0", "aerodrome.envs.cartpole:CartPole")
+register("cartpole-v0", "aerodrome.envs.CartPole:CartPole")

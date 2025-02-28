@@ -32,4 +32,4 @@ class Minimal(Env):
     def close(self):
         print("Close MinimalEnv")
 
-register("minimal-v0", "aerodrome.envs.minimal:Minimal")
+register("minimal-v0", "aerodrome.envs.Minimal:Minimal")
