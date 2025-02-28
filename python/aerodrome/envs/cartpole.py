@@ -1,6 +1,6 @@
 from aerodrome.core import Env
 from aerodrome.registration import register
-from aerodrome.simulator.CartPole.envs import CartPoleEnv
+from aerodrome.simulator.CartPole.envs.CartPoleEnv import CartPoleEnv
 
 class CartPole(Env):
     def __init__(self):

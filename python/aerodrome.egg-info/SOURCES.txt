@@ -11,7 +11,7 @@ python/aerodrome.egg-info/SOURCES.txt
 python/aerodrome.egg-info/dependency_links.txt
 python/aerodrome.egg-info/top_level.txt
 python/aerodrome/envs/cartpole.py
-python/aerodrome/envs/example.py
+python/aerodrome/envs/minimal.py
 python/aerodrome/envs/space3d.py
 python/aerodrome/simulator/CanonicalAircraftEnv/objects/WingedCone2D.cp39-win_amd64.pyd
 python/aerodrome/simulator/CanonicalAircraftEnv/objects/WingedCone2D.exp
@@ -41,7 +41,7 @@ python/aerodrome/simulator/Core/objects/Object3D.cp39-win_amd64.pyd
 python/aerodrome/simulator/Core/objects/Object3D.exp
 python/aerodrome/simulator/Core/objects/Object3D.lib
 python/aerodrome/simulator/Core/objects/Object3D.pdb
-python/aerodrome/simulator/MinimalExample/envs/DerivedEnv.cp39-win_amd64.pyd
-python/aerodrome/simulator/MinimalExample/envs/DerivedEnv.exp
-python/aerodrome/simulator/MinimalExample/envs/DerivedEnv.lib
-python/aerodrome/simulator/MinimalExample/envs/DerivedEnv.pdb
+python/aerodrome/simulator/MinimalExample/envs/MinimalEnv.cp39-win_amd64.pyd
+python/aerodrome/simulator/MinimalExample/envs/MinimalEnv.exp
+python/aerodrome/simulator/MinimalExample/envs/MinimalEnv.lib
+python/aerodrome/simulator/MinimalExample/envs/MinimalEnv.pdb

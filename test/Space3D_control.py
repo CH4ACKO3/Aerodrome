@@ -54,7 +54,7 @@ for integrator in ["euler", "midpoint", "rk23", "rk45"]:
     y = np.zeros(cnt)
 
     for i in range(cnt):
-        action = {"test": {"Nyc":0.0, "Vc":3000}}
+        action = {"test": {"Nyc":1.0, "Vc":3000}}
         result = env.step(action)
         x[i] = result["test"]["pos"][0]
         y[i] = result["test"]["Ny"]

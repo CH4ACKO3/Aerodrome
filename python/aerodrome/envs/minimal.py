@@ -1,27 +1,22 @@
 from aerodrome.core import Env
 from aerodrome.registration import register
-from aerodrome.simulator.MinimalExample.envs import DerivedEnv
+from aerodrome.simulator.MinimalExample.envs.MinimalEnv import MinimalEnv
 
-class ExampleEnv(Env):
+class Minimal(Env):
     def __init__(self):
-        self.env = DerivedEnv()
+        self.env = MinimalEnv()
         self.state = 0
-        print("Init")
+        print("Initialize MinimalEnv")
 
     def step(self, action):
         self.state += 1
         try:
             input_dict = {
                 "value": action,
-                "state": self.state,
-                "metadata": {
-                    "description": "input",
-                    "source": "cmdline input"
-                },
-                "other_info": [1, 2, 3]
             }
             result = self.env.step(input_dict)
-            print(result)
+            result["py_state"] = self.state
+            return result
         except ValueError:
             print("input a valid integer")
         except KeyboardInterrupt:
@@ -29,10 +24,12 @@ class ExampleEnv(Env):
     
     def reset(self):
         self.state = 0
-        self.env.reset()
-        print("Reset")
+        print("Reset MinimalEnv")
+        result = self.env.reset()
+        result["py_state"] = self.state
+        return result
     
     def close(self):
-        print("Close")
+        print("Close MinimalEnv")
 
-register("example-v0", "aerodrome.envs.example:ExampleEnv")
+register("minimal-v0", "aerodrome.envs.minimal:Minimal")

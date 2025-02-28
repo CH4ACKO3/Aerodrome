@@ -35,3 +35,4 @@ src/simulator_info.txt
 *.old
 ref/
 temp.*
+test/

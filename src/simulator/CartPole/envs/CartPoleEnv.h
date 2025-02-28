@@ -11,6 +11,29 @@ namespace py = pybind11;
 
 class CartPoleEnv : public BaseEnv
 {
+private:
+    double gravity = 9.81;
+    double masscart = 1.0;
+    double masspole = 0.1;
+    double total_mass = masspole + masscart;
+    double length = 0.5; // half the pole's length
+    double polemass_length = masspole * length;
+    double force_mag = 10.0;
+    double tau = 0.02; // seconds between state updates
+    std::string kinematic_integrator = "euler";
+
+    double theta_threshold_radians = 12 * 2 * 3.1415926 / 360; // angle at which to fail the episode
+    double x_threshold = 2.4; // distance at which to fail the episode
+
+    double x = 0;
+    double theta = 0;
+    double x_dot = 0;
+    double theta_dot = 0;
+
+    int time_step = 0;
+    int max_steps = 200;
+    bool steps_beyond_done = false;
+
 public:
     CartPoleEnv() {}
 
@@ -18,7 +41,7 @@ public:
 
     py::object reset() override
     {
-        py::dict result, info;
+        py::dict result;
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<> dis(-0.05, 0.05);
@@ -31,17 +54,16 @@ public:
         steps_beyond_done = false;
 
         result["observation"] = py::make_tuple(x, x_dot, theta, theta_dot);
-        result["info"] = info;
+        result["info"] = "";
         return result;
     }
 
     py::object step(const py::object& input_dict) override
     {
-        py::dict result, info;
+        py::dict result;
         if (!input_dict.contains("action"))
         {
-            info["error"] = "input_dict does not contain 'action'";
-            result["info"] = info;
+            result["info"] = "input_dict does not contain 'action'";
             return result;
         }
 
@@ -52,15 +74,13 @@ public:
         }
         catch (const std::exception &e)
         {
-            info["error"] = std::string("failed to convert action to int: ") + e.what();
-            result["info"] = info;
+            result["info"] = std::string("failed to convert action to int: ") + e.what();
             return result;
         }
 
         if (action != 0 && action != 1)
         {
-            info["error"] = "action must be either 0 or 1";
-            result["info"] = info;
+            result["info"] = "action must be either 0 or 1";
             return result;
         }
 
@@ -90,13 +110,12 @@ public:
         }
         else
         {
-            info["error"] = "unknown kinematic integrator";
-            result["info"] = info;
+            result["info"] = "unknown kinematic integrator";
             return result;
         }
 
         time_step ++;
-        bool terminated = (x < -x_threshold || x > x_threshold || theta < -theta_threshold_radians || theta > theta_threshold_radians);
+        bool terminated = ((x < -x_threshold) || (x > x_threshold) || (theta < -theta_threshold_radians) || (theta > theta_threshold_radians));
         bool truncated = (time_step >= max_steps);
 
         double reward;
@@ -119,7 +138,7 @@ public:
         else
         {
             reward = 0.0;
-            info["warning"] = "You are calling 'step()' even though this environment has already returned terminated = True. "
+            result["info"] = "You are calling 'step()' even though this environment has already returned terminated = True. "
                               "You should always call 'reset()' once you receive 'terminated = True' -- any further steps are undefined behavior.";
         }
 
@@ -127,31 +146,12 @@ public:
         result["reward"] = reward;
         result["terminated"] = terminated;
         result["truncated"] = truncated;
-        result["info"] = info;
+
+        if (!result.contains("info"))
+        {
+            result["info"] = "";
+        }
 
         return result;
     }
-
-private:
-    double gravity = 9.81;
-    double masscart = 1.0;
-    double masspole = 0.1;
-    double total_mass = masspole + masscart;
-    double length = 0.5; // half the pole's length
-    double polemass_length = masspole * length;
-    double force_mag = 10.0;
-    double tau = 0.02; // seconds between state updates
-    std::string kinematic_integrator = "euler";
-
-    double theta_threshold_radians = 12 * 2 * 3.1415926 / 360; // angle at which to fail the episode
-    double x_threshold = 2.4; // distance at which to fail the episode
-
-    double x = 0;
-    double theta = 0;
-    double x_dot = 0;
-    double theta_dot = 0;
-
-    int time_step = 0;
-    int max_steps = 500;
-    bool steps_beyond_done = false;
 };
