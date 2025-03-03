@@ -161,6 +161,7 @@ public:
         alpha = (cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta);
         gamma_v = (cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v);
 
+        V = Vc;
         vel[0] = V * cos(theta_v) * cos(phi_v);
         vel[1] = V * sin(theta_v);
         vel[2] = -V * cos(theta_v) * sin(phi_v);

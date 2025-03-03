@@ -27,6 +27,11 @@ public:
         dt = tau / integrate_steps;
     }
 
+    py::object reset()
+    {
+        return py::none();
+    }
+
     void add_object(std::shared_ptr<Object3D> object)
     {
         objects.push_back(object);

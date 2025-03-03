@@ -9,7 +9,7 @@ class WingedCone_RL(Env):
         self.env = Space3D(0.01, 0.001, 5)
         self.env_copy = Space3D(0.01, 0.001, 5)
         self.object_name = None
-        self.eNy_bound = 3
+        self.eNy_bound = 1
 
     def add_object(self, object):
         self.env.add_object(object)
@@ -24,7 +24,7 @@ class WingedCone_RL(Env):
         return obs, {}
 
     def step(self, action):
-        state = self.env.to_dict()[self.object_name]
+        state = self.env.step(action)[self.object_name]
         obs = np.array([state["eNy"], state["i_eNy"], state["d_eNy"]])
         if state["eNy"] > self.eNy_bound:
             if state["d_eNy"] < 0:
@@ -44,6 +44,11 @@ class WingedCone_RL(Env):
             reward -= 10.0
         else:
             terminated = np.array([0], dtype=np.bool_)
+        
         return obs, reward, terminated, False, {}
+    
+    def get_state(self):
+        state = self.env.to_dict()[self.object_name]
+        return state
     
 register("wingedcone-v0", "aerodrome.envs.WingedCone:WingedCone_RL")

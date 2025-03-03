@@ -35,6 +35,10 @@ python/aerodrome/simulator/Core/envs/BaseEnv.cp39-win_amd64.pyd
 python/aerodrome/simulator/Core/envs/BaseEnv.exp
 python/aerodrome/simulator/Core/envs/BaseEnv.lib
 python/aerodrome/simulator/Core/envs/BaseEnv.pdb
+python/aerodrome/simulator/Core/envs/Space3D.cp39-win_amd64.pyd
+python/aerodrome/simulator/Core/envs/Space3D.exp
+python/aerodrome/simulator/Core/envs/Space3D.lib
+python/aerodrome/simulator/Core/envs/Space3D.pdb
 python/aerodrome/simulator/Core/objects/Aircraft3D.cp39-win_amd64.pyd
 python/aerodrome/simulator/Core/objects/Aircraft3D.exp
 python/aerodrome/simulator/Core/objects/Aircraft3D.lib
