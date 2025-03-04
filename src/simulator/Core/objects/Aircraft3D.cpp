@@ -14,5 +14,6 @@ PYBIND11_MODULE(Aircraft3D, m)
         .def(py::init<py::dict>(), py::arg("input_dict") = py::dict())
         .def(py::init<py::dict>())
         .def("to_dict", &Aircraft3D::to_dict)
-        .def("d", &Aircraft3D::d);
+        .def("d", &Aircraft3D::d)
+        .def("reset", &Aircraft3D::reset);
 }

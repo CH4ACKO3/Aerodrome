@@ -15,5 +15,6 @@ PYBIND11_MODULE(Object3D, m)
         .def(py::init<py::dict>())
         .def("to_dict", &Object3D::to_dict)
         .def("step", &Object3D::step)
-        .def("d", &Object3D::d);
+        .def("d", &Object3D::d)
+        .def("reset", &Object3D::reset);
 }

@@ -29,7 +29,11 @@ public:
 
     py::object reset()
     {
-        return py::none();
+        for (auto& object : objects)
+        {
+            object->reset();
+        }
+        return to_dict();
     }
 
     void add_object(std::shared_ptr<Object3D> object)

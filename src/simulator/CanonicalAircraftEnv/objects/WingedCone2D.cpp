@@ -15,6 +15,7 @@ PYBIND11_MODULE(WingedCone2D, m)
     py::class_<WingedCone2D, Object3D, std::shared_ptr<WingedCone2D>>(m, "WingedCone2D")
         .def(py::init<>())
         .def(py::init<py::dict>(), py::arg("input_dict") = py::dict())
-        .def("step", &WingedCone2D::step);
+        .def("step", &WingedCone2D::step)
+        .def("reset", &WingedCone2D::reset);
 }
 

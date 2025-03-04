@@ -33,9 +33,9 @@ public:
 
     double Ny; // 当前过载
     double wz; // 当前滚转角速度
-
+    
     WingedCone2D_Classic() {}
-
+    
     WingedCone2D_Classic(py::dict input_dict) : WingedCone2D(input_dict)
     {
         Kiz = input_dict["Kiz"].cast<double>();
@@ -63,6 +63,11 @@ public:
         Ny = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
                                 + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * g);
         wz = ang_vel[2];
+    }
+
+    virtual void reset() override
+    {
+        *this = WingedCone2D_Classic(initial_state);
     }
 
     double V_controller(double Vc, double V, double dt)

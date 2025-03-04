@@ -34,6 +34,7 @@ public:
     std::array<double, 3> M; // 力矩
 
     Aircraft3D() {}
+
     Aircraft3D(py::dict input_dict) : Object3D(input_dict)
     {
         V = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
@@ -55,6 +56,11 @@ public:
         N = 0.0;
         T = 0.0;
         M = {0.0, 0.0, 0.0};
+    }
+
+    virtual void reset() override
+    {
+        *this = Aircraft3D(initial_state);
     }
 
     virtual py::dict to_dict() override

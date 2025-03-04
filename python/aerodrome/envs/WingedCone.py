@@ -7,17 +7,15 @@ import numpy as np
 class WingedCone_RL(Env):
     def __init__(self):
         self.env = Space3D(0.01, 0.001, 5)
-        self.env_copy = Space3D(0.01, 0.001, 5)
         self.object_name = None
         self.eNy_bound = 1
 
     def add_object(self, object):
         self.env.add_object(object)
-        self.env_copy.add_object(object)
         self.object_name = object.to_dict()["name"]
 
     def reset(self):
-        self.env = self.env_copy
+        self.env.reset()
         state = self.env.to_dict()[self.object_name]
         obs = np.array([state["eNy"], state["i_eNy"], state["d_eNy"]])
 

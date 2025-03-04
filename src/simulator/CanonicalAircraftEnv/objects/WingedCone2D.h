@@ -16,12 +16,17 @@ class WingedCone2D : public Aircraft3D
 {
 public:
     double delta_e; // 升降舵偏角
-    
-    WingedCone2D() {}
 
+    WingedCone2D() {}
+    
     WingedCone2D(py::dict input_dict) : Aircraft3D(input_dict)
     {
         delta_e = 0.0;        
+    }
+
+    virtual void reset() override
+    {
+        *this = WingedCone2D(initial_state);
     }
 
     void _D()

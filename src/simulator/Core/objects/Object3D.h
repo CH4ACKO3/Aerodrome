@@ -38,11 +38,10 @@ public:
     double beta;     // 侧滑角
     double gamma_v;  // 速度倾斜角
 
-    Object3D() 
-        : name(""), integrator("euler"), pos{0.0, 0.0, 0.0}, vel{0.0, 0.0, 0.0}, ang_vel{0.0, 0.0, 0.0}, J{0.0, 0.0, 0.0},
-          V(0.0), theta(0.0), phi(0.0), gamma(0.0), theta_v(0.0), phi_v(0.0),
-            alpha(0.0), beta(0.0), gamma_v(0.0) {}
-        
+    py::dict initial_state;
+
+    Object3D() {}
+
     Object3D(py::dict input_dict)
     {
         name = input_dict["name"].cast<std::string>();
@@ -61,6 +60,13 @@ public:
         gamma_v = input_dict["gamma_v"].cast<double>();
         alpha = input_dict["alpha"].cast<double>();
         beta = input_dict["beta"].cast<double>();
+
+        initial_state = input_dict;
+    }
+
+    virtual void reset()
+    {
+        *this = Object3D(initial_state);
     }
 
     virtual py::dict to_dict()

@@ -67,6 +67,11 @@ public:
         wz = ang_vel[2];
     }
 
+    virtual void reset() override
+    {
+        *this = WingedCone2D_RL(initial_state);
+    }
+
     double V_controller(double Vc, double V, double dt)
     {
         // 速度跟踪误差
