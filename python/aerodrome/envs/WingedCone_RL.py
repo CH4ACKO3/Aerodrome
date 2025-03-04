@@ -49,4 +49,4 @@ class WingedCone_RL(Env):
         state = self.env.to_dict()[self.object_name]
         return state
     
-register("wingedcone-v0", "aerodrome.envs.WingedCone:WingedCone_RL")
+register("wingedcone-v0", "aerodrome.envs.WingedCone_RL:WingedCone_RL")

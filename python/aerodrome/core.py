@@ -16,7 +16,7 @@ class Env(ABC):
     def close(self):
         raise NotImplementedError
     
-def make(id: str):
+def make(id: str, arg):
     """Create an environment by ID"""
     entry_point: str = registry.get(id)
     if entry_point is None:
@@ -25,4 +25,4 @@ def make(id: str):
     module_name, class_name = entry_point.split(":")
     module = __import__(module_name, fromlist=[class_name])
     env_class = getattr(module, class_name)
-    return env_class()
+    return env_class(arg)
