@@ -18,7 +18,7 @@ $ pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu118
 3.从源代码安装 Aerodrome
 
 ```bash
-$ git clone https://github.com/CH4ACKO3/Aerodrome.git
+$ git clone https://github.com/CH4ACKO3/Aerodrome.git --recursive
 $ cd Aerodrome
 $ pip install .
 ```

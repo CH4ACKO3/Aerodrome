@@ -16,10 +16,23 @@ while any_failed and failed_cnt < 10:
             if file.endswith(".pyd"):
                 relative_path = os.path.relpath(os.path.join(root, file), os.path.dirname(__file__))[:-4].replace('\\', '.').split('.')[:-1]
                 relative_path = '.'.join(relative_path)
+                
                 module_name = f"aerodrome.{relative_path}"
+
                 try:
                     importlib.import_module(module_name)
-                except:
+                except Exception as e:
+                    any_failed = True
+                    failed_cnt += 1
+
+            if file.endswith(".so"):
+                relative_path = os.path.relpath(os.path.join(root, file), os.path.dirname(__file__))[:-4].replace('\\', '.').split('.')[0].replace('/', '.')
+                
+                module_name = f"aerodrome.{relative_path}"
+
+                try:
+                    importlib.import_module(module_name)
+                except Exception as e:
                     any_failed = True
                     failed_cnt += 1
 
