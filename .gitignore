@@ -36,3 +36,5 @@ src/simulator_info.txt
 ref/
 temp.*
 test/
+
+site/
