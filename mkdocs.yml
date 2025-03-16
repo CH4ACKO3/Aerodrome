@@ -1,0 +1,41 @@
+site_name: Aerodrome
+site_url: https://ch4acko3.github.io/Aerodrome/
+repo_url: https://github.com/CH4ACKO3/Aerodrome
+
+docs_dir: docs/
+
+theme:
+  name: material
+  features:
+    - navigation.expand
+    - navigation.indexes
+    - navigation.sections
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      languages:
+        - locale: zh
+          default: true
+          name: 简体中文
+          build: true
+        - locale: en
+          name: English
+          build: true
+          nav_translations:
+            概述: Overview
+            快速入门: Get Started
+            安装: Installation
+            项目结构: Project Structure
+
+markdown_extensions:
+  - admonition
+  - attr_list
+
+nav:
+  - 概述:
+    - index.md
+    - 快速入门:
+      - 安装: get_started.md
+      - 项目结构: project_structure.md

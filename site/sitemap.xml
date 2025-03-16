@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://ch4acko3.github.io/Aerodrome/</loc>
+        <lastmod>2025-03-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/"/>
+    </url>
+    <url>
+        <loc>https://ch4acko3.github.io/Aerodrome/en/</loc>
+        <lastmod>2025-03-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/"/>
+    </url>
+</urlset>
