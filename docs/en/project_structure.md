@@ -1,6 +1,6 @@
 # Project Structure #
 
-Aerodrome consists of both C++ and Python components. The C++ functions/classes need to be compiled into ```.pyd``` files using ```pybind11``` first, after which they can be called by the Python code.
+Aerodrome consists of both C++ and Python components. The C++ functions/classes need to be compiled into `.pyd` files using `pybind11` first, after which they can be called by the Python code.
 
 ```
 ./Aerodrome

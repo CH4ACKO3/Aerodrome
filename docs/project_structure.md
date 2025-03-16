@@ -1,6 +1,6 @@
 # 项目结构 #
 
-Aerodrome 由 C++ 和 Python 两部分组成；其中 C++ 函数/类需要先通过 ```pybind11``` 编译为 ```.pyd``` 文件，再被 Python 代码调用。
+Aerodrome 由 C++ 和 Python 两部分组成；其中 C++ 函数/类需要先通过 `pybind11` 编译为 `.pyd` 或 `.so` 文件，再被 Python 代码调用。
 
 ```
 ./Aerodrome

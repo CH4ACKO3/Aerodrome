@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- 由 Microsoft Visio, SVG Export 生成 minimal_example2.svg Page-1 -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"
+		xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/" width="6.11368in" height="2.01919in"
+		viewBox="0 0 440.185 145.382" xml:space="preserve" color-interpolation-filters="sRGB" class="st13">
+	<v:documentProperties v:langID="2052" v:metric="true" v:viewMarkup="false">
+		<v:userDefs>
+			<v:ud v:nameU="msvSubprocessMaster" v:prompt="" v:val="VT4(Rectangle)"/>
+			<v:ud v:nameU="msvNoAutoConnect" v:val="VT0(1):26"/>
+		</v:userDefs>
+	</v:documentProperties>
+
+	<style type="text/css">
+	<![CDATA[
+		.st1 {fill:none;stroke:#0070c0;stroke-dasharray:15.75,11.25;stroke-width:2.25}
+		.st2 {fill:none;stroke:#c00000;stroke-dasharray:15.75,11.25;stroke-width:2.25}
+		.st3 {fill:#0070c0;stroke:#c7c8c8;stroke-width:0.25}
+		.st4 {fill:#feffff;font-family:Calibri;font-size:1.00001em;font-weight:bold}
+		.st5 {font-family:黑体;font-size:1em}
+		.st6 {fill:#feffff;font-family:Calibri;font-size:1.00001em}
+		.st7 {fill:none;stroke:none;stroke-width:0.25}
+		.st8 {fill:#c00000;font-family:黑体;font-size:1.00001em;font-weight:bold}
+		.st9 {fill:url(#grad0-33)}
+		.st10 {stroke:url(#grad0-33);stroke-linecap:round;stroke-linejoin:round;stroke-width:2}
+		.st11 {fill:#4672c4;font-family:Calibri;font-size:1.00001em;font-weight:bold}
+		.st12 {stroke:#4672c4;stroke-width:0.75}
+		.st13 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}
+	]]>
+	</style>
+
+	<defs id="Patterns_And_Gradients">
+		<linearGradient id="grad0-33" x1="0" y1="0" x2="1" y2="0" gradientTransform="rotate(0 0.5 0.5)">
+			<stop offset="0" stop-color="#c00000" stop-opacity="1"/>
+			<stop offset="1" stop-color="#0070c0" stop-opacity="1"/>
+		</linearGradient>
+	</defs>
+	<g v:mID="0" v:index="1" v:groupContext="foregroundPage">
+		<v:userDefs>
+			<v:ud v:nameU="msvThemeOrder" v:val="VT0(0):26"/>
+		</v:userDefs>
+		<title>页-1</title>
+		<v:pageProperties v:drawingScale="0.0393701" v:pageScale="0.0393701" v:drawingUnits="24" v:shadowOffsetX="8.50394"
+				v:shadowOffsetY="-8.50394"/>
+		<v:layer v:name="连接线" v:index="0"/>
+		<v:layer v:name="标注" v:index="1"/>
+		<g id="shape1-1" v:mID="1" v:groupContext="shape" transform="translate(150.644,-20.25)">
+			<title>矩形</title>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<path d="M0 145.38 L269.29 145.38 L269.29 40.5 L0 40.5 L0 145.38 Z" class="st1"/>
+		</g>
+		<g id="shape2-3" v:mID="2" v:groupContext="shape" transform="translate(20.25,-20.25)">
+			<title>矩形.2</title>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<path d="M0 145.38 L90.71 145.38 L90.71 40.5 L0 40.5 L0 145.38 Z" class="st2"/>
+		</g>
+		<g id="shape4-5" v:mID="4" v:groupContext="shape" transform="translate(166.234,-31.5886)">
+			<title>矩形.4</title>
+			<desc>C++ 环境类</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="42.5197" cy="105.697" width="85.04" height="79.3701"/>
+			<rect x="0" y="66.0118" width="85.0394" height="79.3701" class="st3"/>
+			<text x="13.94" y="109.69" class="st4" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>C++ <tspan
+						class="st5">环境类</tspan></text>		</g>
+		<g id="shape5-9" v:mID="5" v:groupContext="shape" transform="translate(291.667,-71.3209)">
+			<title>矩形.5</title>
+			<desc>C++ 实体类</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="45.3543" cy="132.673" width="90.71" height="25.4173"/>
+			<rect x="0" y="119.965" width="90.7087" height="25.4173" class="st3"/>
+			<text x="16.82" y="136.67" class="st6" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>C++ <tspan
+						class="st5">实体类</tspan></text>		</g>
+		<g id="shape9-13" v:mID="9" v:groupContext="shape" transform="translate(301.589,-62.2973)">
+			<title>矩形.9</title>
+			<desc>C++ 实体类</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="45.3543" cy="132.673" width="90.71" height="25.4173"/>
+			<rect x="0" y="119.965" width="90.7087" height="25.4173" class="st3"/>
+			<text x="16.82" y="136.67" class="st6" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>C++ <tspan
+						class="st5">实体类</tspan></text>		</g>
+		<g id="shape10-17" v:mID="10" v:groupContext="shape" transform="translate(312.927,-53.7461)">
+			<title>矩形.10</title>
+			<desc>C++ 实体类</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="45.3543" cy="132.673" width="90.71" height="25.4173"/>
+			<rect x="0" y="119.965" width="90.7087" height="25.4173" class="st3"/>
+			<text x="16.82" y="136.67" class="st6" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>C++ <tspan
+						class="st5">实体类</tspan></text>		</g>
+		<g id="shape11-21" v:mID="11" v:groupContext="shape" transform="translate(321.431,-43.872)">
+			<title>矩形.11</title>
+			<desc>C++ 实体类</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="45.3543" cy="132.673" width="90.71" height="25.4173"/>
+			<rect x="0" y="119.965" width="90.7087" height="25.4173" class="st3"/>
+			<text x="16.78" y="136.67" class="st4" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>C++ <tspan
+						class="st5">实体类</tspan></text>		</g>
+		<g id="shape14-25" v:mID="14" v:groupContext="shape" transform="translate(30.7181,-51.3434)">
+			<title>工作表.14</title>
+			<rect v:rectContext="foreign" x="0" y="80.0973" width="65.0976" height="65.2846" class="st7"/>
+			<switch>
+				<foreignObject x="0" y="80.0973" width="65.0976" height="65.2846"
+						requiredExtensions="http://schemas.microsoft.com/visio/2003/SVGExtensions/">
+					<v:foreignData v:orgSize="4048" v:data="data:metafile;base64,eNrtV11oXEUUPnPnrtlqqyFNyzYJsU2zGm2QYjYaY6Nzb9q
+								adqvGRCXVYlONoWAaSi2iCGaLtVjoQwUf3GhQpGLVF8mrkYaCb1uQ4kNAQX0Q6puUivui63funbl39nYTt5TqiwOHc+bOmfM
+								358yZK4hoiuIxJIh2Af6sVCoM0ymiI4CNOx7dSSTo29uIHgefpOpxYC3RwVaii6DvEtVrwzlJXW+7BAHUDdgIgLgtQglqA90
+								IcBoXv2feMScE5r0CuKR5tyon4HMDiYWHO5RLq7X8uxVRJ3BGr8WaY/peRcLoipfPDBJ9MljP/qwiSz/R7UpG+tvVqojepBp
+								q2vWl091vZNm0C55oLyANaNM4D8AybQWkdNyEBtsPPq/d4uo56+5cQTfCTB0U6sdRVzjmZ6Hog1QY8y2Wbe3qJsvHVE3f6/H
+								Xjk9akdym/ePzdxM5Vbh4ZSjC7/we0AEW4lgPztPI6VwmF4a/HlNG1rqDe1X/+xvUQlOLSiuR2gdlw26o19HnCjFBbKd0fG+
+								lMNefoLge3gUDg6kH3rNKn8n11wOtXA/Al5wbWA+06DP8G/VQqcxEsmyac+I08HEdgzWkA0QF2Pabx/jjsVbAC5j3AVSAn/u
+								0Tc8pWGcc8pO/8NhnXrg+7oX84164fzyQx+uRfBmPN7G5WVHB+Dk3N1dB7sifQH+n7Vsf2fcR9p/xQ3w8wJOTb/izxTn/Quk
+								ocBHzadCnWS/mb2H+dLCGjACe8Ht68oBRzIe0X0PguSfAF0ptev2WgH+2+KsX7l/wZosHWL7H8meLJ71QZsFj/YxDexgb+4C
+								FvGqIY+yvqPK3nlyoh+eORL6kleNm9N1jch09pTGHvE7eh89rPi6jPYCJGvVp5lzw27nm6HOqZUc1XXsk70RTJ1x3jnUnsr5
+								mTTdqGn6lTSzYL1GjV7ai77GdOX0HM+Sne88VpnrPPbDnvP/k7vO+tL7t+3nRZ8zz139c9GvFxXxrj86huheYnrIpgV+m2B/
+								Dk42/FQzdYNHwu7AhjhFlLBlN5kwBay37mjXN9bzO+r7e2rsmcR/167WbOWaJtc267P4YfSa640/Ss+rwVy2qN9eqTO9bbt1
+								N+J7UPQI4LOJe22CtLTgBOtHgOB2j9BrkHKUX6RD9P659TLwSpFyUcxxvrrkunY+PbN816Oha5LEf9P4V7gdz7kjRAavmB+w
+								3z52mPvU33HNk22DnLtMPaj1Pce+2bDc2ce6U5ZIoy0nnhFxyys6S8xKgLCYB+C7yAnPCd8I6ePOC+bdpuQ9pew7pt9APgA8
+								T9WPXpOWjZ/no2T7WE4d/8tfUXBnFksGb8D57DhjTd3EyHk0Bz2X5i1uS37jzcsZ9VWbdEVmSffKUzModMiPLTkbOA6acrMw
+								6fbIkRuQRMSO7xbxcLUqyTJcBGXdv5Ee1DrYT66mym0kNaHuT8bwf8AXfSQhgi7i+eO4097vOSZnoEzadje+6Qpelsxb/X7r
+								HvAeGUyLsMd0r99MCQz3v3Hre451WP6vnvZ9W0jW1afq2TovALvNPlVvmPXit/wg37v3hLvP+cOt6f5hh/peT/fa/en/8Deu
+								Btuw="/>
+				</foreignObject>
+				<!-- Unsupported Record: EmfPlusRecordTypeSetPixelOffsetMode  -->
+				<svg viewBox="-0.70871 -0.70869 329.08 330.01" height="65.2846" preserveAspectRatio="none" width="65.0976" x="0"
+						y="80.0973">
+					<clipPath id="mfid18">
+						<rect x="-0.70871" y="-0.70869" width="329.08" height="330.01" id="mfid19"/>
+					</clipPath>
+					<g clip-path="url(#mfid18)">
+						<mask id="mfid20">
+							<rect width="329" height="330" fill="white" stroke="none"/>
+						</mask>
+						<mask id="mfid21" fill="white" stroke="none">
+							<g>
+								<g mask="url(#mfid20)">
+									<use xlink:href="#mfid19"/>
+								</g>
+							</g>
+						</mask>
+						<!-- GetDC -->
+						<mask id="mfid22" fill-rule="evenodd" fill="white" stroke="none">
+							<rect x="0" y="0" width="329" height="330"/>
+						</mask>
+						<!-- Released DC -->
+						<defs>
+							<path id="mfid23" d="M0,0 L501400,0 L501400,502920 L0,502920 Z"/>
+						</defs>
+						<mask id="mfid24">
+							<use xlink:href="#mfid23" fill-rule="evenodd" fill="white" stroke="none"
+									transform="matrix(0.00065617, 0, 0, 0.00065617, 0, 0)"/>
+						</mask>
+						<mask id="mfid25" fill="white" stroke="none">
+							<g mask="url(#mfid21)">
+								<g mask="url(#mfid24)">
+									<use xlink:href="#mfid19"/>
+								</g>
+							</g>
+						</mask>
+						<defs>
+							<!-- Unsupported Record: EmfPlusRecordTypeSetPixelOffsetMode  -->
+							<svg viewBox="-0.70871 -0.70869 96.149 96.145" height="96" id="mfid26" width="96">
+								<clipPath id="mfid27">
+									<rect x="-0.70871" y="-0.70869" width="96.149" height="96.145" id="mfid28"/>
+								</clipPath>
+								<g clip-path="url(#mfid27)">
+									<mask id="mfid29">
+										<rect width="96" height="96" fill="white" stroke="none"/>
+									</mask>
+									<mask id="mfid30" fill="white" stroke="none">
+										<g>
+											<g mask="url(#mfid29)">
+												<use xlink:href="#mfid28"/>
+											</g>
+										</g>
+									</mask>
+									<defs>
+										<path id="mfid31"
+												d="M64,30 C64,38.837 56.837,46 48,46 C39.163,46 32,38.837 32,30 C32,21.163 39.163,14 48,14 C56.837,14 64,21.163 64,30 Z"/>
+									</defs>
+									<g mask="url(#mfid30)">
+										<g transform="matrix(1, 0, 0, 1, 0, 0)">
+											<g fill="#9d9d9d">
+												<use xlink:href="#mfid31" fill-rule="nonzero" stroke="none"/>
+												<defs>
+													<path id="mfid32"
+															d="M80,82 L80,66 C80,63.6 78.8,61.2 76.8,59.6 C72.4,56 66.8,53.6 61.2,52 C57.2,50.8 52.8,50 48,50 C43.6,50 39.2,50.8 34.8,52 C29.2,53.6 23.6,56.4 19.2,59.6 C17.2,61.2 16,63.6 16,66 L16,82 L80,82 Z"/>
+												</defs>
+												<use xlink:href="#mfid32" fill-rule="nonzero" stroke="none"/>
+											</g>
+										</g>
+									</g>
+								</g>
+							</svg>
+						</defs>
+						<!-- Unsupported Record: EmfPlusRecordTypeSetObject Obj_ImageAttributes -->
+						<g mask="url(#mfid25)">
+							<g transform="matrix(3.3866, 0, 0, 3.397, 2.4001, 2.4074)">
+								<clipPath id="mfid33">
+									<rect x="-0.70871" y="-0.70869" width="97.149" height="97.145"/>
+								</clipPath>
+								<use xlink:href="#mfid26" clip-path="url(#mfid33)" transform="matrix(1, 0, 0, 1, 0, 0)"/>
+							</g>
+						</g>
+						<mask id="mfid34">
+							<rect width="329" height="330" fill="white" stroke="none"/>
+						</mask>
+					</g>
+				</svg>
+			</switch>
+			<rect v:rectContext="foreign" x="0" y="80.0973" width="65.0976" height="65.2846" class="st7"/>
+		</g>
+		<g id="shape15-28" v:mID="15" v:groupContext="shape" transform="translate(20.25,-38.7629)">
+			<title>工作表.15</title>
+			<desc>用户输入输出</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="45.3543" cy="137.63" width="90.71" height="15.5028"/>
+			<rect x="0" y="129.879" width="90.7087" height="15.5028" class="st7"/>
+			<text x="9.21" y="141.62" class="st8" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>用户输入输出</text>		</g>
+		<g id="shape18-31" v:mID="18" v:groupContext="shape" transform="translate(99.7518,-72.6607) rotate(1.16914)">
+			<title>弧线双箭头</title>
+			<v:userDefs>
+				<v:ud v:nameU="Scale" v:val="VT0(1):26"/>
+				<v:ud v:nameU="AntiScale" v:val="VT0(1):26"/>
+				<v:ud v:nameU="visVersion" v:val="VT0(17):26"/>
+			</v:userDefs>
+			<path d="M6.63 139.29 L9.67 142.61 L0 145.38 L3.58 135.98 L6.63 139.29 ZM62.84 139.29 L59.79 142.61 L69.46 145.38 L65.88
+						 135.98 L62.84 139.29 Z" class="st9"/>
+			<path d="M6.63 139.29 A46.6568 46.6568 0 0 1 62.84 139.29" class="st10"/>
+			<path d="M6.63 139.29 L9.67 142.61 L0 145.38 L3.58 135.98 L6.63 139.29" class="st10"/>
+			<path d="M62.84 139.29 L59.79 142.61 L69.46 145.38 L65.88 135.98 L62.84 139.29" class="st10"/>
+		</g>
+		<g id="shape19-40" v:mID="19" v:groupContext="shape" transform="translate(109.765,-90.2658)">
+			<title>工作表.19</title>
+			<desc>pybind</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="21.2598" cy="138.862" width="42.52" height="13.0394"/>
+			<rect x="0" y="132.343" width="42.5197" height="13.0394" class="st7"/>
+			<text x="4.07" y="142.46" class="st11" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>pybind</text>		</g>
+		<g id="shape13-43" v:mID="13" v:groupContext="shape" v:layerMember="1" transform="translate(421.459,38.6752) rotate(90)">
+			<title>正交</title>
+			<v:userDefs>
+				<v:ud v:nameU="BackFillColor" v:prompt="" v:val="VT5(#96afcf)"/>
+				<v:ud v:nameU="BackLineColor" v:prompt="" v:val="VT5(#1f477d)"/>
+				<v:ud v:nameU="BackCharColor" v:prompt="" v:val="VT5(#000000)"/>
+				<v:ud v:nameU="DarkerColor" v:prompt="" v:val="VT5(#000000)"/>
+				<v:ud v:nameU="visVersion" v:prompt="" v:val="VT0(15):26"/>
+				<v:ud v:nameU="msvStructureType" v:prompt="" v:val="VT4(Callout)"/>
+				<v:ud v:nameU="msvSDTargetIntersection" v:prompt=""/>
+				<v:ud v:nameU="msvSDCalloutNoHighlight" v:prompt="" v:val="VT0(0):5"/>
+				<v:ud v:nameU="msvShapeCategories" v:prompt="" v:val="VT0(0):26"/>
+				<v:ud v:nameU="Side" v:prompt="" v:val="VT0(4):26"/>
+				<v:ud v:nameU="LeaderEnd" v:prompt="" v:val="VT7(PNT(6.25MM,-6.4MM)):40"/>
+				<v:ud v:nameU="WHBoxIntersection" v:prompt="" v:val="VT7(PNT(10.096153846154MM,0MM)):40"/>
+				<v:ud v:nameU="IsEndInterior" v:prompt="" v:val="VT0(0):5"/>
+				<v:ud v:nameU="Extension" v:prompt="" v:val="VT0(0.059055118110236):24"/>
+				<v:ud v:nameU="Inset" v:prompt="" v:val="VT0(0.059055118110236):24"/>
+				<v:ud v:nameU="Embellishment" v:prompt="" v:val="VT0(2):26"/>
+				<v:ud v:nameU="MultiFormat" v:prompt="" v:val="VT0(0):26"/>
+				<v:ud v:nameU="visMasterStencil" v:prompt="" v:val="VT4(SDCALL_M.vssx)"/>
+				<v:ud v:nameU="BackFillColor" v:prompt="" v:val="VT5(#ffffff)"/>
+				<v:ud v:nameU="BackLineColor" v:prompt="" v:val="VT5(#e9ebf5)"/>
+				<v:ud v:nameU="BackCharColor" v:prompt="" v:val="VT5(#4672c4)"/>
+				<v:ud v:nameU="DarkerColor" v:prompt="" v:val="VT5(#4672c4)"/>
+				<v:ud v:nameU="msvSDTargetIntersection" v:prompt="" v:val="VT7(PNT(0.49212598425197,-0.34448808612223)):40"/>
+				<v:ud v:nameU="LeaderEnd" v:prompt="" v:val="VT7(PNT(0.49212598425197,-0.34448808612223)):40"/>
+				<v:ud v:nameU="WHBoxIntersection" v:prompt="" v:val="VT7(PNT(12.5MM,0MM)):40"/>
+			</v:userDefs>
+			<path d="M35.43 145.38 L35.43 170.19" class="st12"/>
+			<path d="M0 141.13 L0 145.38 L70.87 145.38 L70.87 141.13" class="st12"/>
+		</g>
+	</g>
+</svg>
