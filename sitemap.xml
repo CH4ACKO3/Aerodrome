@@ -8,11 +8,32 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/"/>
     </url>
     <url>
+        <loc>https://ch4acko3.github.io/Aerodrome/basics/</loc>
+        <lastmod>2025-03-16</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/basics/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/basics/"/>
+    </url>
+    <url>
+        <loc>https://ch4acko3.github.io/Aerodrome/cartpole_dqn/</loc>
+        <lastmod>2025-03-16</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/cartpole_dqn/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/cartpole_dqn/"/>
+    </url>
+    <url>
         <loc>https://ch4acko3.github.io/Aerodrome/get_started/</loc>
         <lastmod>2025-03-16</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/get_started/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/get_started/"/>
+    </url>
+    <url>
+        <loc>https://ch4acko3.github.io/Aerodrome/minimal_example/</loc>
+        <lastmod>2025-03-16</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/minimal_example/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/minimal_example/"/>
     </url>
     <url>
         <loc>https://ch4acko3.github.io/Aerodrome/project_structure/</loc>
@@ -29,11 +50,32 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/"/>
     </url>
     <url>
+        <loc>https://ch4acko3.github.io/Aerodrome/en/basics/</loc>
+        <lastmod>2025-03-16</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/basics/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/basics/"/>
+    </url>
+    <url>
+        <loc>https://ch4acko3.github.io/Aerodrome/en/cartpole_dqn/</loc>
+        <lastmod>2025-03-16</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/cartpole_dqn/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/cartpole_dqn/"/>
+    </url>
+    <url>
         <loc>https://ch4acko3.github.io/Aerodrome/en/get_started/</loc>
         <lastmod>2025-03-16</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/get_started/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/get_started/"/>
+    </url>
+    <url>
+        <loc>https://ch4acko3.github.io/Aerodrome/en/minimal_example/</loc>
+        <lastmod>2025-03-16</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/minimal_example/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/minimal_example/"/>
     </url>
     <url>
         <loc>https://ch4acko3.github.io/Aerodrome/en/project_structure/</loc>
