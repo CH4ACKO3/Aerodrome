@@ -62,3 +62,4 @@ Run the example code and observe the longitudinal step response of the Winged-Co
 ```bash
 $ python examples/AircraftControl/examples/AircraftControl/WingedCone_Classic.py
 ```
+![Figure_1](https://github.com/user-attachments/assets/9597cbe3-4aa2-4e2b-9582-20a9cd301f2b)
