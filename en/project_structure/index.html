@@ -62,7 +62,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#_1" class="md-skip">
+        <a href="#project-structure" class="md-skip">
           Skip to content
         </a>
       
@@ -447,28 +447,28 @@
   
 
 
-<h1 id="_1">项目结构</h1>
-<p>Aerodrome 由 C++ 和 Python 两部分组成；其中 C++ 函数/类需要先通过 <code>pybind11</code> 编译为 <code>.pyd</code> 文件，再被 Python 代码调用。</p>
+<h1 id="project-structure">Project Structure</h1>
+<p>Aerodrome consists of both C++ and Python components. The C++ functions/classes need to be compiled into <code>.pyd</code> files using <code>pybind11</code> first, after which they can be called by the Python code.</p>
 <pre><code>./Aerodrome
-├─docs                              # 项目文档
-├─examples                          # 示例
+├─docs                              # Project Documentation
+├─examples                          # Examples
 │  ├─AircraftControl       
-│  │  ├─ StepResponse.py            # 传统控制和强化学习控制的阶跃响应比较
-│  |  ├─ WingedCone_Classic.py      # 传统控制方法(直接调用 C++ 代码)
-│  |  ├─ WingedCone_PPO.py          # 强化学习控制(C++ 仿真/ Python 交互环境)
-│  |  └─ WingedCone_TimeCompare.py  # C++ 和 Python 仿真运行速度比较
-│  ├─CartPole                       # DQN 实现的 CartPole 控制
-│  └─MinimalExample                 # 最简示例环境
+│  │  ├─ StepResponse.py            # Comparison of Step Response Between Traditional Control and Reinforcement Learning Control
+│  |  ├─ WingedCone_Classic.py      # Traditional Control Method (Directly Calling C++ Code)
+│  |  ├─ WingedCone_PPO.py          # Reinforcement Learning Control (C++ Simulation / Python Interaction Environment)
+│  |  └─ WingedCone_TimeCompare.py  # Comparison of Simulation Execution Speed Between C++ and Python
+│  ├─CartPole                       # DQN Implementation for CartPole Control
+│  └─MinimalExample                 # Minimal Example Environment
 ├─include
 │  └─pybind11
-├─models                            # 预训练模型
-├─python                            # Python 源码
+├─models                            # Pre-trained Models
+├─python                            # Python Source Code
 │  ├─aerodrome 
-│  │  ├─envs                        # 交互环境，处理用户和C++仿真之间的信息交互
-│  │  └─simulator                   # 编译好的 C++ 代码会自动存放到此处
+│  │  ├─envs                        # Interaction Environment, Handling Information Exchange Between User and C++ Simulation
+│  │  └─simulator                   # Compiled C++ Code Will Be Automatically Stored Here
 │  │      ├─CanonicalAircraftEnv 
-│  │      │  ├─envs                 # 环境类(通常情况下环境和实体是作为不同类编写的)
-│  │      │  └─objects              # 实体类
+│  │      │  ├─envs                 # Environment Class (Typically, Environment and Entity Are Written as Separate Classes)
+│  │      │  └─objects              # Entity Class
 │  │      ├─CartPole
 │  │      │  └─envs
 │  │      ├─Core
@@ -477,7 +477,7 @@
 │  │      └─MinimalExample
 │  │          └─envs
 │  └─aerodrome.egg-info
-└─src                              # C++ 源码
+└─src                              # C++ Source Code
    └─simulator
        ├─CanonicalAircraftEnv
        │  ├─envs

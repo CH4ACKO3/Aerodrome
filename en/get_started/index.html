@@ -454,6 +454,9 @@
 <pre><code class="language-bash">$ conda create -n aerodrome python==3.9
 $ conda activate aerodrome
 </code></pre>
+<blockquote>
+<p>Aerodrome has been tested on <code>python&gt;=3.9.0,&lt;3.12</code>, but the binary files included in the source code (C++ compiled files under python/simulator) were generated in a <code>python==3.9</code> environment. If you intend to use a different Python version or your own custom environment, you will need to recompile the binaries and <strong>ensure that the Python versions used for compilation and runtime are consistent</strong>.</p>
+</blockquote>
 <p>2.Install Pytorch</p>
 <p>Running reinforcement learning code requires the use of the <code>torch</code> library; the source code has been tested on <code>torch==2.6.0</code>, but theoretically, it can run on any <code>torch&gt;1.0.0</code> and compatible CUDA versions. For example, <code>PyTorch 2.6.0</code> with <code>CUDA 11.8</code>:</p>
 <pre><code class="language-bash">$ pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu118
@@ -463,9 +466,13 @@ $ conda activate aerodrome
 $ cd Aerodrome
 $ pip install .
 </code></pre>
-<p>4.Install requirements</p>
-<pre><code class="language-bash">$ pip install -r requirements.txt
+<p>4.Compiling the C++ Code</p>
+<p>If you intend to use a custom environment or a Python version that differs from the one used to generate the binary files in the source code (<code>python==3.9</code>), you will need to recompile and install the code:</p>
+<pre><code class="language-bash">$ cmake -B build
+$ cmake --build build
+$ pip install .
 </code></pre>
+<p>The platform and Python version used during compilation will be reflected in the binary file names. For example, a file named *.cp39-win_amd64.pyd indicates that it was compiled on a Windows platform with a 64-bit architecture and in a <code>python==3.9</code> environment.</p>
 
 
 
