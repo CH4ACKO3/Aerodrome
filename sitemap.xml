@@ -43,6 +43,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/longitudinal_control_classic/"/>
     </url>
     <url>
+        <loc>https://ch4acko3.github.io/Aerodrome/longitudinal_control_classic_python/</loc>
+        <lastmod>2025-04-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/longitudinal_control_classic_python/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/longitudinal_control_classic_python/"/>
+    </url>
+    <url>
         <loc>https://ch4acko3.github.io/Aerodrome/longitudinal_control_rl/</loc>
         <lastmod>2025-04-04</lastmod>
         <changefreq>daily</changefreq>
@@ -104,6 +111,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/longitudinal_control_classic/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/longitudinal_control_classic/"/>
+    </url>
+    <url>
+        <loc>https://ch4acko3.github.io/Aerodrome/en/longitudinal_control_classic_python/</loc>
+        <lastmod>2025-04-04</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ch4acko3.github.io/Aerodrome/en/longitudinal_control_classic_python/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://ch4acko3.github.io/Aerodrome/longitudinal_control_classic_python/"/>
     </url>
     <url>
         <loc>https://ch4acko3.github.io/Aerodrome/en/longitudinal_control_rl/</loc>
