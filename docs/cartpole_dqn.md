@@ -15,7 +15,7 @@
 <details>
 <summary>点击展开代码</summary>
 
-```cpp
+```cpp title="CartPoleEnv.h"
 class CartPoleEnv : public BaseEnv
 {
 private:
@@ -170,7 +170,7 @@ public:
 
 非常简单的 Python 环境，把 C++ 环境包装了一下，把返回值处理成 `gymnasium` 的格式。
 
-```py
+```py title="CartPole.py"
 class CartPole(Env):
     def __init__(self):
         self.env = CartPoleEnv()
@@ -195,7 +195,7 @@ class CartPole(Env):
 <details>
 <summary>点击展开代码</summary>
 
-```py
+```py title="CartPole_dqn.py"
 import random
 import numpy as np
 import argparse

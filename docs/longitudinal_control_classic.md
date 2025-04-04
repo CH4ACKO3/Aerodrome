@@ -17,7 +17,7 @@
 <details>
 <summary>点击展开代码</summary>
 
-```cpp
+```cpp title="WingedCone2D.h"
 class WingedCone2D : public Aircraft3D
 {
 public:
@@ -140,13 +140,13 @@ public:
 
 具体地，`WingedCone2D_Classic` 增加了若干控制参数（例如，`Kiz`，`Kwz` 等），控制器所需要的数值（例如，过载跟踪误差 `eNy` 及其积分项 `i_eNy` 等）；传入动作为过载指令，舵偏角不再由动作控制，而是由控制器计算；`step()` 方法中新增由控制器计算舵偏的部分。
 
-> **Note**  
-> 虽然传入动作中有速度指令 `Vc`，并且有由速度指令控制发动机开度的函数 `V_controller()`，但出于简易起见最终并未实装（即，推力 `T` 不受控制器影响，为固定值 `T = 4.959e3`）。
+!!! warning ""
+    虽然传入动作中有速度指令 `Vc`，并且有由速度指令控制发动机开度的函数 `V_controller()`，但出于简易起见最终并未实装（即，推力 `T` 不受控制器影响，为固定值 `T = 4.959e3`）。
 
 <details>
 <summary>点击展开代码</summary>
 
-```cpp
+```cpp title="WingedCone2D_Classic.h"
 class WingedCone2D_Classic : public WingedCone2D
 {
 public:
@@ -334,7 +334,7 @@ public:
 
 由于 `WingedCone2D_Classic` 的控制代码直接在 C++ 类中实现，因此 Python 部分代码较少，而且 **直接调用 C++ 类，没有经过 Python 包装** （也就是 `基础逻辑和类` 章节中介绍的第二种设计模式），只有 C++ 环境调用、步进循环和绘图部分。这也是第一个涉及 `Space3D` 类使用的示例。
 
-```py
+```py title="WingedCone_Classic.py"
 # 直接从编译好的 C++ 模块中取出 WingedCone2D_Classic 和 Space3D 类使用，不经过 Python
 from aerodrome.simulator.CanonicalAircraftEnv.objects.WingedCone2D_Classic import WingedCone2D_Classic
 from aerodrome.simulator.Core.envs.Space3D import Space3D

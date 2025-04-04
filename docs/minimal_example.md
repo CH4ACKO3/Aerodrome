@@ -10,7 +10,7 @@
 
 ## C++ 环境 ##
 
-```cpp
+```cpp title="MinimalEnv.h"
 class MinimalEnv : public BaseEnv { // 继承自 BaseEnv
 public:
     MinimalEnv() : cpp_state(0) {} // 初始化 cpp_state 为 0
@@ -60,7 +60,7 @@ private:
 
 ## Python 环境 ##
 
-```py
+```py title="Minimal.py"
 class Minimal(Env):
     def __init__(self):
         self.env = MinimalEnv() # 初始化 C++ 环境
@@ -94,7 +94,7 @@ class Minimal(Env):
 
 ## 交互代码 ##
 
-```py
+```py title="MinimalExample.py"
 if __name__ == "__main__":
     env = aerodrome.make("minimal-v0") # 创建 Python 环境
     result = env.reset() # 重置环境

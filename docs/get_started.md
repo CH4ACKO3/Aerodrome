@@ -6,8 +6,8 @@
 $ conda create -n aerodrome python==3.9
 $ conda activate aerodrome
 ```
-
-> Aerodrome 在 ```py>=3.9.0,<3.12``` 上测试，但源码中包含的二进制文件（python/simulator 下的 C++ 编译出的文件）是在 ```py==3.9``` 环境下生成的；如果你要使用其它 python 版本或自己实现的环境，则需要重新编译并**保证编译和运行时的 python 版本一致**。
+!!! info "关于编译环境"
+    Aerodrome 在 ```py>=3.9.0,<3.12``` 上测试，但源码中包含的二进制文件（python/simulator 下的 C++ 编译出的文件）是在 ```py==3.9``` 环境下生成的；如果你要使用其它 python 版本或自己实现的环境，则需要重新编译并**保证编译和运行时的 python 版本一致**。
 
 2.安装 Pytorch
 

@@ -1,4 +1,4 @@
-# 基础运行逻辑 #
+## 基础运行逻辑 ##
 
 在 Aerodrome 中，一个典型的 C++/Python 联合编程环境的结构如图：
 <figure markdown="span">
@@ -26,9 +26,10 @@ Python 环境类则负责处理用户输入、C++ 环境的输出（例如，数
 - `BaseEnv`：所有环境的基类，定义了所有环境共有的接口；
 - `Object3D`：所有三维对象的基类，定义了三维对象的通用属性，例如速度、位置、姿态等；
 
-> **Note**  
-> 由于 pybind11 在编译方面的限制，目前 C++ 代码 pybind 绑定的实现方式是将函数/类的定义和实现都写在 `.h` 文件中；pybind绑定则写在同名的 `.cpp` 文件中。
-> 如果有更好的实现方式，非常欢迎提出 issue 或 PR！
+!!! info "关于 pybind11 代码实现"
+    由于 pybind11 在编译方面的限制，目前 C++ 代码 pybind 绑定的实现方式是将函数/类的定义和实现都写在 `.h` 文件中；pybind 绑定则写在同名的 `.cpp` 文件中。
+
+    如果有更好的实现方式，非常欢迎提出 issue 或 PR！
 
 ## BaseEnv ##
 在 BaseEnv 中，定义了所有环境共有的接口，包括：
@@ -39,7 +40,7 @@ Python 环境类则负责处理用户输入、C++ 环境的输出（例如，数
 <details>
 <summary>点击展开代码</summary>
 
-```C++
+```C++ title="BaseEnv.h"
 class BaseEnv
 {
 public:
@@ -64,10 +65,13 @@ Object3D 的内容则较多，包括：
 为了准确方便地计算自身的动力学导数并进行仿真，还对运算符进行了重载。
 在后面会看到，对于派生类，代码很大程度上是可以复用的，只需要重写少量代码就可以实现一个正确且规范的物理对象。
 
+!!! warning "关于姿态表示"
+    Aerodrome 中采用的姿态描述是欧拉角法，会有死锁问题；你也可以自己实现一个旋转矩阵或四元数等其它表示法。
+
 <details>
 <summary>点击展开代码</summary>
 
-```C++
+```C++ title="Object3D.h"
 class Object3D {
 public:
     std::string name;

@@ -7,7 +7,8 @@ $ conda create -n aerodrome python==3.9
 $ conda activate aerodrome
 ```
 
-> Aerodrome has been tested on `python>=3.9.0,<3.12`, but the binary files included in the source code (C++ compiled files under `python/simulator`) were generated in a `python==3.9` environment. If you intend to use a different Python version or your own custom environment, you will need to recompile the binaries and **ensure that the Python versions used for compilation and runtime are consistent**.
+!!! info "Compile Environment"
+    Aerodrome has been tested on `python>=3.9.0,<3.12`, but the binary files included in the source code (C++ compiled files under `python/simulator`) were generated in a `python==3.9` environment. If you intend to use a different Python version or your own custom environment, you will need to recompile the binaries and **ensure that the Python versions used for compilation and runtime are consistent**.
 
 2.Install Pytorch
 

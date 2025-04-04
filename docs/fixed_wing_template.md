@@ -10,7 +10,7 @@
 
 可以看到，`Aircraft3D` 类增加了一些描述固定翼飞行器特性的属性，并复写了一些方法，但没有新增的方法。后面会详细解释每个方法的内容。
 
-```cpp
+```cpp title="Aircraft3D.h"
 class Aircraft3D : public Object3D {
 public:
     double S; // 参考面积
@@ -49,8 +49,8 @@ public:
 ### 构造函数 ###
 `Aircraft3D` 的构造函数接收一个参数字典 `input_dict`，其中包含构造 `Object3D` 类所需的参数，以及 `Aircraft3D` 类新增的参数。
 
-> **Note**  
-> 构造函数和之后使用到的计算大气属性（如密度、声速等）的函数参考自公开资料，实现可见 `src/simulator/y_atmosphere.h`。
+!!! info "大气属性的计算"
+    构造函数和之后使用到的计算大气属性（如密度、声速等）的函数参考自公开资料，具体实现见 `src/simulator/y_atmosphere.h`。
 
 ```cpp
 Aircraft3D(py::dict input_dict) : Object3D(input_dict) // 调用父类构造函数，`Object3D` 的构造函数会从 `input_dict` 中读取其需要的值
@@ -112,9 +112,9 @@ virtual py::dict to_dict() override // `virtual` 表示该函数可以被重写�
 - 姿态角（`theta`、`phi`、`gamma`）
 - 角速度（`ang_vel`）
 
-> **Note**  
-> 描述飞行器的位置姿态还有其它参数，例如迎角 `alpha`、侧滑角 `beta` 等；还有一些量需要随着步进更新，例如飞行器的高度 `h`、动压 `q` 等。但这些量并不是相互独立的，
-> 因此可以只求解上述几个量，在 `step()` 函数中完成运动学积分之后，再根据需要更新其它量。
+!!! info "关于飞行器姿态描述"
+    描述飞行器的位置姿态还有其它参数，例如迎角 `alpha`、侧滑角 `beta` 等；还有一些量需要随着步进更新，例如飞行器的高度 `h`、动压 `q` 等。但这些量并不是相互独立的，
+    因此可以只求解上述几个量，在 `step()` 函数中完成运动学积分之后，再根据需要更新其它量。
 
 返回的是和调用该方法的实例类型相同的一个新实例，其每个属性的值是原实例对应属性的导数。例如，返回实例的 `V` 属性是传入实例的 `V` 属性的导数，即加速度（更准确地说是 `V` 的变化率）
 ```cpp
@@ -147,15 +147,15 @@ virtual Object3D d() override
 ### step() ###
 `step()` 是不同飞行器类中变化最大的函数。`step()` 函数接收一个动作字典 `action`，其中包含控制输入（如推力、舵偏角等，或过载指令，由派生类型决定）和时间步长 `dt`。
 
-> **Note**  
-> 由于积分步长 `dt` 在环境运行过程中有可能会变化（以支持一些自适应步长的算法），因此 `dt` 并没有硬编码在 `Aircraft3D` 类的属性中，而是随动作传入。
+!!! info ""
+    由于积分步长 `dt` 在环境运行过程中有可能会变化（以支持一些自适应步长的算法），因此 `dt` 并没有硬编码在 `Aircraft3D` 类的属性中，而是随动作传入。
 
 在 `step()` 函数中，用户需要根据动作字典 `action` 中的控制输入更新飞行器的状态，包括但不限于计算飞行器受力、运动学步进、更新相关变量等。
 
 在 `Aircraft3D` 类中，飞行器所受外力（升力 `L`、阻力 `D`、侧力 `N`、推力 `T`、力矩 `M`）以动作的形式传入，以演示基本的计算流程。
 
-> **Note**  
-> 由于在 `Object3D` 类中[重载](https://zh.cppreference.com/w/cpp/language/operators)了四则运算符，将两个 `Object3D` 或 `Object3D` 的子类之间的加减乘除定义为其某些属性的对应运算（具体实现见下面代码），在动力学积分时可以更方便地处理数值计算（例如涉及微分的运算）。
+!!! info "关于运算符重载"
+    由于在 `Object3D` 类中[重载](https://zh.cppreference.com/w/cpp/language/operators)了四则运算符，将两个 `Object3D` 或 `Object3D` 的子类之间的加减乘除定义为其某些属性的对应运算（具体实现见下面代码），在动力学积分时可以更方便地处理数值计算（例如涉及微分的运算）。
 
 ```cpp
 virtual py::object step(py::dict action) override // `virtual` 表示该函数可以被重写，`override` 表示重写父类中的同名函数
@@ -230,7 +230,7 @@ virtual py::object step(py::dict action) override // `virtual` 表示该函数�
 
 `Space3D` 类是 `BaseEnv` 的子类，包含一些处理输入输出的必要属性和方法，实现比较简单。
 
-```cpp
+```cpp title="Space3D.h"
 class Space3D : public BaseEnv
 {
 private: // [tl! collapse:start]
