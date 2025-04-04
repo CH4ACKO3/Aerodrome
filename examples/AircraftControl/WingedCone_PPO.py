@@ -66,15 +66,13 @@ def linear_schedule(start_e, end_e, duration, t):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--seed", type=int, default=0,
+    parser.add_argument("--seed", type=int, default=4,
                         help="random seed of the experiment")
     parser.add_argument("--num_steps", type=int, default=1024,
                         help="the number of steps to run per policy rollout")
     parser.add_argument("--total_timesteps", type=int, default=200_000,
                         help="the number of iterations")
-    parser.add_argument("--batch_size", type=int, default=256,
-                        help="the batch size of sample from the replay memory")
-    parser.add_argument("--gamma", type=float, default=0.99,
+    parser.add_argument("--gamma", type=float, default=0.95,
                         help="discount factor")
     parser.add_argument("--gae_lambda", type=float, default=0.95,
                         help="lambda for the general advantage estimation")
@@ -338,6 +336,7 @@ def main():
             ax.plot(x, rewards)
             plt.show()
 
+    np.save("wingedcone_ppo_4.npy", records["reward"])
     fig, ax = plt.subplots(1, 1)
     ax.plot(records["reward"])
     ax.set_xlabel("Iteration")

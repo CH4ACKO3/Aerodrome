@@ -38,3 +38,5 @@ temp.*
 test/
 
 site/
+node_modules
+torchlight.config.js

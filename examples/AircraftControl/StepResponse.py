@@ -64,94 +64,103 @@ def linear_schedule(start_e, end_e, duration, t):
 
 def main():
     fig, ax = plt.subplots(1, 1)
-    ax.axhline(y=1.0, color='r', linestyle='--', alpha=0.5)
+
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("Ny")
 
-    random.seed(0)
-    np.random.seed(0)
-    torch.manual_seed(0)
-    torch.backends.cudnn.deterministic = True
+    for ny in [-2.0, -1.0, 0.0, 1.0, 2.0, 3.0]:
+        ax.axhline(y=ny, color='r', linestyle='--', alpha=0.5)
+        print(f"ny: {ny}")
+        random.seed(0)
+        np.random.seed(0)
+        torch.manual_seed(0)
+        torch.backends.cudnn.deterministic = True
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print(f"Using device: {device}")
 
-    object_dict = {
-        "name": "test",
-        "integrator": "rk45",
-        "S": 3603.0,
-        "c": 80.0,
-        "m": 9375.0,
+        object_dict = {
+            "name": "test",
+            "integrator": "rk45",
+            "S": 3603.0,
+            "c": 80.0,
+            "m": 9375.0,
 
-        "pos": [0.0, 33528.0, 0.0],
-        "vel": [4590.29, 0.0, 0.0],
-        "ang_vel": [0.0, 0.0, 0.0],
-        "J": [1.0, 7*10**6, 7*10**6],
-        "theta": 0.00/180*pi,
-        "phi": 0.0,
-        "gamma": 0.0,   
-        "theta_v": 0.0,
-        "phi_v": 0.0,
-        "gamma_v": 0.0,
-        "alpha": 0.00/180*pi,
-        "beta": 0.0,
+            "pos": [0.0, 33528.0, 0.0],
+            "vel": [4590.29, 0.0, 0.0],
+            "ang_vel": [0.0, 0.0, 0.0],
+            "J": [1.0, 7*10**6, 7*10**6],
+            "theta": 0.00/180*pi,
+            "phi": 0.0,
+            "gamma": 0.0,   
+            "theta_v": 0.0,
+            "phi_v": 0.0,
+            "gamma_v": 0.0,
+            "alpha": 0.00/180*pi,
+            "beta": 0.0,
 
-        "Kiz": 0.2597,
-        "Kwz": 1.6,
-        "Kaz": 13/2,
-        "Kpz": 0.14,
-        "Kp_V": 5.0,
-        "Ki_V": 1.0,
-        "Kd_V": 0.3
-    }
-    
-    env = aerodrome.make("wingedcone-v0")
-    object = WingedCone2D_RL(object_dict)
-    env.add_object(object)
-
-    agent = Agent().to(device)
-    agent.load_state_dict(torch.load("wingedcone_ppo.pth"))
-    agent.eval()
-
-    states = []
-    rewards = []
-    next_obs, info = env.reset()
-    next_obs = torch.Tensor(next_obs).reshape((1, -1)).to(device)
-    step = 0
-    while True:
-        step += 1
-        states.append(env.get_state())
-        with torch.no_grad():
-            action, logprob, _, value = agent.get_action_and_value(next_obs, evaluate=True)
-
-        step_action = {
-            "test": {"Nyc":1.0, "Vc":4590.29, "nn_control":action.item()},
+            "Kiz": 0.2597,
+            "Kwz": 1.6,
+            "Kaz": 13/2,
+            "Kpz": 0.14,
+            "Kp_V": 5.0,
+            "Ki_V": 1.0,
+            "Kd_V": 0.3
         }
-        next_obs, reward, terminations, truncations, infos = env.step(step_action)
-        next_done = np.logical_or(terminations, truncations)
+        
+        env = aerodrome.make("wingedcone-v0")
+        object = WingedCone2D_RL(object_dict)
+        env.add_object(object)
+
+        agent = Agent().to(device)
+        agent.load_state_dict(torch.load("models/wingedcone_ppo.pth"))
+        agent.eval()
+
+        states = []
+        rewards = []
+        next_obs, info = env.reset()
         next_obs = torch.Tensor(next_obs).reshape((1, -1)).to(device)
-        rewards.append(reward)
-        if next_done or step >= 1000:
-            break
-    
-    x = np.arange(1000) * 0.01
-    y = np.array([states[i]["Ny"] for i in range(len(states))])
-    ax.plot(x, y, label="RL")
+        step = 0
+        while True:
+            step += 1
+            states.append(env.get_state())
+            with torch.no_grad():
+                action, logprob, _, value = agent.get_action_and_value(next_obs, evaluate=True)
 
-    # Classical control
-    env = Space3D(0.01, 0.001, 5)
-    object = WingedCone2D_Classic(object_dict)
-    env.add_object(object)
+            step_action = {
+                "test": {"Nyc":ny, "Vc":4590.29, "nn_control":action.item()},
+            }
+            next_obs, reward, terminations, truncations, infos = env.step(step_action)
+            next_done = np.logical_or(terminations, truncations)
+            next_obs = torch.Tensor(next_obs).reshape((1, -1)).to(device)
+            rewards.append(reward)
+            if next_done or step >= 1000:
+                break
+        
+        x = np.arange(1000) * 0.01
+        y = np.array([states[i]["Ny"] for i in range(len(states))])
+        if ny == 0.0:
+            ax.plot(x, y, label="RL", c="#1f77b4")
+        else:
+            ax.plot(x, y, c="#1f77b4")
 
-    cnt = 1000
-    y = np.zeros(cnt)
+        # Classical control
+        env = Space3D(0.01, 0.001, 5)
+        object = WingedCone2D_Classic(object_dict)
+        env.add_object(object)
 
-    for i in range(cnt):
-        action = {"test": {"Nyc":1.0, "Vc":4590.29}}
-        result = env.step(action)
-        y[i] = result["test"]["Ny"]
+        cnt = 1000
+        y = np.zeros(cnt)
 
-    ax.plot(x, y, label="Classic")
+        for i in range(cnt):
+            action = {"test": {"Nyc":ny, "Vc":4590.29}}
+            result = env.step(action)
+            y[i] = result["test"]["Ny"]
+
+        if ny == 0.0:
+            ax.plot(x, y, label="Classic", c="#ff7f0e")
+        else:
+            ax.plot(x, y, c="#ff7f0e")
     ax.legend()
     plt.show()
 

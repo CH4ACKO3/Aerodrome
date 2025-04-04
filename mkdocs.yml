@@ -11,6 +11,10 @@ theme:
     - navigation.indexes
     - navigation.sections
     - content.code.copy
+    - content.code.annotate
+    - content.code.select
+  icon:
+    annotation: material/arrow-right-circle
 
 plugins:
   - search
@@ -32,6 +36,11 @@ plugins:
             示例: Examples
             基础逻辑和类: Basics and Classes
             最简环境: Minimal Example
+            CartPole 和 DQN: CartPole and DQN
+            固定翼飞行器模板: Fixed Wing Template
+            纵向过载控制 - 经典控制: Longitudinal Control - Classic
+            纵向过载控制 - 经典控制（纯Python实现）: Longitudinal Control - Classic (Pure Python Implementation)
+            纵向过载控制 - 强化学习: Longitudinal Control - Reinforcement Learning
 
 markdown_extensions:
   - admonition
@@ -39,12 +48,15 @@ markdown_extensions:
   - md_in_html
   - pymdownx.blocks.caption
   - pymdownx.highlight:
+      use_pygments: true
       anchor_linenums: true
       line_spans: __span
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
 
 nav:
   - 概述:
@@ -56,3 +68,11 @@ nav:
       - 基础逻辑和类: basics.md
       - 最简环境: minimal_example.md
       - CartPole 和 DQN: cartpole_dqn.md
+      - 固定翼飞行器模板: fixed_wing_template.md
+      - 纵向过载控制 - 经典控制: longitudinal_control_classic.md
+      - 纵向过载控制 - 经典控制（纯Python实现）: longitudinal_control_classic_python.md
+      - 纵向过载控制 - 强化学习: longitudinal_control_rl.md
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js

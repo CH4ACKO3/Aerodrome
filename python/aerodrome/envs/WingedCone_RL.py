@@ -24,18 +24,20 @@ class WingedCone_RL(Env):
     def step(self, action):
         state = self.env.step(action)[self.object_name]
         obs = np.array([state["eNy"], state["i_eNy"], state["d_eNy"]])
-        if state["eNy"] > self.eNy_bound:
-            if state["d_eNy"] < 0:
-                reward = -np.tanh(np.abs(state["eNy"]) / self.eNy_bound) + 1
-            else:
-                reward = -np.tanh(np.abs(state["eNy"]) / self.eNy_bound)
-        elif state["eNy"] < -self.eNy_bound:
-            if state["d_eNy"] > 0:
-                reward = -np.tanh(np.abs(state["eNy"]) / self.eNy_bound) + 1
-            else:
-                reward = -np.tanh(np.abs(state["eNy"]) / self.eNy_bound)
-        else:
-            reward = -np.tanh(np.abs(state["eNy"]) / self.eNy_bound) + 1
+        # if state["eNy"] > self.eNy_bound:
+        #     if state["d_eNy"] < 0:
+        #         reward = -np.tanh(np.abs(state["eNy"]) / self.eNy_bound) + 1
+        #     else:
+        #         reward = -np.tanh(np.abs(state["eNy"]) / self.eNy_bound)
+        # elif state["eNy"] < -self.eNy_bound:
+        #     if state["d_eNy"] > 0:
+        #         reward = -np.tanh(np.abs(state["eNy"]) / self.eNy_bound) + 1
+        #     else:
+        #         reward = -np.tanh(np.abs(state["eNy"]) / self.eNy_bound)
+        # else:
+        #     reward = -np.tanh(np.abs(state["eNy"]) / self.eNy_bound) + 1
+
+        reward = -np.tanh(np.abs(state["eNy"]) / self.eNy_bound) + 1
 
         if state["alpha"] > 88*np.pi/180 or state["alpha"] < -88*np.pi/180:
             terminated = np.array([1], dtype=np.bool_)

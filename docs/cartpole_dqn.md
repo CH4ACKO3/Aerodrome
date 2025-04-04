@@ -170,7 +170,7 @@ public:
 
 非常简单的 Python 环境，把 C++ 环境包装了一下，把返回值处理成 `gymnasium` 的格式。
 
-```python
+```py
 class CartPole(Env):
     def __init__(self):
         self.env = CartPoleEnv()
@@ -195,7 +195,7 @@ class CartPole(Env):
 <details>
 <summary>点击展开代码</summary>
 
-```python
+```py
 import random
 import numpy as np
 import argparse

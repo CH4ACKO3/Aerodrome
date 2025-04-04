@@ -60,7 +60,7 @@ private:
 
 ## Python 环境 ##
 
-```python
+```py
 class Minimal(Env):
     def __init__(self):
         self.env = MinimalEnv() # 初始化 C++ 环境
@@ -94,7 +94,7 @@ class Minimal(Env):
 
 ## 交互代码 ##
 
-```python
+```py
 if __name__ == "__main__":
     env = aerodrome.make("minimal-v0") # 创建 Python 环境
     result = env.reset() # 重置环境

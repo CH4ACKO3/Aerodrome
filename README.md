@@ -31,7 +31,7 @@ $ conda activate aerodrome
 ```
 
 > **Warning**  
-> The binary files provided in the source code were compiled on a Windows platform using ```python==3.9```. You may need to recompile them to adapt to your own environment (refer to 4.).
+> The binary files provided in the source code were compiled on a Windows platform using ```py==3.9```. You may need to recompile them to adapt to your own environment (refer to 4.).
 
 2.Install Pytorch
 
@@ -51,7 +51,7 @@ $ pip install .
 
 4.Compiling the C++ Code (Optional)
 
-If you intend to use a custom environment or a Python version that differs from the one used to generate the binary files in the source code (```python==3.9```), you will need to recompile and install the code:
+If you intend to use a custom environment or a Python version that differs from the one used to generate the binary files in the source code (```py==3.9```), you will need to recompile and install the code:
 
 ```bash
 $ cmake -B build
