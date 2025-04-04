@@ -800,7 +800,7 @@
 <details>
 <summary>点击展开代码</summary>
 
-<div class="language-cpp highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">WingedCone2D</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Aircraft3D</span>
+<div class="language-cpp highlight"><span class="filename">WingedCone2D.h</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">WingedCone2D</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Aircraft3D</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="p">{</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">public</span><span class="o">:</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">delta_e</span><span class="p">;</span><span class="w"> </span><span class="c1">// 升降舵偏角</span>
@@ -918,14 +918,13 @@
 <h2 id="wingedcone2d-classic">WingedCone2D - Classic</h2>
 <p><code>WingedCone2D_Classic</code> 类是 <code>WingedCone2D</code> 的子类，提供了纵向过载控制的传统三回路驾驶仪实现。</p>
 <p>具体地，<code>WingedCone2D_Classic</code> 增加了若干控制参数（例如，<code>Kiz</code>，<code>Kwz</code> 等），控制器所需要的数值（例如，过载跟踪误差 <code>eNy</code> 及其积分项 <code>i_eNy</code> 等）；传入动作为过载指令，舵偏角不再由动作控制，而是由控制器计算；<code>step()</code> 方法中新增由控制器计算舵偏的部分。</p>
-<blockquote>
-<p><strong>Note</strong><br />
-虽然传入动作中有速度指令 <code>Vc</code>，并且有由速度指令控制发动机开度的函数 <code>V_controller()</code>，但出于简易起见最终并未实装（即，推力 <code>T</code> 不受控制器影响，为固定值 <code>T = 4.959e3</code>）。</p>
-</blockquote>
+<div class="admonition warning">
+<p>虽然传入动作中有速度指令 <code>Vc</code>，并且有由速度指令控制发动机开度的函数 <code>V_controller()</code>，但出于简易起见最终并未实装（即，推力 <code>T</code> 不受控制器影响，为固定值 <code>T = 4.959e3</code>）。</p>
+</div>
 <details>
 <summary>点击展开代码</summary>
 
-<div class="language-cpp highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">WingedCone2D_Classic</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">WingedCone2D</span>
+<div class="language-cpp highlight"><span class="filename">WingedCone2D_Classic.h</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">WingedCone2D_Classic</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">WingedCone2D</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="p">{</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">public</span><span class="o">:</span>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="c1">// 俯仰角增稳过载驾驶仪控制参数</span>
@@ -1109,7 +1108,7 @@
 
 <h2 id="python">Python 代码</h2>
 <p>由于 <code>WingedCone2D_Classic</code> 的控制代码直接在 C++ 类中实现，因此 Python 部分代码较少，而且 <strong>直接调用 C++ 类，没有经过 Python 包装</strong> （也就是 <code>基础逻辑和类</code> 章节中介绍的第二种设计模式），只有 C++ 环境调用、步进循环和绘图部分。这也是第一个涉及 <code>Space3D</code> 类使用的示例。</p>
-<div class="language-py highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># 直接从编译好的 C++ 模块中取出 WingedCone2D_Classic 和 Space3D 类使用，不经过 Python</span>
+<div class="language-py highlight"><span class="filename">WingedCone_Classic.py</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># 直接从编译好的 C++ 模块中取出 WingedCone2D_Classic 和 Space3D 类使用，不经过 Python</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">aerodrome.simulator.CanonicalAircraftEnv.objects.WingedCone2D_Classic</span><span class="w"> </span><span class="kn">import</span> <span class="n">WingedCone2D_Classic</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">aerodrome.simulator.Core.envs.Space3D</span><span class="w"> </span><span class="kn">import</span> <span class="n">Space3D</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>

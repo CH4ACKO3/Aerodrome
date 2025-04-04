@@ -860,7 +860,7 @@
 </ul>
 <h2 id="aircraft3d">Aircraft3D</h2>
 <p>可以看到，<code>Aircraft3D</code> 类增加了一些描述固定翼飞行器特性的属性，并复写了一些方法，但没有新增的方法。后面会详细解释每个方法的内容。</p>
-<div class="language-cpp highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Aircraft3D</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Object3D</span><span class="w"> </span><span class="p">{</span>
+<div class="language-cpp highlight"><span class="filename">Aircraft3D.h</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Aircraft3D</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Object3D</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">public</span><span class="o">:</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">S</span><span class="p">;</span><span class="w"> </span><span class="c1">// 参考面积</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">c</span><span class="p">;</span><span class="w"> </span><span class="c1">// 特征长度</span>
@@ -896,10 +896,10 @@
 </span></code></pre></div>
 <h3 id="_2">构造函数</h3>
 <p><code>Aircraft3D</code> 的构造函数接收一个参数字典 <code>input_dict</code>，其中包含构造 <code>Object3D</code> 类所需的参数，以及 <code>Aircraft3D</code> 类新增的参数。</p>
-<blockquote>
-<p><strong>Note</strong><br />
-构造函数和之后使用到的计算大气属性（如密度、声速等）的函数参考自公开资料，实现可见 <code>src/simulator/y_atmosphere.h</code>。</p>
-</blockquote>
+<div class="admonition info">
+<p class="admonition-title">大气属性的计算</p>
+<p>构造函数和之后使用到的计算大气属性（如密度、声速等）的函数参考自公开资料，具体实现见 <code>src/simulator/y_atmosphere.h</code>。</p>
+</div>
 <div class="language-cpp highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">Aircraft3D</span><span class="p">(</span><span class="n">py</span><span class="o">::</span><span class="n">dict</span><span class="w"> </span><span class="n">input_dict</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Object3D</span><span class="p">(</span><span class="n">input_dict</span><span class="p">)</span><span class="w"> </span><span class="c1">// 调用父类构造函数，`Object3D` 的构造函数会从 `input_dict` 中读取其需要的值</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="p">{</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">V</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">vel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">vel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">vel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vel</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span><span class="w"> </span><span class="c1">// 从传入参数的速度分量自动计算速度</span>
@@ -955,11 +955,11 @@
 <li>姿态角（<code>theta</code>、<code>phi</code>、<code>gamma</code>）</li>
 <li>角速度（<code>ang_vel</code>）</li>
 </ul>
-<blockquote>
-<p><strong>Note</strong><br />
-描述飞行器的位置姿态还有其它参数，例如迎角 <code>alpha</code>、侧滑角 <code>beta</code> 等；还有一些量需要随着步进更新，例如飞行器的高度 <code>h</code>、动压 <code>q</code> 等。但这些量并不是相互独立的，
+<div class="admonition info">
+<p class="admonition-title">关于飞行器姿态描述</p>
+<p>描述飞行器的位置姿态还有其它参数，例如迎角 <code>alpha</code>、侧滑角 <code>beta</code> 等；还有一些量需要随着步进更新，例如飞行器的高度 <code>h</code>、动压 <code>q</code> 等。但这些量并不是相互独立的，
 因此可以只求解上述几个量，在 <code>step()</code> 函数中完成运动学积分之后，再根据需要更新其它量。</p>
-</blockquote>
+</div>
 <p>返回的是和调用该方法的实例类型相同的一个新实例，其每个属性的值是原实例对应属性的导数。例如，返回实例的 <code>V</code> 属性是传入实例的 <code>V</code> 属性的导数，即加速度（更准确地说是 <code>V</code> 的变化率）
 <div class="language-cpp highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">virtual</span><span class="w"> </span><span class="n">Object3D</span><span class="w"> </span><span class="nf">d</span><span class="p">()</span><span class="w"> </span><span class="k">override</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="p">{</span><span class="w">   </span>
@@ -988,16 +988,15 @@
 </span></code></pre></div></p>
 <h3 id="step">step()</h3>
 <p><code>step()</code> 是不同飞行器类中变化最大的函数。<code>step()</code> 函数接收一个动作字典 <code>action</code>，其中包含控制输入（如推力、舵偏角等，或过载指令，由派生类型决定）和时间步长 <code>dt</code>。</p>
-<blockquote>
-<p><strong>Note</strong><br />
-由于积分步长 <code>dt</code> 在环境运行过程中有可能会变化（以支持一些自适应步长的算法），因此 <code>dt</code> 并没有硬编码在 <code>Aircraft3D</code> 类的属性中，而是随动作传入。</p>
-</blockquote>
+<div class="admonition info">
+<p>由于积分步长 <code>dt</code> 在环境运行过程中有可能会变化（以支持一些自适应步长的算法），因此 <code>dt</code> 并没有硬编码在 <code>Aircraft3D</code> 类的属性中，而是随动作传入。</p>
+</div>
 <p>在 <code>step()</code> 函数中，用户需要根据动作字典 <code>action</code> 中的控制输入更新飞行器的状态，包括但不限于计算飞行器受力、运动学步进、更新相关变量等。</p>
 <p>在 <code>Aircraft3D</code> 类中，飞行器所受外力（升力 <code>L</code>、阻力 <code>D</code>、侧力 <code>N</code>、推力 <code>T</code>、力矩 <code>M</code>）以动作的形式传入，以演示基本的计算流程。</p>
-<blockquote>
-<p><strong>Note</strong><br />
-由于在 <code>Object3D</code> 类中<a href="https://zh.cppreference.com/w/cpp/language/operators">重载</a>了四则运算符，将两个 <code>Object3D</code> 或 <code>Object3D</code> 的子类之间的加减乘除定义为其某些属性的对应运算（具体实现见下面代码），在动力学积分时可以更方便地处理数值计算（例如涉及微分的运算）。</p>
-</blockquote>
+<div class="admonition info">
+<p class="admonition-title">关于运算符重载</p>
+<p>由于在 <code>Object3D</code> 类中<a href="https://zh.cppreference.com/w/cpp/language/operators">重载</a>了四则运算符，将两个 <code>Object3D</code> 或 <code>Object3D</code> 的子类之间的加减乘除定义为其某些属性的对应运算（具体实现见下面代码），在动力学积分时可以更方便地处理数值计算（例如涉及微分的运算）。</p>
+</div>
 <div class="language-cpp highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">virtual</span><span class="w"> </span><span class="n">py</span><span class="o">::</span><span class="n">object</span><span class="w"> </span><span class="n">step</span><span class="p">(</span><span class="n">py</span><span class="o">::</span><span class="n">dict</span><span class="w"> </span><span class="n">action</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="c1">// `virtual` 表示该函数可以被重写，`override` 表示重写父类中的同名函数</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="p">{</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">action</span><span class="p">[</span><span class="s">&quot;dt&quot;</span><span class="p">].</span><span class="n">cast</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">();</span><span class="w"> </span><span class="c1">// 从动作字典中读取积分步长</span>
@@ -1067,7 +1066,7 @@
 </span></code></pre></div>
 <h2 id="space3d">Space3D</h2>
 <p><code>Space3D</code> 类是 <code>BaseEnv</code> 的子类，包含一些处理输入输出的必要属性和方法，实现比较简单。</p>
-<div class="language-cpp highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Space3D</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">BaseEnv</span>
+<div class="language-cpp highlight"><span class="filename">Space3D.h</span><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Space3D</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">BaseEnv</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="p">{</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">private</span><span class="o">:</span><span class="w"> </span><span class="c1">// [tl! collapse:start]</span>
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">tau</span><span class="p">;</span><span class="w"> </span><span class="c1">// 每次积分的时间长度，tau = dt / integrate_steps</span>

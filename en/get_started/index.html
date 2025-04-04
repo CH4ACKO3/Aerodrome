@@ -697,9 +697,10 @@
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>$<span class="w"> </span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>aerodrome<span class="w"> </span><span class="nv">python</span><span class="o">==</span><span class="m">3</span>.9
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>aerodrome
 </span></code></pre></div>
-<blockquote>
+<div class="admonition info">
+<p class="admonition-title">Compile Environment</p>
 <p>Aerodrome has been tested on <code>python&gt;=3.9.0,&lt;3.12</code>, but the binary files included in the source code (C++ compiled files under <code>python/simulator</code>) were generated in a <code>python==3.9</code> environment. If you intend to use a different Python version or your own custom environment, you will need to recompile the binaries and <strong>ensure that the Python versions used for compilation and runtime are consistent</strong>.</p>
-</blockquote>
+</div>
 <p>2.Install Pytorch</p>
 <p>Running reinforcement learning code requires the use of the <code>torch</code> library; the source code has been tested on <code>torch==2.6.0</code>, but theoretically, it can run on any <code>torch&gt;1.0.0</code> and compatible CUDA versions. For example, <code>PyTorch 2.6.0</code> with <code>CUDA 11.8</code>:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">torch</span><span class="o">==</span><span class="m">2</span>.6.0<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
