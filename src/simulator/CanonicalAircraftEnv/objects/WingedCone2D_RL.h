@@ -2,6 +2,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/eigen.h>
 #include "WingedCone2D.h"
 #include <vector>
 #include <string>
@@ -69,7 +70,15 @@ public:
 
     virtual void reset() override
     {
-        *this = WingedCone2D_RL(initial_state);
+        WingedCone2D::reset();
+        eNy = 0;
+        eNy_prev = 0;
+        i_eNy = 0;
+        d_eNy = 0;
+        i_eSAC = 0;
+        i_V = 0;
+        d_eV = 0;
+        eV_prev = 0;
     }
 
     double V_controller(double Vc, double V, double dt)
@@ -114,8 +123,6 @@ public:
 
     virtual py::object step(py::dict action) override
     {
-        double dt = action["dt"].cast<double>();
-
         double Nyc = action["Nyc"].cast<double>();
         double Vc = action["Vc"].cast<double>();
         double nn_control = action["nn_control"].cast<double>();
@@ -130,46 +137,13 @@ public:
         _L();
         _T();
         _M();
+        
+        force_vec c_force = {T * cos(alpha) * cos(beta) - D - m * g * sin(theta),
+                             T * (sin(alpha) * cos(gamma_v) + cos(alpha) * sin(beta) * sin(gamma_v)) + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta),
+                             T * (sin(alpha) * sin(gamma_v) - cos(alpha) * sin(beta) * cos(gamma_v)) + L * sin(gamma_v) + N * cos(gamma_v),
+                             M[0], M[1], M[2]}; // 力和力矩
+        kinematics_step(c_force); // 更新状态
 
-        if (integrator == "euler")
-        {
-            *this = *this + this->d() * dt;
-        }
-        else if (integrator == "midpoint")
-        {
-            auto temp1 = *this + this->d() * (0.5 * dt);
-            auto k1 = temp1.d();
-            *this = *this + k1 * dt;
-        }
-        else if (integrator == "rk23")
-        {
-            auto k1 = this->d();
-            auto temp1 = *this + k1 * (0.5 * dt);
-            auto k2 = temp1.d();
-            auto temp2 = *this + k2 * (0.5 * dt);
-            auto k3 = temp2.d();
-            *this = *this + (k1 + k2 * 2 + k3) * (dt / 4);
-        }
-        else if (integrator == "rk45")
-        {
-            auto k1 = this->d();
-            auto temp1 = *this + k1 * (0.5 * dt);
-            auto k2 = temp1.d();
-            auto temp2 = *this + k2 * (0.5 * dt);
-            auto k3 = temp2.d();
-            auto temp3 = *this + k3 * dt;
-            auto k4 = temp3.d();
-            *this = *this + (k1 + k2 * 2 + k3 * 2 + k4) * (dt / 6);
-        }
-
-        beta = cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma);
-        alpha = (cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta);
-        gamma_v = (cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v);
-
-        V = Vc;
-        vel[0] = V * cos(theta_v) * cos(phi_v);
-        vel[1] = V * sin(theta_v);
-        vel[2] = -V * cos(theta_v) * sin(phi_v);
         h = pos[1];
 
         Tem = Temperature(h);
@@ -177,18 +151,13 @@ public:
         Rho = Density(Tem, Pres);
         a = SpeedofSound(Tem);
         g = Gravity(h);
-
+        
         q = 0.5 * Rho * V * V;
-
+        
         Ny = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
                                 + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * g);
         wz = ang_vel[2];
-
-        eNy = Nyc - Ny;
-        i_eNy += eNy * dt;
-        d_eNy = (eNy - eNy_prev) / dt;
-        eNy_prev = eNy;
-
+        
         return to_dict();
     }
 };

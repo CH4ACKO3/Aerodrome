@@ -2,6 +2,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/eigen.h>
 #include "WingedCone2D_RL.h"
 #include <vector>
 #include <string>

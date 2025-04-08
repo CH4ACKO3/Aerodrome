@@ -130,9 +130,6 @@ def main():
         "gamma": 0.0,   
         "theta_v": 0.0,
         "phi_v": 0.0,
-        "gamma_v": 0.0,
-        "alpha": 0.00/180*pi,
-        "beta": 0.0,
 
         "Kiz": 0.2597,
         "Kwz": 1.6,

@@ -14,5 +14,5 @@ The main contents and features of Aerodrome include:
 
 - Traditional three-loop autopilot implementation and Proximal Policy Optimization (PPO) implementation for longitudinal load control of the Winged-Cone
 
-> **Note**  
-> Aerodrome is **not** a modular library, therefore it is not suitable for import and use. Aerodrome sacrifices some code duplication to ensure that all code is concise, easy to understand, and convenient to extend. Aerodrome also has its limitations, such as the lack of visualization and experimental result saving functions; if you need specific reinforcement learning algorithm examples, you can refer to the CleanRL library; if you need to implement other aircraft models (or even environments in other fields), you can modify the Aerodrome code or rewrite it entirely!
+!!! warning ""
+    Aerodrome is **not** a modular library, therefore it is not suitable for import and use. Aerodrome sacrifices some code duplication to ensure that all code is concise, easy to understand, and convenient to extend. Aerodrome also has its limitations, such as the lack of visualization and experimental result saving functions; if you need specific reinforcement learning algorithm examples, you can refer to the CleanRL library; if you need to implement other aircraft models (or even environments in other fields), you can modify the Aerodrome code or rewrite it entirely!

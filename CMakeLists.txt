@@ -8,6 +8,8 @@ set(PYBIND11_DIR include/pybind11)
 
 add_subdirectory(${PYBIND11_DIR} EXCLUDE_FROM_ALL)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/eigen)
+
 # Start of Selection
 file(GLOB_RECURSE FILES_TO_REMOVE "${CMAKE_SOURCE_DIR}/python/aerodrome/simulator/*")
 foreach(FILE ${FILES_TO_REMOVE})

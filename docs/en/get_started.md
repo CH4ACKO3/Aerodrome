@@ -36,4 +36,5 @@ $ cmake --build build
 $ pip install .
 ```
 
-> The platform and Python version used during compilation will be reflected in the binary file names. For example, a file named `*.cp39-win_amd64.pyd` indicates that it was compiled on a Windows platform with a 64-bit architecture and in a `python==3.9` environment.
+!!! tip ""
+    The platform and Python version used during compilation will be reflected in the binary file names. For example, a file named `*.cp39-win_amd64.pyd` indicates that it was compiled on a Windows platform with a 64-bit architecture and in a `python==3.9` environment.

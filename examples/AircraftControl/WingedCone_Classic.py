@@ -3,11 +3,13 @@ from aerodrome.simulator.Core.envs.Space3D import Space3D
 from math import *
 
 if __name__ == "__main__":
-    dt = 0.001
-    env = Space3D(dt, 0.001, 1)
+    dt = 0.01
+    env = Space3D(dt, 0.001)
     object_dict = {
         "name": "test",
-        "integrator": "rk45",
+        "integrator": "euler",
+        "dt": 0.001,
+
         "S": 3603.0,
         "c": 80.0,
         "m": 9375.0,
@@ -15,15 +17,12 @@ if __name__ == "__main__":
         "pos": [0.0, 33528.0, 0.0],
         "vel": [4590.29, 0.0, 0.0],
         "ang_vel": [0.0, 0.0, 0.0],
-        "J": [1.0, 7*10**6, 7*10**6],
+        "J": [1.0*10**6, 0, 0, 0, 7*10**6, 0, 0, 0, 7*10**6],
         "theta": 0.00/180*pi,
         "phi": 0.0,
         "gamma": 0.0,   
         "theta_v": 0.0,
         "phi_v": 0.0,
-        "gamma_v": 0.0,
-        "alpha": 0.00/180*pi,
-        "beta": 0.0,
 
         "Kiz": 0.2597,
         "Kwz": 1.6,
@@ -36,10 +35,12 @@ if __name__ == "__main__":
 
     object = WingedCone2D_Classic(object_dict)
     env.add_object(object)
+    # result = env.to_dict()
+    # print(result)
 
     import numpy as np
 
-    cnt = 10000
+    cnt = 20000
     x = np.arange(cnt) * dt
     y = np.zeros(cnt)
 

@@ -35,4 +35,5 @@ $ cmake --build build
 $ pip install .
 ```
 
-> 编译时的平台和 python 版本会在二进制文件名中显示；例如，`*.cp39-win_amd64.pyd` 表示文件是在 Windows 平台、64位架构下，`python==3.9` 环境中编译的。
+!!! tip ""
+    编译时的平台和 python 版本会在二进制文件名中显示；例如，`*.cp39-win_amd64.pyd` 表示文件是在 Windows 平台、64位架构下，`python==3.9` 环境中编译的。

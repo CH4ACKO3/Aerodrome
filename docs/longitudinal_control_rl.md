@@ -506,6 +506,7 @@ double Ny_controller(double Nyc, double Ny, double wz, double dt)
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/eigen.h>
 #include "WingedCone2D.h"
 #include <vector>
 #include <string>

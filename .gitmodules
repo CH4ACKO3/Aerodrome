@@ -2,3 +2,6 @@
 	path = include/pybind11
 	url = https://github.com/pybind/pybind11.git
 	ref = v2.10
+[submodule "include/eigen"]
+	path = include/eigen
+	url = https://gitlab.com/libeigen/eigen.git
