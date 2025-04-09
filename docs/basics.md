@@ -23,8 +23,8 @@ Python 环境类则负责处理用户输入、C++ 环境的输出（例如，数
 # C++ 基础类 #
 在 Aerodrome 中，有两个最基本的类型，可以在 `src/simulator/Core` 中找到：
 
-- `BaseEnv`：所有环境的基类，定义了所有环境共有的接口；
-- `Object3D`：所有三维对象的基类，定义了三维对象的通用属性，例如速度、位置、姿态等；
+- `#!cpp BaseEnv`：所有环境的基类，定义了所有环境共有的接口；
+- `#!cpp Object3D`：所有三维对象的基类，定义了三维对象的通用属性，例如速度、位置、姿态等；
 
 !!! info "关于 pybind11 代码实现"
     由于 pybind11 在编译方面的限制，目前 C++ 代码 pybind 绑定的实现方式是将函数/类的定义和实现都写在 `.h` 文件中；pybind 绑定则写在同名的 `.cpp` 文件中。
@@ -34,13 +34,13 @@ Python 环境类则负责处理用户输入、C++ 环境的输出（例如，数
 ## BaseEnv ##
 在 BaseEnv 中，定义了所有环境共有的接口，包括：
 
-- `reset()`：重置环境；
-- `step(action)`：执行一步动作，并返回信息（例如，观测、奖励、终止等）；
+- `#!cpp reset()`：重置环境；
+- `#!cpp step(action)`：执行一步动作，并返回信息（例如，观测、奖励、终止等）；
 
 <details>
 <summary>点击展开代码</summary>
 
-```C++ title="BaseEnv.h"
+```cpp title="BaseEnv.h"
 class BaseEnv
 {
 public:
@@ -75,33 +75,29 @@ Object3D 的内容则较多，包括：
 class Object3D {
 public:
     std::string name;
-    std::string integrator;
+    std::string integrator; // 积分器类型
+    double dt;
 
-    // 位置坐标（地面系）
-    std::array<double, 3> pos;
+    double init_m, m, d_m; // 初始质量；质量；质量变化率
+    Eigen::Matrix3d J; // 惯性矩阵
+    Eigen::Matrix3d J_inv; // 惯性矩阵的逆
 
-    // 速度向量（地面系）
-    std::array<double, 3> vel;
+    Eigen::Vector3d init_pos, pos; // 位置 (地面系)
+    Eigen::Vector3d init_vel, vel; // 速度 (地面系)
+    Eigen::Vector3d init_ang_vel, ang_vel; // 角速度 (弹体系)
 
-    // 角速度向量（弹体系）
-    std::array<double, 3> ang_vel;
-
-    // 转动惯量
-    std::array<double, 3> J;
-
-    double V; // 速度
-
-    // 描述刚体姿态的八个角度
-    double theta;    // 俯仰角
-    double phi;      // 偏航角
-    double gamma;    // 倾斜角
-    double theta_v;  // 速度倾角
-    double phi_v;    // 速度偏角
+    double init_V, V; // 速度
+    double init_theta, theta;    // 俯仰角
+    double init_phi, phi;      // 偏航角
+    double init_gamma, gamma;    // 倾斜角
+    double init_theta_v, theta_v;  // 速度倾角
+    double init_phi_v, phi_v;    // 速度偏角
     double alpha;    // 攻角
     double beta;     // 侧滑角
     double gamma_v;  // 速度倾斜角
 
-    py::dict initial_state;
+    typedef Eigen::Matrix<double, 10, 1> state_vec; // V, theta_v, phi_v, theta, phi, gamma, p, q, r, m
+    typedef Eigen::Matrix<double, 6, 1> force_vec; // fx, fy, fz, mx, my, mz
 
     Object3D() {}
 
@@ -109,27 +105,49 @@ public:
     {
         name = input_dict["name"].cast<std::string>();
         integrator = input_dict["integrator"].cast<std::string>();
-        pos = input_dict["pos"].cast<std::array<double, 3>>();
-        vel = input_dict["vel"].cast<std::array<double, 3>>();
-        ang_vel = input_dict["ang_vel"].cast<std::array<double, 3>>();
-        J = input_dict["J"].cast<std::array<double, 3>>();
-        // V = input_dict["V"].cast<double>();
-        V = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
-        theta = input_dict["theta"].cast<double>();
-        phi = input_dict["phi"].cast<double>();
-        gamma = input_dict["gamma"].cast<double>();
-        theta_v = input_dict["theta_v"].cast<double>();
-        phi_v = input_dict["phi_v"].cast<double>();
-        gamma_v = input_dict["gamma_v"].cast<double>();
-        alpha = input_dict["alpha"].cast<double>();
-        beta = input_dict["beta"].cast<double>();
+        dt = input_dict["dt"].cast<double>();
 
-        initial_state = input_dict;
+        init_m = m = input_dict["m"].cast<double>();
+        d_m = 0;
+        std::array<double, 3> pos_ = input_dict["pos"].cast<std::array<double, 3>>();
+        init_pos = pos = Eigen::Map<Eigen::Vector3d>(pos_.data());
+        std::array<double, 3> vel_ = input_dict["vel"].cast<std::array<double, 3>>();
+        init_vel = vel = Eigen::Map<Eigen::Vector3d>(vel_.data());
+        std::array<double, 3> ang_vel_ = input_dict["ang_vel"].cast<std::array<double, 3>>();
+        init_ang_vel = ang_vel = Eigen::Map<Eigen::Vector3d>(ang_vel_.data());
+        std::array<double, 9> J_ = input_dict["J"].cast<std::array<double, 9>>();
+        J = Eigen::Map<Eigen::Matrix3d>(J_.data());
+        J_inv = J.inverse();
+        init_V = V = sqrt(vel(0) * vel(0) + vel(1) * vel(1) + vel(2) * vel(2));
+        init_theta = theta = input_dict["theta"].cast<double>();
+        init_phi = phi = input_dict["phi"].cast<double>();
+        init_gamma = gamma = input_dict["gamma"].cast<double>();
+        init_theta_v = theta_v = input_dict["theta_v"].cast<double>();
+        init_phi_v = phi_v = input_dict["phi_v"].cast<double>();
+
+        beta = asin(cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma));
+        alpha = asin((cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta));
+        gamma_v = asin((cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v));
     }
 
     virtual void reset()
     {
-        *this = Object3D(initial_state);
+        pos = init_pos;
+        vel = init_vel;
+        ang_vel = init_ang_vel;
+        m = init_m;
+        d_m = 0;
+
+        V = init_V;
+        theta = init_theta;
+        phi = init_phi;
+        gamma = init_gamma;
+        theta_v = init_theta_v;
+        phi_v = init_phi_v;
+
+        beta = asin(cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma));
+        alpha = asin((cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta));
+        gamma_v = asin((cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v));
     }
 
     virtual py::dict to_dict()
@@ -138,7 +156,10 @@ public:
         output_dict["pos"] = pos;
         output_dict["vel"] = vel;
         output_dict["ang_vel"] = ang_vel;
+        output_dict["m"] = m;
+        output_dict["dt"] = dt;
         output_dict["J"] = J;
+        output_dict["J_inv"] = J_inv;
         output_dict["V"] = V;
         output_dict["theta"] = theta;
         output_dict["phi"] = phi;
@@ -154,193 +175,114 @@ public:
 
     virtual py::object step(py::dict action)
     {
-        double dt = action["dt"].cast<double>();
-        
-        pos = action["pos"].cast<std::array<double, 3>>();
-        vel = action["vel"].cast<std::array<double, 3>>();
-        ang_vel = action["ang_vel"].cast<std::array<double, 3>>();
-        J = action["J"].cast<std::array<double, 3>>();
-        // V = action["V"].cast<double>();
-        V = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
-        theta = action["theta"].cast<double>();
-        phi = action["phi"].cast<double>();
-        gamma = action["gamma"].cast<double>();
-        theta_v = action["theta_v"].cast<double>();
-        phi_v = action["phi_v"].cast<double>();
-        gamma_v = action["gamma_v"].cast<double>();
-        alpha = action["alpha"].cast<double>();
-        beta = action["beta"].cast<double>();
+        double fx = 0, fy = 0, fz = 0; // 力 (弹体系)
+        double mx = 0, my = 0, mz = 0; // 力矩 (弹体系)
+
+        force_vec c_force = {fx, fy, fz, mx, my, mz}; // 力和力矩
+        kinematics_step(c_force); // 更新状态
+
+        return to_dict();
+    }
+    
+    void kinematics_step(const force_vec& c_force)
+    {
+        state_vec c_state = {V, theta_v, phi_v,
+                             theta, phi, gamma,
+                             ang_vel(0), ang_vel(1), ang_vel(2), m};
+        state_vec new_state;
+        new_state.setZero();
 
         if (integrator == "euler")
         {
-            *this = *this + this->d() * dt;
+            // Update state using Euler method
+            state_vec d_state = d(c_state, c_force);
+
+            new_state = c_state + d_state * dt;
         }
         else if (integrator == "midpoint")
         {
-            auto temp1 = *this + this->d() * (0.5 * dt);
-            auto k1 = temp1.d();
-            *this = *this + k1 * dt;
-        }
-        else if (integrator == "rk23")
-        {
-            auto k1 = this->d();
-            auto temp1 = *this + k1 * (0.5 * dt);
-            auto k2 = temp1.d();
-            auto temp2 = *this + k2 * (0.5 * dt);
-            auto k3 = temp2.d();
-            *this = *this + (k1 + k2 * 2 + k3) * (dt / 4);
-        }
-        else if (integrator == "rk45")
-        {
-            auto k1 = this->d();
-            auto temp1 = *this + k1 * (0.5 * dt);
-            auto k2 = temp1.d();
-            auto temp2 = *this + k2 * (0.5 * dt);
-            auto k3 = temp2.d();
-            auto temp3 = *this + k3 * dt;
-            auto k4 = temp3.d();
-            *this = *this + (k1 + k2 * 2 + k3 * 2 + k4) * (dt / 6);
-        }
+            // Midpoint method
+            state_vec k1 = d(c_state, c_force);
+            state_vec k2 = d(c_state + k1 * (dt / 2), c_force);
 
-        theta_v = atan2(vel[1], sqrt(vel[0] * vel[0] + vel[2] * vel[2]));
-        phi_v = atan2(-vel[2], vel[0]);
+            new_state = c_state + k2 * dt;
+        }
+        else if (integrator == "rk4")
+        {
+            // RK4 method
+            state_vec k1 = d(c_state, c_force);
+            state_vec k2 = d(c_state + k1 * (dt / 2), c_force);
+            state_vec k3 = d(c_state + k2 * (dt / 2), c_force);
+            state_vec k4 = d(c_state + k3 * dt, c_force);
+
+            new_state = c_state + (k1 + 2 * k2 + 2 * k3 + k4) * (dt / 6);
+        }
         
-        beta = cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma);
-        alpha = (cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta);
-        gamma_v = (cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v);
+        V = new_state(0);
+        theta_v = new_state(1);
+        phi_v = new_state(2);
+        theta = new_state(3);
+        phi = new_state(4);
+        gamma = new_state(5);
+        ang_vel(0) = new_state(6);
+        ang_vel(1) = new_state(7);
+        ang_vel(2) = new_state(8);
+        m = new_state(9);
 
-        V = sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
-        return to_dict();
+        // [V, theta_v, phi_v,
+        //  theta, phi, gamma,
+        //  ang_vel(0), ang_vel(1), ang_vel(2), m] = new_state;
+
+        vel(0) = V * cos(theta_v) * cos(phi_v);
+        vel(1) = V * sin(theta_v);
+        vel(2) = -V * cos(theta_v) * sin(phi_v);
+        pos += vel * dt;
+
+        beta = asin(cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma));
+        alpha = asin((cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta));
+        gamma_v = asin((cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v));
     }
 
-    virtual Object3D d()
+    state_vec d(const state_vec& c_state, const force_vec& c_force) const
     {
-        auto derivative = *this;
+        // c_x: current value of x
+        // d_x: derivative of x
 
-        derivative.pos[0] = vel[0];
-        derivative.pos[1] = vel[1];
-        derivative.pos[2] = vel[2];
+        auto c_V = c_state(0);
+        auto c_theta_v = c_state(1);
+        auto c_phi_v = c_state(2);
+        auto c_theta = c_state(3);
+        auto c_phi = c_state(4);
+        auto c_gamma = c_state(5);
+        auto c_p = c_state(6);
+        auto c_q = c_state(7);
+        auto c_r = c_state(8);
+        auto c_m = c_state(9);
 
-        derivative.vel[0] = 0;
-        derivative.vel[1] = 0;
-        derivative.vel[2] = 0;
+        double c_fx = c_force(0), c_fy = c_force(1), c_fz = c_force(2);
+        double c_mx = c_force(3), c_my = c_force(4), c_mz = c_force(5);
 
-        derivative.ang_vel[0] = 0;
-        derivative.ang_vel[1] = 0;
-        derivative.ang_vel[2] = 0;
+        // Eigen::Vector 不支持结构化绑定
+        // auto [c_V, c_theta_v, c_phi_v, c_theta, c_phi, c_gamma, c_p, c_q, c_r, c_m] = c_state;
+        // auto [c_fx, c_fy, c_fz, c_mx, c_my, c_mz] = c_force;
 
-        derivative.theta = ang_vel[1] * sin(gamma) + ang_vel[2] * cos(gamma);
-        derivative.phi = (ang_vel[1] * cos(gamma) - ang_vel[2] * sin(gamma)) / cos(theta);
-        derivative.gamma = ang_vel[0] * - tan(theta) * (ang_vel[1] * cos(gamma) - ang_vel[2] * sin(gamma));
+        auto d_V = c_fx / c_m;
+        auto d_theta_v = c_fy / (c_m * c_V);
+        auto d_phi_v = - c_fz / (c_m * c_V * cos(c_theta_v));
 
-        derivative.theta_v = 0;
-        derivative.phi_v = 0;
-        derivative.gamma_v = 0;
+        Eigen::Vector3d c_ang_vel(c_p, c_q, c_r);
+        Eigen::Vector3d c_moment(c_mx, c_my, c_mz);
+        Eigen::Vector3d d_ang_vel = J_inv * (c_moment - c_ang_vel.cross(J * c_ang_vel));
 
-        derivative.alpha = 0;
-        derivative.beta = 0;
+        auto d_theta = c_q * sin(c_gamma) + c_r * cos(c_gamma);
+        auto d_phi = (c_q * cos(c_gamma) - c_r * sin(c_gamma)) / cos(c_theta);
+        auto d_gamma = c_p - tan(c_theta) * (c_q * cos(c_gamma) - c_r * sin(c_gamma));
 
-        return derivative;
-    }
-    
-    template<typename T, typename P>
-    friend T operator+(const T& lop, const P& rop)
-    {
-        auto result = lop;
-
-        for (int i = 0; i < 3; ++i)
-        {   
-            result.pos[i] = lop.pos[i] + rop.pos[i];
-            result.vel[i] = lop.vel[i] + rop.vel[i];
-            result.ang_vel[i] = lop.ang_vel[i] + rop.ang_vel[i];
-        }   
-
-        result.V = lop.V + rop.V;
-        result.theta = lop.theta + rop.theta;
-        result.phi = lop.phi + rop.phi;
-        result.gamma = lop.gamma + rop.gamma;
-        result.theta_v = lop.theta_v + rop.theta_v;
-        result.phi_v = lop.phi_v + rop.phi_v; 
-        result.alpha = lop.alpha + rop.alpha;
-        result.beta = lop.beta + rop.beta;
-        result.gamma_v = lop.gamma_v + rop.gamma_v;
-
-        return result;
-    }
-
-    template<typename T, typename P>
-    friend T operator-(const T& lop, const P& rop)
-    {
-        auto result = lop;
-
-        for (int i = 0; i < 3; ++i)
-        {
-            result.pos[i] = lop.pos[i] - rop.pos[i];
-            result.vel[i] = lop.vel[i] - rop.vel[i];
-            result.ang_vel[i] = lop.ang_vel[i] - rop.ang_vel[i];
-        }
-
-        result.V = lop.V - rop.V;
-        result.theta = lop.theta - rop.theta;
-        result.phi = lop.phi - rop.phi;
-        result.gamma = lop.gamma - rop.gamma;
-        result.theta_v = lop.theta_v - rop.theta_v;
-        result.phi_v = lop.phi_v - rop.phi_v;
-        result.alpha = lop.alpha - rop.alpha;
-        result.beta = lop.beta - rop.beta;
-        result.gamma_v = lop.gamma_v - rop.gamma_v;
-
-        return result;
-    }
-
-    template<typename T>
-    friend T operator*(const T& lop, const double& rop)
-    {
-        auto result = lop;
-
-        for (int i = 0; i < 3; ++i)
-        {
-            result.pos[i] = lop.pos[i] * rop; 
-            result.vel[i] = lop.vel[i] * rop;
-            result.ang_vel[i] = lop.ang_vel[i] * rop;
-        }   
-
-        result.V = lop.V * rop;
-        result.theta = lop.theta * rop;
-        result.phi = lop.phi * rop;
-        result.gamma = lop.gamma * rop;
-        result.theta_v = lop.theta_v * rop;
-        result.phi_v = lop.phi_v * rop;
-        result.alpha = lop.alpha * rop;
-        result.beta = lop.beta * rop;
-        result.gamma_v = lop.gamma_v * rop;
-
-        return result;
-    }
-    
-    template<typename T>
-    friend T operator/(const T& lop, const double& rop)
-    {
-        auto result = lop;
-
-        for (int i = 0; i < 3; ++i)
-        {
-            result.pos[i] = lop.pos[i] / rop; 
-            result.vel[i] = lop.vel[i] / rop;
-            result.ang_vel[i] = lop.ang_vel[i] / rop;
-        }   
-
-        result.V = lop.V / rop;
-        result.theta = lop.theta / rop;
-        result.phi = lop.phi / rop;
-        result.gamma = lop.gamma / rop;
-        result.theta_v = lop.theta_v / rop;
-        result.phi_v = lop.phi_v / rop;   
-        result.alpha = lop.alpha / rop;
-        result.beta = lop.beta / rop;
-        result.gamma_v = lop.gamma_v / rop;
-
-        return result;
+        state_vec d_state = {d_V, d_theta_v, d_phi_v,
+                             d_theta, d_phi, d_gamma,
+                             d_ang_vel(0), d_ang_vel(1), d_ang_vel(2), d_m};
+        
+        return d_state;
     }
 };
 ```

@@ -16,8 +16,6 @@
 
 本项目中使用经过修改的 [CleanRL PPO](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_continuous_action.py) 代码，构建了基本的训练工作流。由于环境接口设计仿照了 Gymnasium 的标准，因此只需要很少的改动。
 
-
-
 ```py title="WingedCone_PPO.py > 库导入"
 import random 
 import numpy as np
@@ -392,7 +390,7 @@ if __name__ == "__main__":
 
 ## WingedCone - Python 环境 ##
 
-这里是 `wingedcone-v0` 环境（也就是上面的 PPO 代码中的 `env` 所属的类）的实现：
+这里是 `#!py wingedcone-v0` 环境（也就是上面的 PPO 代码中的 `#!py env` 所属的类）的实现：
 
 ```py title="WingedCone_RL.py"
 from aerodrome.core import Env
@@ -457,7 +455,7 @@ register("wingedcone-v0", "aerodrome.envs.WingedCone_RL:WingedCone_RL") # 把环
 
 ## WingedCone2D - PPO ##
 
-`WingedCone2D_PPO` 类也是 `WingedCone2D` 的子类，与 `WingedCone2D_Classic` 基本相同，区别仅为使用神经网络输出替换了 PI 控制器：
+`#!python WingedCone2D_PPO` 类也是 `#!python WingedCone2D` 的子类，与 `#!python WingedCone2D_Classic` 基本相同，区别仅为使用神经网络输出替换了 PI 控制器：
 
 ```cpp
 // 强化学习控制
@@ -502,19 +500,6 @@ double Ny_controller(double Nyc, double Ny, double wz, double dt)
 <summary>点击展开完整代码</summary>
 
 ```cpp title="WingedCone2D_RL.h"
-#pragma once
-
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <pybind11/eigen.h>
-#include "WingedCone2D.h"
-#include <vector>
-#include <string>
-#include <array>
-#include <cmath>
-
-namespace py = pybind11;
-
 class WingedCone2D_RL : public WingedCone2D
 {
 public:
@@ -574,7 +559,15 @@ public:
 
     virtual void reset() override
     {
-        *this = WingedCone2D_RL(initial_state);
+        WingedCone2D::reset();
+        eNy = 0;
+        eNy_prev = 0;
+        i_eNy = 0;
+        d_eNy = 0;
+        i_eSAC = 0;
+        i_V = 0;
+        d_eV = 0;
+        eV_prev = 0;
     }
 
     double V_controller(double Vc, double V, double dt)
@@ -619,8 +612,6 @@ public:
 
     virtual py::object step(py::dict action) override
     {
-        double dt = action["dt"].cast<double>();
-
         double Nyc = action["Nyc"].cast<double>();
         double Vc = action["Vc"].cast<double>();
         double nn_control = action["nn_control"].cast<double>();
@@ -635,46 +626,13 @@ public:
         _L();
         _T();
         _M();
+        
+        force_vec c_force = {T * cos(alpha) * cos(beta) - D - m * g * sin(theta),
+                             T * (sin(alpha) * cos(gamma_v) + cos(alpha) * sin(beta) * sin(gamma_v)) + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta),
+                             T * (sin(alpha) * sin(gamma_v) - cos(alpha) * sin(beta) * cos(gamma_v)) + L * sin(gamma_v) + N * cos(gamma_v),
+                             M[0], M[1], M[2]}; // 力和力矩
+        kinematics_step(c_force); // 更新状态
 
-        if (integrator == "euler")
-        {
-            *this = *this + this->d() * dt;
-        }
-        else if (integrator == "midpoint")
-        {
-            auto temp1 = *this + this->d() * (0.5 * dt);
-            auto k1 = temp1.d();
-            *this = *this + k1 * dt;
-        }
-        else if (integrator == "rk23")
-        {
-            auto k1 = this->d();
-            auto temp1 = *this + k1 * (0.5 * dt);
-            auto k2 = temp1.d();
-            auto temp2 = *this + k2 * (0.5 * dt);
-            auto k3 = temp2.d();
-            *this = *this + (k1 + k2 * 2 + k3) * (dt / 4);
-        }
-        else if (integrator == "rk45")
-        {
-            auto k1 = this->d();
-            auto temp1 = *this + k1 * (0.5 * dt);
-            auto k2 = temp1.d();
-            auto temp2 = *this + k2 * (0.5 * dt);
-            auto k3 = temp2.d();
-            auto temp3 = *this + k3 * dt;
-            auto k4 = temp3.d();
-            *this = *this + (k1 + k2 * 2 + k3 * 2 + k4) * (dt / 6);
-        }
-
-        beta = cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma);
-        alpha = (cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta);
-        gamma_v = (cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v);
-
-        V = Vc;
-        vel[0] = V * cos(theta_v) * cos(phi_v);
-        vel[1] = V * sin(theta_v);
-        vel[2] = -V * cos(theta_v) * sin(phi_v);
         h = pos[1];
 
         Tem = Temperature(h);
@@ -682,18 +640,13 @@ public:
         Rho = Density(Tem, Pres);
         a = SpeedofSound(Tem);
         g = Gravity(h);
-
+        
         q = 0.5 * Rho * V * V;
-
+        
         Ny = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
                                 + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * g);
         wz = ang_vel[2];
-
-        eNy = Nyc - Ny;
-        i_eNy += eNy * dt;
-        d_eNy = (eNy - eNy_prev) / dt;
-        eNy_prev = eNy;
-
+        
         return to_dict();
     }
 };

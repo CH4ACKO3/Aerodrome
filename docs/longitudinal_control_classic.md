@@ -10,9 +10,9 @@
 
 ## WingedCone2D ##
 
-`WingedCone2D` 实现为 `Aircraft3D` 的子类，"`2D`" 表示其气动模型只实现了纵向的部分。
+`#!cpp WingedCone2D` 实现为 `#!cpp Aircraft3D` 的子类，"`2D`" 表示其气动模型只实现了纵向的部分。
 
-相对于 `Aircraft3D`，`WingedCone2D` 增加了升降舵偏角 `delta_e` 属性，并复写了 `Aircraft3D` 的 `step()` 方法，在其中增加了计算气动力的部分。相应地，气动力（`L`，`D`，`T`，`M`）的计算被实现为单独的函数（`_L()`，`_D()`，`_T()`，`_M()`）。输入动作直接对 `delta_e` 进行修改。
+相对于 `#!cpp Aircraft3D`，`#!cpp WingedCone2D` 增加了升降舵偏角 `#!cpp delta_e` 属性，并复写了 `#!cpp Aircraft3D` 的 `#!cpp step()` 方法，在其中增加了计算气动力的部分。相应地，气动力（`#!cpp L`，`#!cpp D`，`#!cpp T`，`#!cpp M`）的计算被实现为单独的函数（`#!cpp _L()`，`#!cpp _D()`，`#!cpp _T()`，`#!cpp _M()`）。输入动作直接对 `delta_e` 进行修改。
 
 <details>
 <summary>点击展开代码</summary>
@@ -27,12 +27,13 @@ public:
     
     WingedCone2D(py::dict input_dict) : Aircraft3D(input_dict)
     {
-        delta_e = 0.0;        
+        delta_e = 0.0;
     }
 
     virtual void reset() override
     {
-        *this = WingedCone2D(initial_state);
+        Aircraft3D::reset();
+        delta_e = 0.0;
     }
 
     void _D()
@@ -69,54 +70,20 @@ public:
 
     virtual py::object step(py::dict action) override
     {
-        double dt = action["dt"].cast<double>();
-
-        delta_e = action["delta_e"].cast<double>(); // 传入动作直接修改 delta_e
+        delta_e = action["delta_e"].cast<double>();
         
-        // 新增计算气动力的部分
+        // 计算气动力
         _D();
         _L();
         _T();
         _M();
+        
+        force_vec c_force = {T * cos(alpha) * cos(beta) - D - m * g * sin(theta),
+                             T * (sin(alpha) * cos(gamma_v) + cos(alpha) * sin(beta) * sin(gamma_v)) + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta),
+                             T * (sin(alpha) * sin(gamma_v) - cos(alpha) * sin(beta) * cos(gamma_v)) + L * sin(gamma_v) + N * cos(gamma_v),
+                             M[0], M[1], M[2]}; // 力和力矩
+        kinematics_step(c_force); // 更新状态
 
-        if (integrator == "euler")
-        {
-            *this = *this + this->d() * dt;
-        }
-        else if (integrator == "midpoint")
-        {
-            auto temp1 = *this + this->d() * (0.5 * dt);
-            auto k1 = temp1.d();
-            *this = *this + k1 * dt;
-        }
-        else if (integrator == "rk23")
-        {
-            auto k1 = this->d();
-            auto temp1 = *this + k1 * (0.5 * dt);
-            auto k2 = temp1.d();
-            auto temp2 = *this + k2 * (0.5 * dt);
-            auto k3 = temp2.d();
-            *this = *this + (k1 + k2 * 2 + k3) * (dt / 4);
-        }
-        else if (integrator == "rk45")
-        {
-            auto k1 = this->d();
-            auto temp1 = *this + k1 * (0.5 * dt);
-            auto k2 = temp1.d();
-            auto temp2 = *this + k2 * (0.5 * dt);
-            auto k3 = temp2.d();
-            auto temp3 = *this + k3 * dt;
-            auto k4 = temp3.d();
-            *this = *this + (k1 + k2 * 2 + k3 * 2 + k4) * (dt / 6);
-        }
-
-        beta = cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma);
-        alpha = (cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta);
-        gamma_v = (cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v);
-
-        vel[0] = V * cos(theta_v) * cos(phi_v);
-        vel[1] = V * sin(theta_v);
-        vel[2] = -V * cos(theta_v) * sin(phi_v);
         h = pos[1];
 
         Tem = Temperature(h);
@@ -124,24 +91,24 @@ public:
         Rho = Density(Tem, Pres);
         a = SpeedofSound(Tem);
         g = Gravity(h);
-
+        
         q = 0.5 * Rho * V * V;
+
         return to_dict();
     }
 };
-
 ```
 
 </details>
 
 ## WingedCone2D - Classic ##
 
-`WingedCone2D_Classic` 类是 `WingedCone2D` 的子类，提供了纵向过载控制的传统三回路驾驶仪实现。
+`#!cpp WingedCone2D_Classic` 类是 `#!cpp WingedCone2D` 的子类，提供了纵向过载控制的传统三回路驾驶仪实现。
 
-具体地，`WingedCone2D_Classic` 增加了若干控制参数（例如，`Kiz`，`Kwz` 等），控制器所需要的数值（例如，过载跟踪误差 `eNy` 及其积分项 `i_eNy` 等）；传入动作为过载指令，舵偏角不再由动作控制，而是由控制器计算；`step()` 方法中新增由控制器计算舵偏的部分。
+具体地，`#!cpp WingedCone2D_Classic` 增加了若干控制参数（例如，`#!cpp Kiz`，`#!cpp Kwz` 等），控制器所需要的数值（例如，过载跟踪误差 `#!cpp eNy` 及其积分项 `#!cpp i_eNy` 等）；传入动作为过载指令，舵偏角不再由动作控制，而是由控制器计算；`#!cpp step()` 方法中新增由控制器计算舵偏的部分。
 
 !!! warning ""
-    虽然传入动作中有速度指令 `Vc`，并且有由速度指令控制发动机开度的函数 `V_controller()`，但出于简易起见最终并未实装（即，推力 `T` 不受控制器影响，为固定值 `T = 4.959e3`）。
+    虽然传入动作中有速度指令 `#!cpp Vc`，并且有由速度指令控制发动机开度的函数 `#!cpp V_controller()`，但出于简易起见最终并未实装（即，推力 `#!cpp T` 不受控制器影响，为固定值 `#!cpp T = 4.959e3`）。
 
 <details>
 <summary>点击展开代码</summary>
@@ -204,7 +171,14 @@ public:
 
     virtual void reset() override
     {
-        *this = WingedCone2D_Classic(initial_state);
+        WingedCone2D::reset();
+        eNy = 0;
+        i_eNy = 0;
+        p_eNy = 0;
+        i_eSAC = 0;
+        i_V = 0;
+        d_eV = 0;
+        eV_prev = 0;
     }
 
     double V_controller(double Vc, double V, double dt)
@@ -254,15 +228,13 @@ public:
 
     virtual py::object step(py::dict action) override
     {
-        double dt = action["dt"].cast<double>();
-
         double Nyc = action["Nyc"].cast<double>();
         double Vc = action["Vc"].cast<double>();
 
-        delta_e = Ny_controller(Nyc, Ny, wz, dt*0.1);
+        delta_e = Ny_controller(Nyc, Ny, wz, dt);
         delta_e = std::clamp(delta_e, -25 / 57.3, 25 / 57.3);
 
-        double Phi = V_controller(Vc, V, dt*0.1);
+        double Phi = V_controller(Vc, V, dt);
 
         // 计算气动力
         _D();
@@ -270,44 +242,12 @@ public:
         _T();
         _M();
 
-        if (integrator == "euler")
-        {
-            *this = *this + this->d() * dt;
-        }
-        else if (integrator == "midpoint")
-        {
-            auto temp1 = *this + this->d() * (0.5 * dt);
-            auto k1 = temp1.d();
-            *this = *this + k1 * dt;
-        }
-        else if (integrator == "rk23")
-        {
-            auto k1 = this->d();
-            auto temp1 = *this + k1 * (0.5 * dt);
-            auto k2 = temp1.d();
-            auto temp2 = *this + k2 * (0.5 * dt);
-            auto k3 = temp2.d();
-            *this = *this + (k1 + k2 * 2 + k3) * (dt / 4);
-        }
-        else if (integrator == "rk45")
-        {
-            auto k1 = this->d();
-            auto temp1 = *this + k1 * (0.5 * dt);
-            auto k2 = temp1.d();
-            auto temp2 = *this + k2 * (0.5 * dt);
-            auto k3 = temp2.d();
-            auto temp3 = *this + k3 * dt;
-            auto k4 = temp3.d();
-            *this = *this + (k1 + k2 * 2 + k3 * 2 + k4) * (dt / 6);
-        }
+        force_vec c_force = {T * cos(alpha) * cos(beta) - D - m * g * sin(theta),
+                             T * (sin(alpha) * cos(gamma_v) + cos(alpha) * sin(beta) * sin(gamma_v)) + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta),
+                             T * (sin(alpha) * sin(gamma_v) - cos(alpha) * sin(beta) * cos(gamma_v)) + L * sin(gamma_v) + N * cos(gamma_v),
+                             M[0], M[1], M[2]}; // 力和力矩
+        kinematics_step(c_force); // 更新状态
 
-        beta = cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma);
-        alpha = (cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta);
-        gamma_v = (cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v);
-
-        vel[0] = V * cos(theta_v) * cos(phi_v);
-        vel[1] = V * sin(theta_v);
-        vel[2] = -V * cos(theta_v) * sin(phi_v);
         h = pos[1];
 
         Tem = Temperature(h);
@@ -315,24 +255,23 @@ public:
         Rho = Density(Tem, Pres);
         a = SpeedofSound(Tem);
         g = Gravity(h);
-
+        
         q = 0.5 * Rho * V * V;
-
+        
         Ny = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
                                 + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * g);
         wz = ang_vel[2];
-
+        
         return to_dict();
     }
 };
-
 ```
 
 </details>
 
 ## Python 代码 ##
 
-由于 `WingedCone2D_Classic` 的控制代码直接在 C++ 类中实现，因此 Python 部分代码较少，而且 **直接调用 C++ 类，没有经过 Python 包装** （也就是 `基础逻辑和类` 章节中介绍的第二种设计模式），只有 C++ 环境调用、步进循环和绘图部分。这也是第一个涉及 `Space3D` 类使用的示例。
+由于 `#!cpp WingedCone2D_Classic` 的控制代码直接在 C++ 类中实现，因此 Python 部分代码较少，而且 **直接调用 C++ 类，没有经过 Python 包装** （也就是 `基础逻辑和类` 章节中介绍的第二种设计模式），只有 C++ 环境调用、步进循环和绘图部分。这也是第一个涉及 `#!cpp Space3D` 类使用的示例。
 
 ```py title="WingedCone_Classic.py"
 # 直接从编译好的 C++ 模块中取出 WingedCone2D_Classic 和 Space3D 类使用，不经过 Python
@@ -343,7 +282,7 @@ from math import *
 if __name__ == "__main__":
     dt = 0.001 # 定义步进步长，这里设置为固定值 0.001
     # 实例化 Space3D 类，第二个实参表示步进步长，第三个实参表示每次步进分成的积分次数
-    env = Space3D(dt, 0.001, 1) 
+    env = Space3D(dt, 0.001) 
 
     # 定义仿真对象的参数字典，用于生成对象
     object_dict = {
@@ -356,15 +295,12 @@ if __name__ == "__main__":
         "pos": [0.0, 33528.0, 0.0],
         "vel": [4590.29, 0.0, 0.0],
         "ang_vel": [0.0, 0.0, 0.0],
-        "J": [1.0, 7*10**6, 7*10**6],
+        "J": [1.0, 0, 0, 0, 7*10**6, 0, 0, 0, 7*10**6],
         "theta": 0.00/180*pi,
         "phi": 0.0,
         "gamma": 0.0,   
         "theta_v": 0.0,
         "phi_v": 0.0,
-        "gamma_v": 0.0,
-        "alpha": 0.00/180*pi,
-        "beta": 0.0,
 
         "Kiz": 0.2597,
         "Kwz": 1.6,

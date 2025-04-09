@@ -36,6 +36,7 @@ src/simulator_info.txt
 ref/
 temp.*
 test/
+legacy/
 
 site/
 node_modules

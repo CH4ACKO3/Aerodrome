@@ -1,6 +1,6 @@
 # 固定翼飞行器模板 #
 
-在 Aerodrome 中，我们提供了一个固定翼飞行器的模板类 `Aircraft3D`，该类继承自 `Object3D` 类，并增加了一些用于描述固定翼飞行器特性的属性。
+在 Aerodrome 中，我们提供了一个固定翼飞行器的模板类 `#!cpp Aircraft3D`，该类继承自 `#!cpp Object3D` 类，并增加了一些用于描述固定翼飞行器特性的属性。
 
 使用到的代码：
 
@@ -8,14 +8,13 @@
 
 ## Aircraft3D ##
 
-可以看到，`Aircraft3D` 类增加了一些描述固定翼飞行器特性的属性，并复写了一些方法，但没有新增的方法。后面会详细解释每个方法的内容。
+可以看到，`#!cpp Aircraft3D` 类增加了一些描述固定翼飞行器特性的属性，并复写了一些方法，但没有新增的方法。后面会详细解释每个方法的内容。
 
 ```cpp title="Aircraft3D.h"
 class Aircraft3D : public Object3D {
 public:
     double S; // 参考面积
     double c; // 特征长度
-    double m; // 质量
 
     double h; // 高度
     double q; // 动压
@@ -41,13 +40,11 @@ public:
     virtual py::dict to_dict() override; // 属性转换为字典
 
     virtual py::object step(py::dict action) override; // 步进
-
-    virtual Object3D d() override; // 运动学导数
 }
 ```
 
 ### 构造函数 ###
-`Aircraft3D` 的构造函数接收一个参数字典 `input_dict`，其中包含构造 `Object3D` 类所需的参数，以及 `Aircraft3D` 类新增的参数。
+`#!cpp Aircraft3D` 的构造函数接收一个参数字典 `#!cpp input_dict`，其中包含构造 `#!cpp Object3D` 类所需的参数，以及 `#!cpp Aircraft3D` 类新增的参数。
 
 !!! info "大气属性的计算"
     构造函数和之后使用到的计算大气属性（如密度、声速等）的函数参考自公开资料，具体实现见 `src/simulator/y_atmosphere.h`。
@@ -59,7 +56,6 @@ Aircraft3D(py::dict input_dict) : Object3D(input_dict) // 调用父类构造函�
     h = pos[1]; // 自动计算高度（这里假设飞行器在小范围内飞行，不考虑地面曲率，因此高度等于 y 坐标）
     S = input_dict["S"].cast<double>(); // 参考面积
     c = input_dict["c"].cast<double>(); // 特征长度
-    m = input_dict["m"].cast<double>(); // 质量（也可以定义为初始质量）
 
     Tem = Temperature(h); // 根据高度计算温度
     Pres = Pressure(h); // 根据高度计算压力
@@ -76,17 +72,41 @@ Aircraft3D(py::dict input_dict) : Object3D(input_dict) // 调用父类构造函�
     M = {0.0, 0.0, 0.0}; // 初始力矩
 }
 ```
+### reset() ###
+`#!cpp reset()` 函数首先调用父类 `#!cpp Object3D` 的 `#!cpp reset()` 函数，再重置 `#!cpp Aircraft3D` 类型新增的若干参数。
+
+```cpp
+virtual void reset() override
+{
+    Object3D::reset();
+    
+    h = pos[1];
+
+    Tem = Temperature(h);
+    Pres = Pressure(h);
+    Rho = Density(Tem, Pres);
+    a = SpeedofSound(Tem);
+    g = Gravity(h);
+    
+    q = 0.5 * Rho * V * V;
+
+    L = 0.0;
+    D = 0.0;
+    N = 0.0;
+    T = 0.0;
+    M = {0.0, 0.0, 0.0};
+}
+```
 
 ### to_dict() ###
-`to_dict()` 函数将 `Aircraft3D` 实例的属性转换为字典并输出，方便在 Python 中使用。其首先调用父类 `Object3D` 的 `to_dict()` 函数，然后将 `Aircraft3D` 类新增的属性添加到字典中。
+`#!cpp to_dict()` 函数将 `#!cpp Aircraft3D` 实例的属性转换为字典并输出，方便在 Python 中使用。其首先调用父类 `#!cpp Object3D` 的 `#!cpp to_dict()` 函数，然后将 `#!cpp Aircraft3D` 类新增的属性添加到字典中。
 
 ```cpp
 virtual py::dict to_dict() override // `virtual` 表示该函数可以被重写，`override` 表示重写父类中的同名函数
 {
     py::dict output_dict = Object3D::to_dict(); // 调用父类 `Object3D` 的 `to_dict()` 函数
-    output_dict["S"] = S; // 往 `output_dict` 中添加 `Aircraft3D` 类新增的属性
+    output_dict["S"] = S; // 往 `output_dict` 中添加 `#!cpp Aircraft3D` 类新增的属性
     output_dict["c"] = c;
-    output_dict["m"] = m;
     output_dict["V"] = V;
     output_dict["h"] = h;
     output_dict["q"] = q;
@@ -104,115 +124,22 @@ virtual py::dict to_dict() override // `virtual` 表示该函数可以被重写�
 }
 ```
 
-### d() ###
-`d()` 函数计算 `Aircraft3D` 实例的运动学导数。假设不考虑加速度和角加速度的变化（即，加速度和角加速度是由飞行器所受力引起或由输入决定的），则求解以下几个量的导数可以满足计算要求：
-
-- 位置（`pos`）
-- 速度（包括速度大小和角度，即`V`、`theta_v`、`phi_v`）
-- 姿态角（`theta`、`phi`、`gamma`）
-- 角速度（`ang_vel`）
-
-!!! info "关于飞行器姿态描述"
-    描述飞行器的位置姿态还有其它参数，例如迎角 `alpha`、侧滑角 `beta` 等；还有一些量需要随着步进更新，例如飞行器的高度 `h`、动压 `q` 等。但这些量并不是相互独立的，
-    因此可以只求解上述几个量，在 `step()` 函数中完成运动学积分之后，再根据需要更新其它量。
-
-返回的是和调用该方法的实例类型相同的一个新实例，其每个属性的值是原实例对应属性的导数。例如，返回实例的 `V` 属性是传入实例的 `V` 属性的导数，即加速度（更准确地说是 `V` 的变化率）
-```cpp
-virtual Object3D d() override
-{   
-    auto derivative = *this;
-    
-    derivative.V = (T * cos(alpha) * cos(beta) - D - m * g * sin(theta_v)) / m;
-    derivative.theta_v = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
-                            + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * V);
-    derivative.phi_v = -(T * (sin(alpha) * sin(gamma_v) - cos(alpha) * sin(beta) * cos(gamma_v))
-                        + L * sin(gamma_v) + N * cos(gamma_v)) / (m * V * cos(theta_v));
-
-    derivative.ang_vel[0] = (M[0] - (J[2] - J[1]) * ang_vel[1] * ang_vel[2]) / J[0];
-    derivative.ang_vel[1] = (M[1] - (J[0] - J[2]) * ang_vel[2] * ang_vel[0]) / J[1];
-    derivative.ang_vel[2] = (M[2] - (J[1] - J[0]) * ang_vel[0] * ang_vel[1]) / J[2];
-
-    derivative.theta = ang_vel[1] * sin(gamma) + ang_vel[2] * cos(gamma);
-    derivative.phi = (ang_vel[1] * cos(gamma) - ang_vel[2] * sin(gamma)) / cos(theta);
-    derivative.gamma = ang_vel[0] * - tan(theta) * (ang_vel[1] * cos(gamma) - ang_vel[2] * sin(gamma));
-
-    derivative.pos[0] = V * cos(theta_v) * cos(phi_v);
-    derivative.pos[1] = V * sin(theta_v);
-    derivative.pos[2] = -V * cos(theta_v) * sin(phi_v);
-
-    return derivative;
-}
-```
-
 ### step() ###
-`step()` 是不同飞行器类中变化最大的函数。`step()` 函数接收一个动作字典 `action`，其中包含控制输入（如推力、舵偏角等，或过载指令，由派生类型决定）和时间步长 `dt`。
+`#!cpp step()` 是不同飞行器类中变化最大的函数。`#!cpp step()` 函数接收一个动作字典 `#!cpp action`，其中包含控制输入（如推力、舵偏角等，或过载指令，由派生类型决定）
 
-!!! info ""
-    由于积分步长 `dt` 在环境运行过程中有可能会变化（以支持一些自适应步长的算法），因此 `dt` 并没有硬编码在 `Aircraft3D` 类的属性中，而是随动作传入。
+在 `#!cpp step()` 函数中，用户需要根据动作字典 `#!cpp action` 中的控制输入更新飞行器的状态，包括但不限于计算飞行器受力、运动学步进、更新相关变量等。
 
-在 `step()` 函数中，用户需要根据动作字典 `action` 中的控制输入更新飞行器的状态，包括但不限于计算飞行器受力、运动学步进、更新相关变量等。
-
-在 `Aircraft3D` 类中，飞行器所受外力（升力 `L`、阻力 `D`、侧力 `N`、推力 `T`、力矩 `M`）以动作的形式传入，以演示基本的计算流程。
-
-!!! info "关于运算符重载"
-    由于在 `Object3D` 类中[重载](https://zh.cppreference.com/w/cpp/language/operators)了四则运算符，将两个 `Object3D` 或 `Object3D` 的子类之间的加减乘除定义为其某些属性的对应运算（具体实现见下面代码），在动力学积分时可以更方便地处理数值计算（例如涉及微分的运算）。
+在 `#!cpp Aircraft3D` 类中，飞行器所受外力（升力 `#!cpp L`、阻力 `#!cpp D`、侧力 `#!cpp N`、推力 `#!cpp T`、力矩 `#!cpp M`）以动作的形式传入，以演示基本的计算流程。
 
 ```cpp
 virtual py::object step(py::dict action) override // `virtual` 表示该函数可以被重写，`override` 表示重写父类中的同名函数
 {
-    double dt = action["dt"].cast<double>(); // 从动作字典中读取积分步长
-    
-    L = action["L"].cast<double>(); // 从动作字典中读取飞行器所受外力
-    D = action["D"].cast<double>();
-    N = action["N"].cast<double>();
-    T = action["T"].cast<double>();
-    M = action["M"].cast<std::array<double, 3>>();
+    force_vec c_force = {T * cos(alpha) * cos(beta) - D - m * g * sin(theta),
+                         T * (sin(alpha) * cos(gamma_v) + cos(alpha) * sin(beta) * sin(gamma_v)) + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta),
+                         T * (sin(alpha) * sin(gamma_v) - cos(alpha) * sin(beta) * cos(gamma_v)) + L * sin(gamma_v) + N * cos(gamma_v),
+                         M[0], M[1], M[2]}; // 力和力矩
+    kinematics_step(c_force); // 更新状态
 
-    // 使用不同的积分方法更新飞行器状态
-
-    if (integrator == "euler")
-    {
-        // 这里可以直接运算是因为在 Object3D 类中重载了四则运算
-        // this->d() 调用求导方法，返回动力学导数（即，返回的实例的每个属性是传入的实例对应属性的导数）
-        // this->d() * dt 即表示增量
-        *this = *this + this->d() * dt;
-    }
-    else if (integrator == "midpoint")
-    {
-        auto temp1 = *this + this->d() * (0.5 * dt);
-        auto k1 = temp1.d();
-        *this = *this + k1 * dt;
-    }
-    else if (integrator == "rk23")
-    {
-        auto k1 = this->d();
-        auto temp1 = *this + k1 * (0.5 * dt);
-        auto k2 = temp1.d();
-        auto temp2 = *this + k2 * (0.5 * dt);
-        auto k3 = temp2.d();
-        *this = *this + (k1 + k2 * 2 + k3) * (dt / 4);
-    }
-    else if (integrator == "rk45")
-    {
-        auto k1 = this->d();
-        auto temp1 = *this + k1 * (0.5 * dt);
-        auto k2 = temp1.d();
-        auto temp2 = *this + k2 * (0.5 * dt);
-        auto k3 = temp2.d();
-        auto temp3 = *this + k3 * dt;
-        auto k4 = temp3.d();
-        *this = *this + (k1 + k2 * 2 + k3 * 2 + k4) * (dt / 6);
-    }
-    
-    // 由于在上面的动力学积分中只计算了必要的量
-    // 此处还需要对未更新的属性进行计算
-    beta = cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma);
-    alpha = (cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta);
-    gamma_v = (cos(alpha) * sin(beta) * sin(theta) - sin(alpha) * sin(beta) * cos(gamma) * cos(theta) + cos(beta) * sin(gamma) * cos(theta)) / cos(theta_v);
-
-    vel[0] = V * cos(theta_v) * cos(phi_v);
-    vel[1] = V * sin(theta_v);
-    vel[2] = -V * cos(theta_v) * sin(phi_v);
     h = pos[1];
 
     Tem = Temperature(h);
@@ -220,33 +147,28 @@ virtual py::object step(py::dict action) override // `virtual` 表示该函数�
     Rho = Density(Tem, Pres);
     a = SpeedofSound(Tem);
     g = Gravity(h);
-
+    
     q = 0.5 * Rho * V * V;
+
     return to_dict();
 }
 ```
 
 ## Space3D ##
 
-`Space3D` 类是 `BaseEnv` 的子类，包含一些处理输入输出的必要属性和方法，实现比较简单。
+`#!cpp Space3D` 类是 `#!cpp BaseEnv` 的子类，包含一些处理输入输出的必要属性和方法，实现比较简单。
 
 ```cpp title="Space3D.h"
 class Space3D : public BaseEnv
 {
-private: // [tl! collapse:start]
-    double tau; // 每次积分的时间长度，tau = dt / integrate_steps
-    double dt; // 每次被调用 step() 方法时，步进的时间长度
-    double eps; // 容差，可以用于检查动力学积分的精度，未实装
-    int integrate_steps; // 每次被调用 step() 方法时，调用环境内对象的 step() 方法的次数（将每次步进划分为几次积分） // [tl! collapse:end]
+private:
+    double dt; // Object3D 类自身也具有 dt 参数，这里的 dt 是为了检查环境中各 Object3D 实例 dt 属性的一致性。
+    double eps; // 未实装，用于检查姿态参数相容性的容差。
 
 public:
     std::vector<std::shared_ptr<Object3D>> objects;
 
-    Space3D(double tau, double eps, int integrate_steps)
-        : tau(tau), eps(eps), integrate_steps(integrate_steps)
-    {
-        dt = tau / integrate_steps;
-    }
+    Space3D(double dt, double eps) : dt(dt), eps(eps) {}
 
     py::object reset()
     {
@@ -259,45 +181,32 @@ public:
 
     void add_object(std::shared_ptr<Object3D> object)
     {
-        objects.push_back(object); // 将传入的对象(Object3D及其子类)存入列表中
+        objects.push_back(object);
     }
 
     bool check_consistency()
     {
+        // 相容性检查，未实装
         return true;
     }
 
-    py::dict to_dict() // 调用环境中每个对象的 to_dict() 方法，并将所有返回值存入一个字典中并返回
+    py::dict to_dict()
     {
         py::dict output_dict;
         for (auto& object : objects)
         {
-            output_dict[py::str(object->name)] = object->to_dict(); 
+            output_dict[py::str(object->name)] = object->to_dict();
         }
         return output_dict;
     }
 
-    py::dict get_d() // 获取环境中所有对象的运动学导数，用于 debug
-    {
-        py::dict output_dict;
-        for (auto& object : objects)
-        {
-            output_dict[py::str(object->name)] = (object->d()).to_dict(); 
-        }
-        return output_dict;
-    }
-
-    py::object step(const py::object& actions) // 步进时会调用环境中所有对象的 step() 方法若干次，并获取返回值
+    py::object step(const py::object& actions)
     {
         py::dict result, info;
 
-        for (int i = 0; i < integrate_steps; ++i)
+        for (auto& object : objects)
         {
-            for (auto& object : objects)
-            {
-                actions[py::str(object->name)]["dt"] = dt;   
-                result[py::str(object->name)] = object->step(actions[py::str(object->name)]);
-            }
+            result[py::str(object->name)] = object->step(actions[py::str(object->name)]);
         }
 
         return result;

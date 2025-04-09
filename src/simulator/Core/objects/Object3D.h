@@ -48,8 +48,12 @@ public:
 
         init_m = m = input_dict["m"].cast<double>();
         d_m = 0;
-        std::array<double, 3> pos_ = input_dict["pos"].cast<std::array<double, 3>>();
-        init_pos = pos = Eigen::Map<Eigen::Vector3d>(pos_.data());
+
+        // std::array<double, 3> pos_ = input_dict["pos"].cast<std::array<double, 3>>();
+        // init_pos = pos = Eigen::Map<Eigen::Vector3d>(pos_.data());
+
+        init_pos = pos = input_dict["pos"].cast<Eigen::Vector3d>();
+
         std::array<double, 3> vel_ = input_dict["vel"].cast<std::array<double, 3>>();
         init_vel = vel = Eigen::Map<Eigen::Vector3d>(vel_.data());
         std::array<double, 3> ang_vel_ = input_dict["ang_vel"].cast<std::array<double, 3>>();
