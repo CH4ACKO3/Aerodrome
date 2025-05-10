@@ -289,7 +289,7 @@ double cm(double alpha, double el) {
   v = t + abs(da) * (cm_a[l - 1][m - 1] - t);
   w = u + abs(da) * (cm_a[l - 1][n - 1] - u);
 
-  return v + (w - v) * sign(de);
+  return v + (w - v) * abs(de);
 }
 
 /*

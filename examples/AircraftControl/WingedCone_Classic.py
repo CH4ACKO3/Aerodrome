@@ -24,10 +24,10 @@ if __name__ == "__main__":
         "theta_v": 0.0,
         "phi_v": 0.0,
 
-        "Kiz": 0.2597,
-        "Kwz": 1.6,
-        "Kaz": 13/2,
-        "Kpz": 0.14,
+        "Kiz": 0.2597 * 0.1,
+        "Kwz": 1.6 ,
+        "Kaz": 13/2 * 0.1,
+        "Kpz": 0.14 * 0.1,
         "Kp_V": 5.0,
         "Ki_V": 1.0,
         "Kd_V": 0.3
@@ -40,11 +40,11 @@ if __name__ == "__main__":
 
     import numpy as np
 
-    cnt = 20000
+    cnt = 10000
     x = np.arange(cnt) * dt
     y = np.zeros(cnt)
 
-    Nyc = 0.0
+    Nyc = 1.0
     Vc = 3000
 
     for i in range(cnt):

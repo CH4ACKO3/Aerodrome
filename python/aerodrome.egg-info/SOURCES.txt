@@ -52,6 +52,10 @@ python/aerodrome/simulator/F16/objects/F16.cp39-win_amd64.pyd
 python/aerodrome/simulator/F16/objects/F16.exp
 python/aerodrome/simulator/F16/objects/F16.lib
 python/aerodrome/simulator/F16/objects/F16.pdb
+python/aerodrome/simulator/F16/objects/F16_low.cp39-win_amd64.pyd
+python/aerodrome/simulator/F16/objects/F16_low.exp
+python/aerodrome/simulator/F16/objects/F16_low.lib
+python/aerodrome/simulator/F16/objects/F16_low.pdb
 python/aerodrome/simulator/MinimalExample/envs/MinimalEnv.cp39-win_amd64.pyd
 python/aerodrome/simulator/MinimalExample/envs/MinimalEnv.exp
 python/aerodrome/simulator/MinimalExample/envs/MinimalEnv.lib

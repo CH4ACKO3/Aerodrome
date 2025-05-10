@@ -120,11 +120,12 @@ def main():
         "S": 3603.0,
         "c": 80.0,
         "m": 9375.0,
+        "dt": 0.01,
 
         "pos": [0.0, 33528.0, 0.0],
         "vel": [4590.29, 0.0, 0.0],
         "ang_vel": [0.0, 0.0, 0.0],
-        "J": [1.0, 7*10**6, 7*10**6],
+        "J": [1.0, 0, 0, 0, 7*10**6, 0, 0, 0, 7*10**6],
         "theta": 0.00/180*pi,
         "phi": 0.0,
         "gamma": 0.0,   
@@ -164,6 +165,8 @@ def main():
         "policy_loss": np.zeros(args.num_iterations),
         "entropy": np.zeros(args.num_iterations),
     }
+
+    Nyc_rnd = 1.0
 
     for iteration in tqdm(range(1, args.num_iterations + 1)):
         env = aerodrome.make("wingedcone-v0")
