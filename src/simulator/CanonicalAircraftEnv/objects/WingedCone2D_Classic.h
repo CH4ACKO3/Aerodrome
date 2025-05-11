@@ -61,9 +61,8 @@ public:
         _T();
         _M();
 
-        Ny = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
-                                + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * g);
-        wz = ang_vel[2];
+        Ny = (L - m * g * cos(theta_v)) / (m * g);
+        wz = ang_vel_b(1);
     }
 
     virtual void reset() override
@@ -139,9 +138,9 @@ public:
         _T();
         _M();
 
-        force_vec c_force = {T * cos(alpha) * cos(beta) - D - m * g * sin(theta),
-                             T * (sin(alpha) * cos(gamma_v) + cos(alpha) * sin(beta) * sin(gamma_v)) + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta),
-                             T * (sin(alpha) * sin(gamma_v) - cos(alpha) * sin(beta) * cos(gamma_v)) + L * sin(gamma_v) + N * cos(gamma_v),
+        force_vec c_force = {T - D * cos(alpha) * cos(beta) - N * sin(beta) * cos(alpha) + L * sin(alpha) - m * g * sin(theta),
+                             -D * sin(beta) + N * cos(beta) + m * g * cos(theta) * sin(gamma),
+                             -D * cos(beta) * sin(alpha) - N * sin(beta) * sin(alpha) - L * cos(alpha) + m * g * cos(theta) * cos(gamma),
                              M[0], M[1], M[2]}; // 力和力矩
         kinematics_step(c_force); // 更新状态
 
@@ -155,9 +154,8 @@ public:
         
         q = 0.5 * Rho * V * V;
         
-        Ny = (T * (sin(alpha) * cos(gamma_v) - cos(alpha) * sin(beta) * sin(gamma_v))
-                                + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta_v)) / (m * g);
-        wz = ang_vel[2];
+        Ny = (L - m * g * cos(theta_v)) / (m * g);
+        wz = ang_vel_b(1);
         
         return to_dict();
     }

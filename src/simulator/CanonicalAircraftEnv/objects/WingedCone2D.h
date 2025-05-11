@@ -51,7 +51,7 @@ public:
     void _M()
     {
         double CM1 = -0.035 * alpha * alpha + 0.036617 * alpha + 5.3261e-6;
-        double CM2 = ang_vel[2] * c * (-6.796 * alpha * alpha + 0.3015 * alpha - 0.2289) / (2 * V);
+        double CM2 = ang_vel_b(1) * c * (-6.796 * alpha * alpha + 0.3015 * alpha - 0.2289) / (2 * V);
         double CM3 = 0.0292 * (delta_e - alpha);
         M[2] = q * S * c * (CM1 + CM2 + CM3);
     }
@@ -73,9 +73,9 @@ public:
         _T();
         _M();
         
-        force_vec c_force = {T * cos(alpha) * cos(beta) - D - m * g * sin(theta),
-                             T * (sin(alpha) * cos(gamma_v) + cos(alpha) * sin(beta) * sin(gamma_v)) + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta),
-                             T * (sin(alpha) * sin(gamma_v) - cos(alpha) * sin(beta) * cos(gamma_v)) + L * sin(gamma_v) + N * cos(gamma_v),
+        force_vec c_force = {T - D * cos(alpha) * cos(beta) - N * sin(beta) * cos(alpha) + L * sin(alpha) - m * g * sin(theta),
+                             -D * sin(beta) + N * cos(beta) + m * g * cos(theta) * sin(gamma),
+                             -D * cos(beta) * sin(alpha) - N * sin(beta) * sin(alpha) - L * cos(alpha) + m * g * cos(theta) * cos(gamma),
                              M[0], M[1], M[2]}; // 力和力矩
         kinematics_step(c_force); // 更新状态
 

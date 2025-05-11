@@ -12,6 +12,7 @@ python/aerodrome.egg-info/dependency_links.txt
 python/aerodrome.egg-info/requires.txt
 python/aerodrome.egg-info/top_level.txt
 python/aerodrome/envs/CartPole.py
+python/aerodrome/envs/F16.py
 python/aerodrome/envs/Minimal.py
 python/aerodrome/envs/WingedCone_RL.py
 python/aerodrome/envs/WingedCone_py.py

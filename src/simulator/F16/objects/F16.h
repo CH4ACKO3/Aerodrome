@@ -144,16 +144,16 @@ public:
  
         double tvt = .5f / vt;
         double b2v = F16Val.b * tvt;
-        double cq = F16Val.cbar * ang_vel(2) * tvt;
+        double cq = F16Val.cbar * ang_vel_b(1) * tvt;
 
         // Damping
         auto d = dampp(alpha_);
         cxt = cxt + cq * d[0];
-        cyt = cyt + b2v * (d[1] * -ang_vel(1) + d[2] * ang_vel(0));
+        cyt = cyt + b2v * (d[1] * ang_vel_b(2) + d[2] * ang_vel_b(0));
         czt = czt + cq * d[3];
-        clt = clt + b2v * (d[4] * -ang_vel(1) + d[5] * ang_vel(0));
+        clt = clt + b2v * (d[4] * ang_vel_b(1) + d[5] * ang_vel_b(0));
         cmt = cmt + cq * d[6] + czt * (F16Val.xcgr - F16Val.xcg);
-        cnt = cnt + b2v * (d[7] * -ang_vel(1) + d[8] * ang_vel(0)) - cyt * (F16Val.xcgr - F16Val.xcg) * F16Val.cbar / F16Val.b;
+        cnt = cnt + b2v * (d[7] * ang_vel_b(1) + d[8] * ang_vel_b(0)) - cyt * (F16Val.xcgr - F16Val.xcg) * F16Val.cbar / F16Val.b;
 
         double qs = qbar * F16Val.s;
         double qsb = qs * F16Val.b;
@@ -161,23 +161,23 @@ public:
         double ay = rmqs * cyt;
         double az = rmqs * czt;
 
-        D = -qs * cxt;
+        D = -qs * cxt; // defined in body frame
         L = -qs * czt;
         N = qs * cyt;
 
         M[0] = qsb * clt;
-        M[1] = -qsb * cnt;
-        M[2] = qsb * cmt;
+        M[1] = qsb * cmt;
+        M[2] = qsb * cnt;
 
-        force_vec c_force = {T * cos(alpha) * cos(beta) - D - m * F16Val.g * sin(theta),
-            T * (sin(alpha) * cos(gamma_v) + cos(alpha) * sin(beta) * sin(gamma_v)) + L * cos(gamma_v) - N * sin(gamma_v) - m * F16Val.g * cos(theta),
-            T * (sin(alpha) * sin(gamma_v) - cos(alpha) * sin(beta) * cos(gamma_v)) + L * sin(gamma_v) + N * cos(gamma_v),
-            M[0], M[1], M[2]};
+        force_vec c_force = {T - D - m * F16Val.g * sin(theta),
+                             N + m * F16Val.g * cos(theta) * sin(gamma),
+                             -L + m * F16Val.g * cos(theta) * cos(gamma),
+                             M[0], M[1], M[2]}; // 力和力矩
 
         // force_vec c_force = {0, 0, 0, 0, 0, 0};
         kinematics_step(c_force);
 
-        h = pos[1];
+        h = -pos(2);
 
         Tem = Temperature(h * F16Val.fttom);
         Pres = Pressure(h * F16Val.fttom);
@@ -187,10 +187,19 @@ public:
         
         q = 0.5 * Rho * V * V;
 
-        Ny = (T * (sin(alpha) * cos(gamma_v) + cos(alpha) * sin(beta) * sin(gamma_v))
-                                + L * cos(gamma_v) - N * sin(gamma_v) - m * F16Val.g * cos(theta_v)) / (m * F16Val.g);
+        // ground frame
+        // Nz = (L * cos(gamma) * cos(theta) - N * sin(gamma) * cos(theta) + (T - D) * sin(theta)) / (m * F16Val.g) - 1;
 
-        Nz = (T * (sin(alpha) * sin(gamma_v) - cos(alpha) * sin(beta) * cos(gamma_v)) + L * sin(gamma_v) + N * cos(gamma_v)) / (m * F16Val.g);
+        // wind frame
+        // Ny = (L * sin(gamma) * cos(beta) + N * cos(gamma) * cos(beta) - (T - D) * cos(alpha) * sin(beta)) / (m * F16Val.g);
+
+        // code from stanleybak
+        double xa = 15.0;
+        az = az-xa*((F16Val.c5 * ang_vel_b(0)-F16Val.c7 * F16Val.he) * ang_vel_b(2) + F16Val.c6 * (ang_vel_b(2) * ang_vel_b(2)-ang_vel_b(0) * ang_vel_b(0)) + qs * F16Val.cbar * F16Val.c7 * cmt);
+        ay = ay+xa*((F16Val.c8 * ang_vel_b(0)-F16Val.c2 * ang_vel_b(2) + F16Val.c9 * F16Val.he) * ang_vel_b(1) + qsb * (F16Val.c4 * clt + F16Val.c9 * cnt));
+
+        Nz = (-az / F16Val.g) - 1;
+        Ny = ay / F16Val.g;
 
         return to_dict();
     }

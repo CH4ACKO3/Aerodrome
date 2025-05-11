@@ -15,23 +15,23 @@ namespace py = pybind11;
 
 class Aircraft3D : public Object3D {
 public:
-    double S; // 参考面积
-    double c; // 特征长度
+    double S; // Reference area
+    double c; // Characteristic length
 
-    double h; // 高度
-    double q; // 动压
+    double h; // Height/Altitude
+    double q; // Dynamic pressure
 
-    double Rho; // 空气密度
-    double Tem; // 温度
-    double Pres; // 压力
-    double a; // 声速
-    double g; // 重力加速度
+    double Rho; // Air density
+    double Tem; // Temperature
+    double Pres; // Pressure
+    double a; // Speed of sound
+    double g; // Gravitational acceleration
 
-    double L; // 升力
-    double D; // 阻力
-    double N; // 侧力
-    double T; // 推力
-    std::array<double, 3> M; // 力矩
+    double L; // Lift, defined in wind
+    double D; // Drag
+    double N; // Side force
+    double T; // Thrust
+    std::array<double, 3> M; // Moment
 
     Aircraft3D() {}
 
@@ -60,7 +60,7 @@ public:
     {
         Object3D::reset();
         
-        h = pos[1];
+        h = -pos[2];
 
         Tem = Temperature(h);
         Pres = Pressure(h);
@@ -106,9 +106,9 @@ public:
         T = action["T"].cast<double>();
         M = action["M"].cast<std::array<double, 3>>();
         
-        force_vec c_force = {T * cos(alpha) * cos(beta) - D - m * g * sin(theta),
-                             T * (sin(alpha) * cos(gamma_v) + cos(alpha) * sin(beta) * sin(gamma_v)) + L * cos(gamma_v) - N * sin(gamma_v) - m * g * cos(theta),
-                             T * (sin(alpha) * sin(gamma_v) - cos(alpha) * sin(beta) * cos(gamma_v)) + L * sin(gamma_v) + N * cos(gamma_v),
+        force_vec c_force = {T - D * cos(alpha) * cos(beta) - N * sin(beta) * cos(alpha) + L * sin(alpha) - m * g * sin(theta),
+                             -D * sin(beta) + N * cos(beta) + m * g * cos(theta) * sin(gamma),
+                             -D * cos(beta) * sin(alpha) - N * sin(beta) * sin(alpha) - L * cos(alpha) + m * g * cos(theta) * cos(gamma),
                              M[0], M[1], M[2]}; // 力和力矩
         kinematics_step(c_force); // 更新状态
 

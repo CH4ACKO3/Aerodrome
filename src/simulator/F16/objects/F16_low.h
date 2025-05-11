@@ -90,20 +90,20 @@ public:
 
     virtual py::object step(py::dict input_dict) override
     {
-        double Nyc = input_dict["Ny"].cast<double>();
-        double ps = input_dict["ps"].cast<double>();
         double Nzc = input_dict["Nz"].cast<double>();
+        double ps = input_dict["ps"].cast<double>();
+        double Nyc = input_dict["Ny"].cast<double>();
         double throttle = input_dict["throttle"].cast<double>();
 
         Eigen::Matrix<double, 8, 1> x_ctrl = (Eigen::Matrix<double, 8, 1>() << 
             alpha - xequil(1),
-            ang_vel(2) - xequil(7),
-            int_e_Ny,
+            ang_vel_b(1) - xequil(7),
+            int_e_Nz,
             beta - xequil(2),
-            ang_vel(0) - xequil(6),
-            -ang_vel(1) - xequil(8),
+            ang_vel_b(0) - xequil(6),
+            ang_vel_b(2) - xequil(8),
             int_e_ps,
-            int_e_Nz
+            int_e_Ny
         ).finished();
 
         u_deg.setZero();
@@ -117,21 +117,16 @@ public:
         u_deg(2) = std::clamp(u_deg(2), AileronMinDeg, AileronMaxDeg);
         u_deg(3) = std::clamp(u_deg(3), RudderMinDeg, RudderMaxDeg);
 
-        double thtlc = u_deg(0);
-        double el = u_deg(1);
-        double ail = u_deg(2);
-        double rdr = u_deg(3);
-
-        input_dict["thtlc"] = thtlc;
-        input_dict["el"] = el;
-        input_dict["ail"] = ail;
-        input_dict["rdr"] = rdr;
+        input_dict["thtlc"] = u_deg(0);
+        input_dict["el"] = u_deg(1);
+        input_dict["ail"] = u_deg(2);
+        input_dict["rdr"] = u_deg(3);
 
         F16::step(input_dict);  
 
-        int_e_Ny += dt * (Ny - Nyc);
-        int_e_ps += dt * (gamma_v - ps);
         int_e_Nz += dt * (Nz - Nzc);
+        int_e_ps += dt * (gamma - ps);
+        int_e_Ny += dt * (Ny - Nyc);
 
         return to_dict();
     }
