@@ -3,7 +3,7 @@ from aerodrome.simulator.Core.envs.Space3D import Space3D
 from math import *
 
 if __name__ == "__main__":
-    dt = 0.01
+    dt = 0.001
     env = Space3D(dt, 0.001)
     object_dict = {
         "name": "test",
@@ -14,7 +14,7 @@ if __name__ == "__main__":
         "c": 80.0,
         "m": 9375.0,
 
-        "pos": [0.0, 33528.0, 0.0],
+        "pos": [0.0, 0.0, -33528.0],
         "vel": [4590.29, 0.0, 0.0],
         "ang_vel": [0.0, 0.0, 0.0],
         "J": [1.0*10**6, 0, 0, 0, 7*10**6, 0, 0, 0, 7*10**6],

@@ -143,7 +143,7 @@ public:
                              M[0], M[1], M[2]}; // 力和力矩
         kinematics_step(c_force); // 更新状态
 
-        h = pos[1];
+        h = -pos[2];
 
         Tem = Temperature(h);
         Pres = Pressure(h);
@@ -154,6 +154,11 @@ public:
         q = 0.5 * Rho * V * V;
         
         Ny = (L - m * g * cos(theta_v)) / (m * g);
+        eNy = Nyc - Ny;
+        i_eNy += eNy * dt;
+        d_eNy = (eNy - eNy_prev) / dt;
+        eNy_prev = eNy;
+
         wz = ang_vel_b(1);
         
         return to_dict();

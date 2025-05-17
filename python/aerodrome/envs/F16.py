@@ -9,6 +9,16 @@ class WingedCone_RL(Env):
         self.env = Space3D(dt, 0.001)
         self.object_name = None
 
+        self.eNy = 0
+        self.i_eNy = 0
+        self.d_eNy = 0
+        self.eNz = 0
+        self.i_eNz = 0
+        self.d_eNz = 0
+        self.eGamma = 0
+        self.i_eGamma = 0
+        self.d_eGamma = 0
+
     def add_object(self, object):
         self.env.add_object(object)
         self.object_name = object.to_dict()["name"]
@@ -16,7 +26,11 @@ class WingedCone_RL(Env):
     def reset(self):
         self.env.reset()
         state = self.env.to_dict()[self.object_name]
-        obs = np.array([state["eNy"], state["i_eNy"], state["d_eNy"]])
+        obs = np.array([state["h"], state["V"], state["vel_b"][0], state["vel_b"][1], state["vel_b"][2],
+                        state["ang_vel_b"][0], state["ang_vel_b"][1], state["ang_vel_b"][2],
+                        state["alpha"], state["beta"], state["gamma"],
+                        state["theta_v"], state["theta"], state["Ny"], state["Nz"]])
+        ctrl_obs = np.array([state["u_deg"][0], state["u_deg"][1], state["u_deg"][2], state["u_deg"][3]])
 
         return obs, {}
 

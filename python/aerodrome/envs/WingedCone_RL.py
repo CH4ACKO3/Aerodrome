@@ -5,8 +5,8 @@ from copy import deepcopy
 import numpy as np
 
 class WingedCone_RL(Env):
-    def __init__(self):
-        self.env = Space3D(0.01, 0.001, 5)
+    def __init__(self, dt=0.001):
+        self.env = Space3D(dt, 0.001)
         self.object_name = None
         self.eNy_bound = 1
 

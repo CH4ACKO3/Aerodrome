@@ -59,12 +59,15 @@ public:
     double cmt;
     double cnt;
 
+    std::string model;
+
     F16() {}
 
     F16(py::dict input_dict) : Aircraft3D(input_dict)
     {
         power = input_dict["power"].cast<double>();
         power0 = power;
+        model = input_dict["model"].cast<std::string>();
         thtlc = 0.0;
         el = 0.0;
         ail = 0.0;
@@ -100,6 +103,7 @@ public:
     virtual py::dict to_dict() override
     {
         py::dict output_dict = Aircraft3D::to_dict();
+        output_dict["model"] = model;
         output_dict["power"] = power;
         output_dict["thtlc"] = thtlc;
         output_dict["el"] = el;
@@ -148,12 +152,26 @@ public:
 
         // Damping
         auto d = dampp(alpha_);
-        cxt = cxt + cq * d[0];
-        cyt = cyt + b2v * (d[1] * ang_vel_b(2) + d[2] * ang_vel_b(0));
-        czt = czt + cq * d[3];
-        clt = clt + b2v * (d[4] * ang_vel_b(1) + d[5] * ang_vel_b(0));
-        cmt = cmt + cq * d[6] + czt * (F16Val.xcgr - F16Val.xcg);
-        cnt = cnt + b2v * (d[7] * ang_vel_b(1) + d[8] * ang_vel_b(0)) - cyt * (F16Val.xcgr - F16Val.xcg) * F16Val.cbar / F16Val.b;
+
+        if (model == "stevens")
+        {
+            cxt = cxt + cq * d[0];
+            cyt = cyt + b2v * (d[1] * ang_vel_b(2) + d[2] * ang_vel_b(0));
+            czt = czt + cq * d[3];
+            clt = clt + b2v * (d[4] * ang_vel_b(2) + d[5] * ang_vel_b(0));
+            cmt = cmt + cq * d[6] + czt * (F16Val.xcgr - F16Val.xcg);
+            cnt = cnt + b2v * (d[7] * ang_vel_b(2) + d[8] * ang_vel_b(0)) - cyt * (F16Val.xcgr - F16Val.xcg) * F16Val.cbar / F16Val.b;
+        }
+        else if (model == "morelli")
+        {
+            Eigen::Matrix<double, 6, 1> result = morelli(alpha, beta, el/F16Val.rtod, ail/F16Val.rtod, rdr/F16Val.rtod, ang_vel_b(0), ang_vel_b(1), ang_vel_b(2), F16Val.cbar, F16Val.b, vt, F16Val.xcg, F16Val.xcgr);
+            cxt = result(0);
+            cyt = result(1);
+            czt = result(2);
+            clt = result(3);
+            cmt = result(4);
+            cnt = result(5);
+        }
 
         double qs = qbar * F16Val.s;
         double qsb = qs * F16Val.b;
@@ -196,7 +214,7 @@ public:
         // code from stanleybak
         double xa = 15.0;
         az = az-xa*((F16Val.c5 * ang_vel_b(0)-F16Val.c7 * F16Val.he) * ang_vel_b(2) + F16Val.c6 * (ang_vel_b(2) * ang_vel_b(2)-ang_vel_b(0) * ang_vel_b(0)) + qs * F16Val.cbar * F16Val.c7 * cmt);
-        ay = ay+xa*((F16Val.c8 * ang_vel_b(0)-F16Val.c2 * ang_vel_b(2) + F16Val.c9 * F16Val.he) * ang_vel_b(1) + qsb * (F16Val.c4 * clt + F16Val.c9 * cnt));
+        // ay = ay+xa*((F16Val.c8 * ang_vel_b(0)-F16Val.c2 * ang_vel_b(2) + F16Val.c9 * F16Val.he) * ang_vel_b(1) + qsb * (F16Val.c4 * clt + F16Val.c9 * cnt));
 
         Nz = (-az / F16Val.g) - 1;
         Ny = ay / F16Val.g;

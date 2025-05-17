@@ -70,7 +70,7 @@ def main():
                         help="random seed of the experiment")
     parser.add_argument("--num_steps", type=int, default=1024,
                         help="the number of steps to run per policy rollout")
-    parser.add_argument("--total_timesteps", type=int, default=200_000,
+    parser.add_argument("--total_timesteps", type=int, default=50_000,
                         help="the number of iterations")
     parser.add_argument("--gamma", type=float, default=0.95,
                         help="discount factor")
@@ -114,28 +114,30 @@ def main():
     print(f"Using device: {device}")
 
     env = aerodrome.make("wingedcone-v0")
+    dt = 0.001
     object_dict = {
         "name": "test",
-        "integrator": "rk45",
+        "integrator": "euler",
+        "dt": dt,
+
         "S": 3603.0,
         "c": 80.0,
         "m": 9375.0,
-        "dt": 0.01,
 
-        "pos": [0.0, 33528.0, 0.0],
+        "pos": [0.0, 0.0, -33528.0],
         "vel": [4590.29, 0.0, 0.0],
         "ang_vel": [0.0, 0.0, 0.0],
-        "J": [1.0, 0, 0, 0, 7*10**6, 0, 0, 0, 7*10**6],
+        "J": [1.0*10**6, 0, 0, 0, 7*10**6, 0, 0, 0, 7*10**6],
         "theta": 0.00/180*pi,
         "phi": 0.0,
         "gamma": 0.0,   
         "theta_v": 0.0,
         "phi_v": 0.0,
 
-        "Kiz": 0.2597,
-        "Kwz": 1.6,
-        "Kaz": 13/2,
-        "Kpz": 0.14,
+        "Kiz": 0.2597 * 0.1,
+        "Kwz": 1.6 ,
+        "Kaz": 13/2 * 0.1,
+        "Kpz": 0.14 * 0.1,
         "Kp_V": 5.0,
         "Ki_V": 1.0,
         "Kd_V": 0.3

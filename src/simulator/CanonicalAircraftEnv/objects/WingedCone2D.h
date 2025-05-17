@@ -53,7 +53,7 @@ public:
         double CM1 = -0.035 * alpha * alpha + 0.036617 * alpha + 5.3261e-6;
         double CM2 = ang_vel_b(1) * c * (-6.796 * alpha * alpha + 0.3015 * alpha - 0.2289) / (2 * V);
         double CM3 = 0.0292 * (delta_e - alpha);
-        M[2] = q * S * c * (CM1 + CM2 + CM3);
+        M[1] = q * S * c * (CM1 + CM2 + CM3);
     }
 
     virtual py::dict to_dict() override
@@ -79,7 +79,7 @@ public:
                              M[0], M[1], M[2]}; // 力和力矩
         kinematics_step(c_force); // 更新状态
 
-        h = pos[1];
+        h = -pos[2];
 
         Tem = Temperature(h);
         Pres = Pressure(h);

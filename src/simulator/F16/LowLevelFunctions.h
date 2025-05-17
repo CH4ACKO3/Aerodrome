@@ -736,70 +736,200 @@ double thrust(double power, double alt, double rmach) {
 // /*
 //  * morelli model engine dynamics
 //  */
-// boost::array<double, 6> morelli(double alpha,
-//                                 double beta,
-//                                 double de,
-//                                 double da,
-//                                 double dr,
-//                                 double p,
-//                                 double q,
-//                                 double r,
-//                                 double cbar,
-//                                 double b,
-//                                 double V,
-//                                 double xcg,
-//                                 double xcgref) {
-//   /* TODO this isn't great */
-//   MorelliParameters MV = MorelliParameters();
+Eigen::Matrix<double, 6, 1> morelli(double alpha,
+                                double beta,
+                                double de,
+                                double da,
+                                double dr,
+                                double p,
+                                double q,
+                                double r,
+                                double cbar,
+                                double b,
+                                double V,
+                                double xcg,
+                                double xcgref) {
 
-//   float phat, qhat, rhat;
-//   phat = p * b / (2 * V);
-//   qhat = q * cbar / (2 * V);
-//   rhat = r * b / (2 * V);
+  double  a0 = -1.943367e-2;
+  double  a1 = 2.136104e-1;
+  double  a2 = -2.903457e-1;
+  double  a3 = -3.348641e-3;
+  double  a4 = -2.060504e-1;
+  double  a5 = 6.988016e-1;
+  double  a6 = -9.035381e-1;
 
-//   float Cx0, Cxq, Cy0, Cyp, Cyr, Cz0, Czq, Cl0, Clp, Clr, Clda, Cldr, Cm0, Cmq, Cn0, Cnp, Cnr, Cnda, Cndr;
-//   Cx0 = MV.a0 + MV.a1 * alpha + MV.a2 * pow(de, 2.0) + MV.a3 * de + MV.a4 * alpha * de + MV.a5 * pow(alpha, 2.0)
-//       + MV.a6 * pow(alpha, 3.0);
-//   Cxq = MV.b0 + MV.b1 * alpha + MV.b2 * pow(alpha, 2.0) + MV.b3 * pow(alpha, 3.0) + MV.b4 * pow(alpha, 4.0);
-//   Cy0 = MV.c0 * beta + MV.c1 * da + MV.c2 * dr;
-//   Cyp = MV.d0 + MV.d1 * alpha + MV.d2 * pow(alpha, 2.0) + MV.d3 * pow(alpha, 3.0);
-//   Cyr = MV.e0 + MV.e1 * alpha + MV.e2 * pow(alpha, 2.0) + MV.e3 * pow(alpha, 3.0);
-//   Cz0 = (MV.f0 + MV.f1 * alpha + MV.f2 * pow(alpha, 2.0) + MV.f3 * pow(alpha, 3.0) + MV.f4 * pow(alpha, 4.0))
-//       * (1 - pow(beta, 2.0)) + MV.f5 * de;
-//   Czq = MV.g0 + MV.g1 * alpha + MV.g2 * pow(alpha, 2.0) + MV.g3 * pow(alpha, 3.0) + MV.g4 * pow(alpha, 4.0);
-//   Cl0 = MV.h0 * beta + MV.h1 * alpha * beta + MV.h2 * pow(alpha, 2.0) * beta + MV.h3 * pow(beta, 2.0)
-//       + MV.h4 * alpha * pow(beta, 2.0) + MV.h5 *
-//       pow(alpha, 3.0) * beta + MV.h6 * pow(alpha, 4.0) * beta + MV.h7 * pow(alpha, 2.0) * pow(beta, 2.0);
-//   Clp = MV.i0 + MV.i1 * alpha + MV.i2 * pow(alpha, 2.0) + MV.i3 * pow(alpha, 3.0);
-//   Clr = MV.j0 + MV.j1 * alpha + MV.j2 * pow(alpha, 2.0) + MV.j3 * pow(alpha, 3.0) + MV.j4 * pow(alpha, 4.0);
-//   Clda = MV.k0 + MV.k1 * alpha + MV.k2 * beta + MV.k3 * pow(alpha, 2.0) + MV.k4 * alpha * beta
-//       + MV.k5 * pow(alpha, 2.0) * beta + MV.k6 * pow(alpha, 3.0);
-//   Cldr = MV.l0 + MV.l1 * alpha + MV.l2 * beta + MV.l3 * alpha * beta + MV.l4 * pow(alpha, 2.0) * beta
-//       + MV.l5 * pow(alpha, 3.0) * beta + MV.l6 * pow(beta, 2.0);
-//   Cm0 = MV.m0 + MV.m1 * alpha + MV.m2 * de + MV.m3 * alpha * de + MV.m4 * pow(de, 2.0) + MV.m5 * pow(alpha, 2.0) * de
-//       + MV.m6 * pow(de, 3.0) + MV.m7 *
-//       alpha * pow(de, 2.0);
+double b0 = 4.833383e-1;
+double b1 = 8.644627;
+double b2 = 1.131098e1;
+double b3 = -7.422961e1;
+double b4 = 6.075776e1;
 
-//   Cmq = MV.n0 + MV.n1 * alpha + MV.n2 * pow(alpha, 2.0) + MV.n3 * pow(alpha, 3.0) + MV.n4 * pow(alpha, 4.0)
-//       + MV.n5 * pow(alpha, 5.0);
-//   Cn0 = MV.o0 * beta + MV.o1 * alpha * beta + MV.o2 * pow(beta, 2.0) + MV.o3 * alpha * pow(beta, 2.0)
-//       + MV.o4 * pow(alpha, 2.0) * beta + MV.o5 *
-//       pow(alpha, 2.0) * pow(beta, 2.0) + MV.o6 * pow(alpha, 3.0) * beta;
-//   Cnp = MV.p0 + MV.p1 * alpha + MV.p2 * pow(alpha, 2.0) + MV.p3 * pow(alpha, 3.0) + MV.p4 * pow(alpha, 4.0);
-//   Cnr = MV.q0 + MV.q1 * alpha + MV.q2 * pow(alpha, 2.0);
-//   Cnda = MV.r0 + MV.r1 * alpha + MV.r2 * beta + MV.r3 * alpha * beta + MV.r4 * pow(alpha, 2.0) * beta
-//       + MV.r5 * pow(alpha, 3.0) * beta + MV.r6 *
-//       pow(alpha, 2.0) + MV.r7 * pow(alpha, 3.0) + MV.r8 * pow(beta, 3.0) + MV.r9 * alpha * pow(beta, 3.0);
-//   Cndr = MV.s0 + MV.s1 * alpha + MV.s2 * beta + MV.s3 * alpha * beta + MV.s4 * pow(alpha, 2.0) * beta
-//       + MV.s5 * pow(alpha, 2.0);
+double c0 = -1.145916;
+double c1 = 6.016057e-2;
+double c2 = 1.642479e-1;
 
-//   float Cx, Cy, Cz, Cl, Cm, Cn;
-//   Cx = Cx0 + Cxq * qhat;
-//   Cy = Cy0 + Cyp * phat + Cyr * rhat;
-//   Cz = Cz0 + Czq * qhat;
-//   Cl = Cl0 + Clp * phat + Clr * rhat + Clda * da + Cldr * dr;
-//   Cm = Cm0 + Cmq * qhat + Cz * (xcgref - xcg);
-//   Cn = Cn0 + Cnp * phat + Cnr * rhat + Cnda * da + Cndr * dr - Cy * (xcgref - xcg) * (cbar / b);
+double d0 = -1.006733e-1;
+double d1 = 8.679799e-1;
+double d2 = 4.260586;
+double d3 = -6.923267;
 
-//   return boost::array<double, 6>({Cx, Cy, Cz, Cl, Cm, Cn});
-// }
+double e0 = 8.071648e-1;
+double e1 = 1.189633e-1;
+double e2 = 4.177702;
+double e3 = -9.162236;
+
+double f0 = -1.378278e-1;
+double f1 = -4.211369;
+double f2 = 4.775187;
+double f3 = -1.026225e1;
+double f4 = 8.399763;
+double f5 = -4.354000e-1;
+
+double g0 = -3.054956e1;
+double g1 = -4.132305e1;
+double g2 = 3.292788e2;
+double g3 = -6.848038e2;
+double g4 = 4.080244e2;
+
+double h0 = -1.05853e-1;
+double h1 = -5.776677e-1;
+double h2 = -1.672435e-2;
+double h3 = 1.357256e-1;
+double h4 = 2.172952e-1;
+double h5 = 3.464156;
+double h6 = -2.835451;
+double h7 = -1.098104;
+
+double i0 = -4.126806e-1;
+double i1 = -1.189974e-1;
+double i2 = 1.247721;
+double i3 = -7.391132e-1;
+
+double j0 = 6.250437e-2;
+double j1 = 6.067723e-1;
+double j2 = -1.101964;
+double j3 = 9.100087;
+double j4 = -1.192672e1;
+
+double k0 = -1.463144e-1;
+double k1 = -4.07391e-2;
+double k2 = 3.253159e-2;
+double k3 = 4.851209e-1;
+double k4 = 2.978850e-1;
+double k5 = -3.746393e-1;
+double k6 = -3.213068e-1;
+
+double l0 = 2.635729e-2;
+double l1 = -2.192910e-2;
+double l2 = -3.152901e-3;
+double l3 = -5.817803e-2;
+double l4 = 4.516159e-1;
+double l5 = -4.928702e-1;
+double l6 = -1.579864e-2;
+
+double m0 = -2.029370e-2;
+double m1 = 4.660702e-2;
+double m2 = -6.012308e-1;
+double m3 = -8.062977e-2;
+double m4 = 8.320429e-2;
+double m5 = 5.018538e-1;
+double m6 = 6.378864e-1;
+double m7 = 4.226356e-1;
+
+double n0 = -5.19153;
+double n1 = -3.554716;
+double n2 = -3.598636e1;
+double n3 = 2.247355e2;
+double n4 = -4.120991e2;
+double n5 = 2.411750e2;
+
+double  o0 = 2.993363e-1;
+double  o1 = 6.594004e-2;
+double  o2 = -2.003125e-1;
+double  o3 = -6.233977e-2;
+double  o4 = -2.107885;
+double  o5 = 2.141420;
+double  o6 = 8.476901e-1;
+
+double  p0 = 2.677652e-2;
+double  p1 = -3.298246e-1;
+double  p2 = 1.926178e-1;
+double  p3 = 4.013325;
+double  p4 = -4.404302;
+
+double  q0 = -3.698756e-1;
+double  q1 = -1.167551e-1;
+double  q2 = -7.641297e-1;
+
+double  r0 = -3.348717e-2;
+double  r1 = 4.276655e-2;
+double  r2 = 6.573646e-3;
+double  r3 = 3.535831e-1;
+double  r4 = -1.373308;
+double  r5 = 1.237582;
+double  r6 = 2.302543e-1;
+double  r7 = -2.512876e-1;
+double  r8 = 1.588105e-1;
+double  r9 = -5.199526e-1;
+
+double  s0 = -8.115894e-2;
+double  s1 = -1.156580e-2;
+double  s2 = 2.514167e-2;
+double  s3 = 2.038748e-1;
+double  s4 = -3.337476e-1;
+double  s5 = 1.004297e-1;
+
+  double phat, qhat, rhat;
+  phat = p * b / (2 * V);
+  qhat = q * cbar / (2 * V);
+  rhat = r * b / (2 * V);
+
+  double Cx0, Cxq, Cy0, Cyp, Cyr, Cz0, Czq, Cl0, Clp, Clr, Clda, Cldr, Cm0, Cmq, Cn0, Cnp, Cnr, Cnda, Cndr;
+  Cx0 = a0 + a1 * alpha + a2 * pow(de, 2.0) + a3 * de + a4 * alpha * de + a5 * pow(alpha, 2.0)
+      + a6 * pow(alpha, 3.0);
+  Cxq = b0 + b1 * alpha + b2 * pow(alpha, 2.0) + b3 * pow(alpha, 3.0) + b4 * pow(alpha, 4.0);
+  Cy0 = c0 * beta + c1 * da + c2 * dr;
+  Cyp = d0 + d1 * alpha + d2 * pow(alpha, 2.0) + d3 * pow(alpha, 3.0);
+  Cyr = e0 + e1 * alpha + e2 * pow(alpha, 2.0) + e3 * pow(alpha, 3.0);
+  Cz0 = (f0 + f1 * alpha + f2 * pow(alpha, 2.0) + f3 * pow(alpha, 3.0) + f4 * pow(alpha, 4.0))
+      * (1 - pow(beta, 2.0)) + f5 * de;
+  Czq = g0 + g1 * alpha + g2 * pow(alpha, 2.0) + g3 * pow(alpha, 3.0) + g4 * pow(alpha, 4.0);
+  Cl0 = h0 * beta + h1 * alpha * beta + h2 * pow(alpha, 2.0) * beta + h3 * pow(beta, 2.0)
+      + h4 * alpha * pow(beta, 2.0) + h5 *
+      pow(alpha, 3.0) * beta + h6 * pow(alpha, 4.0) * beta + h7 * pow(alpha, 2.0) * pow(beta, 2.0);
+  Clp = i0 + i1 * alpha + i2 * pow(alpha, 2.0) + i3 * pow(alpha, 3.0);
+  Clr = j0 + j1 * alpha + j2 * pow(alpha, 2.0) + j3 * pow(alpha, 3.0) + j4 * pow(alpha, 4.0);
+  Clda = k0 + k1 * alpha + k2 * beta + k3 * pow(alpha, 2.0) + k4 * alpha * beta
+      + k5 * pow(alpha, 2.0) * beta + k6 * pow(alpha, 3.0);
+  Cldr = l0 + l1 * alpha + l2 * beta + l3 * alpha * beta + l4 * pow(alpha, 2.0) * beta
+      + l5 * pow(alpha, 3.0) * beta + l6 * pow(beta, 2.0);
+  Cm0 = m0 + m1 * alpha + m2 * de + m3 * alpha * de + m4 * pow(de, 2.0) + m5 * pow(alpha, 2.0) * de
+      + m6 * pow(de, 3.0) + m7 *
+      alpha * pow(de, 2.0);
+
+  Cmq = n0 + n1 * alpha + n2 * pow(alpha, 2.0) + n3 * pow(alpha, 3.0) + n4 * pow(alpha, 4.0)
+      + n5 * pow(alpha, 5.0);
+  Cn0 = o0 * beta + o1 * alpha * beta + o2 * pow(beta, 2.0) + o3 * alpha * pow(beta, 2.0)
+      + o4 * pow(alpha, 2.0) * beta + o5 *
+      pow(alpha, 2.0) * pow(beta, 2.0) + o6 * pow(alpha, 3.0) * beta;
+  Cnp = p0 + p1 * alpha + p2 * pow(alpha, 2.0) + p3 * pow(alpha, 3.0) + p4 * pow(alpha, 4.0);
+  Cnr = q0 + q1 * alpha + q2 * pow(alpha, 2.0);
+  Cnda = r0 + r1 * alpha + r2 * beta + r3 * alpha * beta + r4 * pow(alpha, 2.0) * beta
+      + r5 * pow(alpha, 3.0) * beta + r6 *
+      pow(alpha, 2.0) + r7 * pow(alpha, 3.0) + r8 * pow(beta, 3.0) + r9 * alpha * pow(beta, 3.0);
+  Cndr = s0 + s1 * alpha + s2 * beta + s3 * alpha * beta + s4 * pow(alpha, 2.0) * beta
+      + s5 * pow(alpha, 2.0);
+
+  double Cx, Cy, Cz, Cl, Cm, Cn;
+  Cx = Cx0 + Cxq * qhat;
+  Cy = Cy0 + Cyp * phat + Cyr * rhat;
+  Cz = Cz0 + Czq * qhat;
+  Cl = Cl0 + Clp * phat + Clr * rhat + Clda * da + Cldr * dr;
+  Cm = Cm0 + Cmq * qhat + Cz * (xcgref - xcg);
+  Cn = Cn0 + Cnp * phat + Cnr * rhat + Cnda * da + Cndr * dr - Cy * (xcgref - xcg) * (cbar / b);
+
+  Eigen::Matrix<double, 6, 1> result;
+  result << Cx, Cy, Cz, Cl, Cm, Cn;
+
+  return result;
+}

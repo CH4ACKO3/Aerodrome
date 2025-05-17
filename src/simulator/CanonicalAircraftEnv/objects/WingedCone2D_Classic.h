@@ -144,7 +144,7 @@ public:
                              M[0], M[1], M[2]}; // 力和力矩
         kinematics_step(c_force); // 更新状态
 
-        h = pos[1];
+        h = -pos[2];
 
         Tem = Temperature(h);
         Pres = Pressure(h);

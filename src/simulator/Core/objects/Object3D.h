@@ -100,10 +100,13 @@ public:
 
         ang_g = init_ang_g;
 
-        beta = asin(cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma));
-        alpha = asin((cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta));
+        // beta = asin(cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma));
+        // alpha = asin((cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta));
 
         vel_b = init_vel_b;
+
+        alpha = atan2(vel_b(2), vel_b(0));
+        beta = asin(vel_b(1) / V);
         quat = Eigen::Quaterniond(Eigen::AngleAxisd(init_ang_g(2), Eigen::Vector3d::UnitZ()) *
                                    Eigen::AngleAxisd(init_ang_g(1), Eigen::Vector3d::UnitY()) *
                                    Eigen::AngleAxisd(init_ang_g(0), Eigen::Vector3d::UnitX()));
@@ -204,8 +207,10 @@ public:
         theta_v = asin(-vel_g(2) / V);
         phi_v = atan2(-vel_g(1), vel_g(0));
 
-        beta = asin(cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma));
-        alpha = asin((cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta));
+        // beta = asin(cos(theta_v) * (cos(gamma) * sin(phi - phi_v) + sin(theta) * sin(gamma) * cos(phi - phi_v)) - sin(theta_v) * cos(theta) * sin(gamma));
+        // alpha = asin((cos(theta_v) * (sin(theta) * cos(gamma) * cos(phi - phi_v) - sin(gamma) * sin(phi - phi_v)) - sin(theta_v) * cos(theta) * cos(gamma)) / cos(beta));
+        alpha = atan2(vel_b(2), vel_b(0));
+        beta = asin(vel_b(1) / V);
     }
 
     state_vec d(const state_vec& c_state, const force_vec& c_force) const
@@ -242,7 +247,7 @@ public:
             std::array{c_force(0), c_force(1), c_force(2), c_force(3), c_force(4), c_force(5)};
 
 
-        auto d_p_n = (c_e_1 * c_e_1 + c_e_0 * c_e_0 - c_e_2 * c_e_2 - c_e_3 * c_e_3) * c_u + 2 * (c_e_1 * c_e_2 - c_e_3 * c_e_0) * c_v         + 2 * (c_e_1 * c_e_3 + c_e_0 * c_e_2) * c_w;
+        auto d_p_n = (c_e_1 * c_e_1 + c_e_0 * c_e_0 - c_e_2 * c_e_2 - c_e_3 * c_e_3) * c_u + 2 * (c_e_1 * c_e_2 - c_e_3 * c_e_0) * c_v         + 2 * (c_e_1 * c_e_3 + c_e_2 * c_e_0) * c_w;
         auto d_p_e = 2 * (c_e_1 * c_e_2 + c_e_3 * c_e_0) * c_u         + (c_e_2 * c_e_2 + c_e_0 * c_e_0 - c_e_1 * c_e_1 - c_e_3 * c_e_3) * c_v + 2 * (c_e_2 * c_e_3 - c_e_1 * c_e_0) * c_w;
         auto d_p_d = 2 * (c_e_1 * c_e_3 - c_e_2 * c_e_0) * c_u         + 2 * (c_e_2 * c_e_3 + c_e_1 * c_e_0) * c_v         + (c_e_3 * c_e_3 + c_e_0 * c_e_0 - c_e_1 * c_e_1 - c_e_2 * c_e_2) * c_w;
 
