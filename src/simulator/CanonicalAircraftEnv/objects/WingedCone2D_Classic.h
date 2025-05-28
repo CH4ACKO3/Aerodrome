@@ -23,6 +23,7 @@ public:
     double eNy; // 过载跟踪误差
     double i_eNy; // 过载积分项
     double p_eNy; // 过载比例项
+    double d_eNy; // 过载微分项
 
     double i_eSAC; // 增稳回路积分项
 
@@ -51,6 +52,7 @@ public:
         eNy = 0;
         i_eNy = 0;
         p_eNy = 0;
+        d_eNy = 0;
         i_eSAC = 0;
         i_V = 0;
         d_eV = 0;
@@ -71,10 +73,19 @@ public:
         eNy = 0;
         i_eNy = 0;
         p_eNy = 0;
+        d_eNy = 0;
         i_eSAC = 0;
         i_V = 0;
         d_eV = 0;
         eV_prev = 0;
+
+        _D();
+        _L();
+        _T();
+        _M();
+
+        Ny = (L - m * g * cos(theta_v)) / (m * g);
+        wz = ang_vel_b(1);
     }
 
     double V_controller(double Vc, double V, double dt)
@@ -97,11 +108,13 @@ public:
     double Ny_controller(double Nyc, double Ny, double wz, double dt)
     {
         // 过载跟踪误差
-        eNy = Nyc - Ny;
+        double eNy_ = Nyc - Ny;
 
         // PI校正环节
-        i_eNy += eNy * dt;
-        p_eNy = eNy;
+        i_eNy += (eNy + eNy_)/2 * dt;
+        p_eNy = eNy_;
+        d_eNy = (eNy_ - eNy) / dt;
+        eNy = eNy_;
 
         double pi_eNy = Kiz * i_eNy + Kpz * p_eNy;
 
@@ -119,6 +132,11 @@ public:
     {
         py::dict output_dict = WingedCone2D::to_dict();
         output_dict["Ny"] = Ny;
+        output_dict["eNy"] = eNy;
+        output_dict["i_eNy"] = i_eNy;
+        output_dict["p_eNy"] = p_eNy;
+        output_dict["d_eNy"] = d_eNy;
+
         return output_dict;
     }
 
@@ -142,6 +160,7 @@ public:
                              -D * sin(beta) + N * cos(beta) + m * g * cos(theta) * sin(gamma),
                              -D * cos(beta) * sin(alpha) - N * sin(beta) * sin(alpha) - L * cos(alpha) + m * g * cos(theta) * cos(gamma),
                              M[0], M[1], M[2]}; // 力和力矩
+        c_force[0] = 0;
         kinematics_step(c_force); // 更新状态
 
         h = -pos[2];

@@ -186,7 +186,10 @@ public:
         vel_b(0) = new_state(3);
         vel_b(1) = new_state(4);
         vel_b(2) = new_state(5);
-        quat = Eigen::Quaterniond(new_state(6), new_state(7), new_state(8), new_state(9));
+
+        double norm = new_state(6) * new_state(6) + new_state(7) * new_state(7) + new_state(8) * new_state(8) + new_state(9) * new_state(9);
+        norm = sqrt(norm);
+        quat = Eigen::Quaterniond(new_state(6) / norm, new_state(7) / norm, new_state(8) / norm, new_state(9) / norm);
         ang_vel_b(0) = new_state(10);
         ang_vel_b(1) = new_state(11);
         ang_vel_b(2) = new_state(12);
