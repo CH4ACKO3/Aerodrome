@@ -45,3 +45,7 @@ The primary agent performs visual and functional review directly; the user's no-
 ## Navigation correction and bilingual title
 
 Use 概率飞行工程 as the primary Chinese title, with Probabilistic Aviation retained as the secondary English name. The shared SiteTitle component stacks both names within the existing header height. Sidebar links and group labels use the same 14px font; nested group-label spans must inherit it instead of Starlight's large style. Preserve Starlight's header-dependent fixed TOC offset: never add unconditional padding to .right-sidebar. Compact TOC labels have an explicit 1.6 line height for Chinese glyphs.
+
+## Stable navigation metrics
+
+The fixed site title and sidebar use --pa-navigation-font (Segoe UI / Microsoft YaHei / sans-serif), independent of network fonts. Sidebar active rows retain weight 500; color and background indicate selection without changing line breaks. The document reserves a stable scrollbar gutter. Body Inter uses font-display: optional to avoid a late font swap during reading; unavailable subsets fall back to system fonts. Do not restore swap-based webfonts in fixed navigation.

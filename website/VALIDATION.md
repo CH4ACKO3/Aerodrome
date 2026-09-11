@@ -45,3 +45,9 @@ Current limits: only the rigid-velocity lesson runs through the bridge; no job c
 - Verified 1280px desktop, 1000px compact navigation after an anchor jump, and 390px mobile with expanded TOC. Header/desktop TOC boundary is 68px; compact navigation stays directly below the header and its current-section text stays inside its line box. Mobile document width remains 375px within a 390px viewport.
 - Added bilingual site title: 概率飞行工程 · Probabilistic Aviation.
 - Astro check reports 0 errors/warnings/hints; production build and link/math validation pass for 39 pages.
+
+## Click/navigation stability
+
+- Removed network-font dependence from logo/sidebar; kept selected sidebar weight unchanged and reserved the document scrollbar gutter. Body font now uses optional display rather than late swap.
+- At 1280px, measured the logo and chapter 1/6 rectangles before and after scene loading, navigating to chapter 6, and opening search: coordinates and dimensions were identical in all four snapshots. This verifies settled layout, not every intermediate browser paint.
+- Checked the 390px scene layout visually. Astro check: 0 errors/warnings/hints; 39-page production build and internal path/math validation pass.
