@@ -1,0 +1,7 @@
+renderer:
+  kind: headless
+  version: "1"
+  parameters:
+    width: 1280
+    height: 720
+    every_steps: 10

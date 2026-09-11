@@ -1,0 +1,12 @@
+# Six-degree-of-freedom rigid body teaching scenario.
+entities:
+  - id: aircraft
+    model:
+      kind: rigid_body
+      version: "1"
+      parameters:
+        attitude: quaternion
+        mass_kg: 1000.0
+        position_ned_m: [0.0, 0.0, -1000.0]
+        velocity_body_m_s: [100.0, 0.0, 0.0]
+        omega_body_rad_s: [0.0, 0.0, 0.05]

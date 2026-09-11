@@ -1,0 +1,64 @@
+{
+  "source": "https://github.com/isrlab/F16-Model-Matlab",
+  "commit": "d019742f2fe7f5f25c521bc7e846519b28b759b3",
+  "source_sha256": "b9ac8d21cfb749c0e9897766d5f7b3cdcfdafc86ef8e948c064aafdc2e453f07",
+  "npz_sha256": "8c59021955eed05cf3ee41f99fd9d8df634558684f018daebe0f2795f09dac4b",
+  "extraction": "MATLAB reshape(order=F), exact beta=0 grid slice; no resampling",
+  "axis_units": "degrees",
+  "tables": {
+    "alpha1": [
+      20
+    ],
+    "alpha2": [
+      14
+    ],
+    "dh1": [
+      5
+    ],
+    "Cx": [
+      20,
+      5
+    ],
+    "Cz": [
+      20,
+      5
+    ],
+    "Cm": [
+      20,
+      5
+    ],
+    "Cx_lef": [
+      14
+    ],
+    "Cz_lef": [
+      14
+    ],
+    "Cm_lef": [
+      14
+    ],
+    "Cxq": [
+      20
+    ],
+    "Czq": [
+      20
+    ],
+    "Cmq": [
+      20
+    ],
+    "deltaCxq_lef": [
+      14
+    ],
+    "deltaCzq_lef": [
+      14
+    ],
+    "deltaCmq_lef": [
+      14
+    ],
+    "deltaCm": [
+      20
+    ],
+    "eta_el": [
+      5
+    ]
+  }
+}

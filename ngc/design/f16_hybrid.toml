@@ -1,0 +1,73 @@
+# Design example only: referenced components and pipeline runner are not implemented.
+schema_version = 1
+status = "design-only"
+id = "examples.f16.hybrid-evaluation"
+
+[assets.aerodynamics]
+source_lock = "f16_source.lock.json"
+
+[assembly]
+id = "f16.ngc.reference-v1"
+
+[assembly.slots.aerodynamics]
+component = "f16.nasa1538.isrl-aero-jax"
+asset = "aerodynamics"
+execution = "jax"
+kind = "algebraic"
+
+[assembly.slots.engine]
+# Replace only this slot to evaluate a different propulsion model.
+component = "user.engine.matlab"
+execution = "matlab-engine"
+kind = "co_simulation"
+model_version = "must-be-supplied-before-build"
+
+[assembly.slots.rigid_body]
+component = "aerodrome.rigid-body-6dof"
+execution = "jax"
+kind = "continuous"
+
+[assembly.slots.navigation]
+component = "aerodrome.navigation.ekf"
+kind = "discrete"
+
+[assembly.slots.guidance]
+component = "aerodrome.guidance.reference-tracking"
+kind = "discrete"
+
+[assembly.slots.control]
+component = "aerodrome.control.frozen-policy"
+policy_artifact = "inputs.trained_policy"
+kind = "discrete"
+
+[simulation]
+runner = "co-simulation"
+native_integrator = "rk4"
+physics_dt_s = 0.002
+communication_dt_s = 0.02
+coupling = "jacobi-zoh"
+require_end_to_end_gradient = false
+# Timing values illustrate the schema; they are not validated F16 settings.
+
+[scenario]
+id = "f16.heldout-tracking"
+split = "test"
+seed = 2026
+
+[evaluation]
+metrics = ["tracking_rmse", "control_effort", "constraint_violations"]
+
+[[pipeline.stages]]
+id = "validate"
+kind = "validate-assembly"
+needs = []
+
+[[pipeline.stages]]
+id = "evaluate"
+kind = "evaluate-policy"
+needs = ["validate"]
+
+[[pipeline.stages]]
+id = "report"
+kind = "render-report"
+needs = ["evaluate"]

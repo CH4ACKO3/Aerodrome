@@ -1,0 +1,24 @@
+includes:
+  - scenario/rigid.yaml
+  - environment/vacuum.yaml
+  - renderer/none.yaml
+
+schema_version: 1
+action: run
+name: teaching_experiment
+seed: 0
+clock:
+  physics_dt_s: 0.01
+  ticks_per_step: 2
+  sensor_every: 2
+  guidance_every: 10
+  control_every: 2
+runtime:
+  steps: 500
+  chunk_steps: 100
+  dtype: float64
+  device: cpu
+  jit: true
+  trace: true
+  output_dir: artifacts/config_runs
+assets: {}

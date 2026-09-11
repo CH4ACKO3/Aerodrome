@@ -1,0 +1,5 @@
+environment:
+  kind: constant_gravity
+  version: "1"
+  parameters:
+    gravity_ned_m_s2: [0.0, 0.0, 0.0]

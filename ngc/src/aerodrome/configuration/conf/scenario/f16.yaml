@@ -1,0 +1,10 @@
+# F-16 longitudinal teaching scenario.
+entities:
+  - id: f16
+    model:
+      kind: f16_longitudinal
+      version: "1"
+      parameters:
+        speed_m_s: 150.0
+        height_m: 3000.0
+        perturbation: [5.0, 0.0174532925199433, 0.0087266462599716, 0.0349065850398866, 30.0]

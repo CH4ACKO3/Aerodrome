@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "status": "selected-reference-not-integrated",
+  "model_family": "f16.nasa1538.isrl-airframe",
+  "source": {
+    "repository": "https://github.com/isrlab/F16-Model-Matlab",
+    "commit": "d019742f2fe7f5f25c521bc7e846519b28b759b3",
+    "repository_license": "MIT",
+    "reference": "https://ntrs.nasa.gov/citations/19800005879"
+  },
+  "asset": {
+    "path_in_repository": "F16AeroData.h5",
+    "sha256": "b9ac8d21cfb749c0e9897766d5f7b3cdcfdafc86ef8e948c064aafdc2e453f07",
+    "interpolation": "linear",
+    "extrapolation": "none",
+    "converted_asset": null
+  },
+  "limitations": [
+    "Deep-stall delta_Cm_ds correction is zero in the source implementation",
+    "Engine dynamic model must be selected and validated separately",
+    "JAX port and numerical validation have not been performed"
+  ]
+}
