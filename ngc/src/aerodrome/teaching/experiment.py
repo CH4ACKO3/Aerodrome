@@ -31,10 +31,21 @@ def run_velocity(config):
                          -c.max_force_N, c.max_force_N)
         loads = BodyLoads(jnp.array([force, 0., 0.], dtype=jnp.float32), jnp.zeros(3, dtype=jnp.float32))
         updated, _ = built.world.step(state, (loads,), built.parameters)
-        return updated, (updated.entities[0].velocity_body_m_s[0], force)
-    _, (velocity, force) = jax.jit(lambda s: jax.lax.scan(step, s, None, length=250))(built.state)
+        body = updated.entities[0]
+        return updated, (body.velocity_body_m_s[0], force, body.position_ned_m, body.attitude)
+    _, (velocity, force, positions, attitudes) = jax.jit(lambda s: jax.lax.scan(step, s, None, length=250))(built.state)
     values = np.asarray(velocity).tolist()
+    from aerodrome.rendering import Scene, RenderEntity, Frame, Pose
+    import math
+    scene = Scene((RenderEntity("body", asset_uri="asset://aircraft/training-fighter",
+                   body_from_asset_quaternion=(.5,-.5,-.5,.5)),),
+                  origin_lla=(math.radians(22.5),math.radians(114.),0.))
+    positions = np.concatenate([np.asarray(built.state.entities[0].position_ned_m)[None],np.asarray(positions)])
+    attitudes = np.concatenate([np.asarray(built.state.entities[0].attitude)[None],np.asarray(attitudes)])
+    frames = [Frame(0,0,i*built.world.step_dt_s,i*2,(i*2,i*2),(Pose(p,q),)).to_dict()
+              for i,(p,q) in enumerate(zip(positions,attitudes))]
     return dict(experiment="rigid-velocity-v1", manifest=MANIFEST, config=c.model_dump(),
+                render=dict(scene=scene.to_dict(),frames=frames,source="World/RK4 rigid velocity experiment; schematic fighter asset"),
                 dt_s=built.world.step_dt_s, device=str(velocity.device),
                 time_s=(np.arange(251)*built.world.step_dt_s).tolist(),
                 velocity_m_s=[c.initial_velocity_m_s]+values,

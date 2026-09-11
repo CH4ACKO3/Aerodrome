@@ -1,0 +1,54 @@
+---
+title: 三维场景与飞机资产
+description: 用可替换后端读取同一套 World Scene/Frame 协议。
+---
+import SceneViewer from '../../../components/SceneViewer.astro';
+
+物理模型决定飞机怎么运动，渲染模型决定你看到什么。这里用同一个刚体 World 轨迹，
+切换局部三维场景、地球尺度视图和航迹地图。默认不请求外部地图服务。
+
+<SceneViewer />
+
+## 各个库负责什么
+
+| 组件 | 当前接入能力 | 数据要求 |
+| --- | --- | --- |
+| Three.js + GLTFLoader | 飞机 GLB、姿态、舵面、轨迹回放、可控相机 | Scene/Frame v1 与资产映射 |
+| Three.js Sky / Water | 参数化天空、海面与反射 | 内置生成法线纹理，无外部贴图 |
+| 3d-tiles-renderer | 城市/地形 3D Tiles 流式加载，LOD 与缓存上限 | tileset URL；局部 Y-up 或 ECEF，真实数据需 origin_lla |
+| CesiumJS | 地球椭球、ECEF 飞机姿态、3D Tiles、地形服务 | 本地原点；地形/瓦片地址可选 |
+| MapLibre GL JS | 地图、位置与航向、样式和 DEM 地形 | 样式 URL、raster-dem TileJSON 可选 |
+
+城市、山地、海洋、高空是**显示环境预设**，没有自动改变重力、空气密度、碰撞或传感器结果。
+程序地形与示意楼房不能当作真实 DEM 或城市数据；高空预设只调整天空散射，不会修改轨迹高度。
+Cesium/MapLibre 使用自己的地理视图，不套用 Three.js 的海面或山地预设。
+
+## 从本地仿真到画面
+
+在[速度控制实验](/Aerodrome/experiments/velocity-control/)运行并下载结果 JSON，再导入这里。
+新增结果包含原始 Scene/Frame v1 姿态。浏览器只做位置插值和四元数 SLERP，不运行第二套动力学。
+离线 FPS 是绘图调用频率，不是 GPU 完成时间；回放不报告仿真 TPS。当前没有把 HTTP 任务结果冒充实时 tick 流。
+
+Three.js 适配器还提供 `submit(RenderRequest)`，应用相机和命名关节，并返回 v1 receipt；
+`presented` 表示浏览器已提交绘制，不等于 GPU 时间戳。跨进程 WebSocket 运输仍由后续适配器连接。
+
+## 战斗机模型工作流
+
+内置模型是可下载的[简化战斗机 GLB](/Aerodrome/models/training-fighter.glb)，不是完整 F-16。
+推荐在 Blender 制作并导出 glTF 2.0 / GLB：以米为单位，拆分 `elevator`、`rudder`、
+`aileron_left`、`aileron_right`，把原点放在实际铰链处，保留 rest pose。
+当前浏览器能控制这些节点的绝对偏角；蒙皮动画、起落架与机体损伤还没有教学控制接口。
+
+资产 URI 与物理模型 ID 独立。你可以用同一个外观显示不同飞行动力学模型，也能替换外观而不修改 World。
+模型轴向通过 `body_from_asset_quaternion` 描述，最终旋转严格为 `A R_nb R_body_asset`；
+真实地理场景则使用 WGS84 原点构造 NED 到 ECEF 变换。
+
+## 外部资源
+
+各后端按需加载，切换时释放旧 WebGL 上下文、模型与控制器；Three.js 像素比上限为 1.5，
+3D Tiles 使用几何误差与有界缓存控制开销。教学服务不代为代理 URL 或保存访问密钥。
+
+参考官方接口：[Three.js GLTFLoader](https://threejs.org/docs/pages/GLTFLoader.html)、
+[3D Tiles Renderer](https://github.com/NASA-AMMOS/3DTilesRendererJS)、
+[CesiumJS](https://cesium.com/learn/cesiumjs-learn/cesiumjs-quickstart/)、
+[MapLibre](https://maplibre.org/maplibre-gl-js/docs/)。

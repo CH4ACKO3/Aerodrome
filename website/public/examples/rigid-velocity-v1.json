@@ -15,6 +15,6814 @@
     "mass_kg": 1000,
     "max_force_N": 1000
   },
+  "render": {
+    "scene": {
+      "schema_version": 1,
+      "kind": "scene",
+      "position_frame": "local_ned",
+      "position_unit": "m",
+      "quaternion_order": "wxyz",
+      "rotation": "body_frd_to_ned",
+      "origin_lla": [
+        0.39269908169872414,
+        1.9896753472735358,
+        0.0
+      ],
+      "entities": [
+        {
+          "id": "body",
+          "asset_uri": "asset://aircraft/training-fighter",
+          "scale": 1.0,
+          "body_from_asset_quaternion": [
+            0.5,
+            -0.5,
+            -0.5,
+            0.5
+          ]
+        }
+      ]
+    },
+    "frames": [
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.0,
+        "tick": 0,
+        "source_ticks": [
+          0,
+          0
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.0,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.02,
+        "tick": 2,
+        "source_ticks": [
+          2,
+          2
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.00020000000949949026,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.04,
+        "tick": 4,
+        "source_ticks": [
+          4,
+          4
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.000800000037997961,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.06,
+        "tick": 6,
+        "source_ticks": [
+          6,
+          6
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.0017999999690800905,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.08,
+        "tick": 8,
+        "source_ticks": [
+          8,
+          8
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.0031999999191612005,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.1,
+        "tick": 10,
+        "source_ticks": [
+          10,
+          10
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.004999999888241291,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.12,
+        "tick": 12,
+        "source_ticks": [
+          12,
+          12
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.007199999876320362,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.14,
+        "tick": 14,
+        "source_ticks": [
+          14,
+          14
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.009799999184906483,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.16,
+        "tick": 16,
+        "source_ticks": [
+          16,
+          16
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.012799999676644802,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.18,
+        "tick": 18,
+        "source_ticks": [
+          18,
+          18
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.016200000420212746,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.2,
+        "tick": 20,
+        "source_ticks": [
+          20,
+          20
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.019999999552965164,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.22,
+        "tick": 22,
+        "source_ticks": [
+          22,
+          22
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.02420000173151493,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.24,
+        "tick": 24,
+        "source_ticks": [
+          24,
+          24
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.028800003230571747,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.26,
+        "tick": 26,
+        "source_ticks": [
+          26,
+          26
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.03380000591278076,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.28,
+        "tick": 28,
+        "source_ticks": [
+          28,
+          28
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.039200007915496826,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.3,
+        "tick": 30,
+        "source_ticks": [
+          30,
+          30
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.04500000923871994,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.32,
+        "tick": 32,
+        "source_ticks": [
+          32,
+          32
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.051200009882450104,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.34,
+        "tick": 34,
+        "source_ticks": [
+          34,
+          34
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.05780000984668732,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.36,
+        "tick": 36,
+        "source_ticks": [
+          36,
+          36
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.06480000913143158,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.38,
+        "tick": 38,
+        "source_ticks": [
+          38,
+          38
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.07220000773668289,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.4,
+        "tick": 40,
+        "source_ticks": [
+          40,
+          40
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.08000000566244125,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.42,
+        "tick": 42,
+        "source_ticks": [
+          42,
+          42
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.08820000290870667,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.44,
+        "tick": 44,
+        "source_ticks": [
+          44,
+          44
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.09679999947547913,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.46,
+        "tick": 46,
+        "source_ticks": [
+          46,
+          46
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.10580000281333923,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.48,
+        "tick": 48,
+        "source_ticks": [
+          48,
+          48
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.1151999980211258,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.5,
+        "tick": 50,
+        "source_ticks": [
+          50,
+          50
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.125,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.52,
+        "tick": 52,
+        "source_ticks": [
+          52,
+          52
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.13520000874996185,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.54,
+        "tick": 54,
+        "source_ticks": [
+          54,
+          54
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.14579999446868896,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.56,
+        "tick": 56,
+        "source_ticks": [
+          56,
+          56
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.15679998695850372,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.58,
+        "tick": 58,
+        "source_ticks": [
+          58,
+          58
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.16819998621940613,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.6,
+        "tick": 60,
+        "source_ticks": [
+          60,
+          60
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.17999999225139618,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.62,
+        "tick": 62,
+        "source_ticks": [
+          62,
+          62
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.1921999752521515,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.64,
+        "tick": 64,
+        "source_ticks": [
+          64,
+          64
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.20479996502399445,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.66,
+        "tick": 66,
+        "source_ticks": [
+          66,
+          66
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.21779996156692505,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.68,
+        "tick": 68,
+        "source_ticks": [
+          68,
+          68
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.2311999648809433,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.7000000000000001,
+        "tick": 70,
+        "source_ticks": [
+          70,
+          70
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.2449999451637268,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.72,
+        "tick": 72,
+        "source_ticks": [
+          72,
+          72
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.25919994711875916,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.74,
+        "tick": 74,
+        "source_ticks": [
+          74,
+          74
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.27379992604255676,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.76,
+        "tick": 76,
+        "source_ticks": [
+          76,
+          76
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.288799911737442,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.78,
+        "tick": 78,
+        "source_ticks": [
+          78,
+          78
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.3041999042034149,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.8,
+        "tick": 80,
+        "source_ticks": [
+          80,
+          80
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.31999990344047546,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.8200000000000001,
+        "tick": 82,
+        "source_ticks": [
+          82,
+          82
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.33619987964630127,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.84,
+        "tick": 84,
+        "source_ticks": [
+          84,
+          84
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.3527998626232147,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.86,
+        "tick": 86,
+        "source_ticks": [
+          86,
+          86
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.3697998523712158,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.88,
+        "tick": 88,
+        "source_ticks": [
+          88,
+          88
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.38719984889030457,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.9,
+        "tick": 90,
+        "source_ticks": [
+          90,
+          90
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.40499985218048096,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.92,
+        "tick": 92,
+        "source_ticks": [
+          92,
+          92
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.4231998324394226,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.9400000000000001,
+        "tick": 94,
+        "source_ticks": [
+          94,
+          94
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.4417998194694519,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.96,
+        "tick": 96,
+        "source_ticks": [
+          96,
+          96
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.46079981327056885,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 0.98,
+        "tick": 98,
+        "source_ticks": [
+          98,
+          98
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.48019981384277344,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.0,
+        "tick": 100,
+        "source_ticks": [
+          100,
+          100
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.4999997913837433,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.02,
+        "tick": 102,
+        "source_ticks": [
+          102,
+          102
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.5201997756958008,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.04,
+        "tick": 104,
+        "source_ticks": [
+          104,
+          104
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.5407958030700684,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.06,
+        "tick": 106,
+        "source_ticks": [
+          106,
+          106
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.5617798566818237,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.08,
+        "tick": 108,
+        "source_ticks": [
+          108,
+          108
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.5831442475318909,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.1,
+        "tick": 110,
+        "source_ticks": [
+          110,
+          110
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.6048813462257385,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.12,
+        "tick": 112,
+        "source_ticks": [
+          112,
+          112
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.6269837021827698,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.1400000000000001,
+        "tick": 114,
+        "source_ticks": [
+          114,
+          114
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.649444043636322,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.16,
+        "tick": 116,
+        "source_ticks": [
+          116,
+          116
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.6722551584243774,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.18,
+        "tick": 118,
+        "source_ticks": [
+          118,
+          118
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.6954100728034973,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.2,
+        "tick": 120,
+        "source_ticks": [
+          120,
+          120
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.7189018726348877,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.22,
+        "tick": 122,
+        "source_ticks": [
+          122,
+          122
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.742723822593689,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.24,
+        "tick": 124,
+        "source_ticks": [
+          124,
+          124
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.766869306564331,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.26,
+        "tick": 126,
+        "source_ticks": [
+          126,
+          126
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.7913318872451782,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.28,
+        "tick": 128,
+        "source_ticks": [
+          128,
+          128
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.8161052465438843,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.3,
+        "tick": 130,
+        "source_ticks": [
+          130,
+          130
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.8411831259727478,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.32,
+        "tick": 132,
+        "source_ticks": [
+          132,
+          132
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.8665594458580017,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.34,
+        "tick": 134,
+        "source_ticks": [
+          134,
+          134
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.8922282457351685,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.36,
+        "tick": 136,
+        "source_ticks": [
+          136,
+          136
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.9181836843490601,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.3800000000000001,
+        "tick": 138,
+        "source_ticks": [
+          138,
+          138
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.9444199800491333,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.4000000000000001,
+        "tick": 140,
+        "source_ticks": [
+          140,
+          140
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.9709315896034241,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.42,
+        "tick": 142,
+        "source_ticks": [
+          142,
+          142
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              0.9977129101753235,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.44,
+        "tick": 144,
+        "source_ticks": [
+          144,
+          144
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.0247585773468018,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.46,
+        "tick": 146,
+        "source_ticks": [
+          146,
+          146
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.0520634651184082,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.48,
+        "tick": 148,
+        "source_ticks": [
+          148,
+          148
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.0796221494674683,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.5,
+        "tick": 150,
+        "source_ticks": [
+          150,
+          150
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.1074297428131104,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.52,
+        "tick": 152,
+        "source_ticks": [
+          152,
+          152
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.1354811191558838,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.54,
+        "tick": 154,
+        "source_ticks": [
+          154,
+          154
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.163771390914917,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.56,
+        "tick": 156,
+        "source_ticks": [
+          156,
+          156
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.192296028137207,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.58,
+        "tick": 158,
+        "source_ticks": [
+          158,
+          158
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.2210500240325928,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.6,
+        "tick": 160,
+        "source_ticks": [
+          160,
+          160
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.2500289678573608,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.62,
+        "tick": 162,
+        "source_ticks": [
+          162,
+          162
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.2792283296585083,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.6400000000000001,
+        "tick": 164,
+        "source_ticks": [
+          164,
+          164
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.3086436986923218,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.6600000000000001,
+        "tick": 166,
+        "source_ticks": [
+          166,
+          166
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.3382707834243774,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.68,
+        "tick": 168,
+        "source_ticks": [
+          168,
+          168
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.368105411529541,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.7,
+        "tick": 170,
+        "source_ticks": [
+          170,
+          170
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.3981432914733887,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.72,
+        "tick": 172,
+        "source_ticks": [
+          172,
+          172
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.4283803701400757,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.74,
+        "tick": 174,
+        "source_ticks": [
+          174,
+          174
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.4588127136230469,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.76,
+        "tick": 176,
+        "source_ticks": [
+          176,
+          176
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.4894365072250366,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.78,
+        "tick": 178,
+        "source_ticks": [
+          178,
+          178
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.5202476978302002,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.8,
+        "tick": 180,
+        "source_ticks": [
+          180,
+          180
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.551242709159851,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.82,
+        "tick": 182,
+        "source_ticks": [
+          182,
+          182
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.5824178457260132,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.84,
+        "tick": 184,
+        "source_ticks": [
+          184,
+          184
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.6137694120407104,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.86,
+        "tick": 186,
+        "source_ticks": [
+          186,
+          186
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.645293951034546,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.8800000000000001,
+        "tick": 188,
+        "source_ticks": [
+          188,
+          188
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.676988124847412,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.9000000000000001,
+        "tick": 190,
+        "source_ticks": [
+          190,
+          190
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.7088483572006226,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.92,
+        "tick": 192,
+        "source_ticks": [
+          192,
+          192
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.7408713102340698,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.94,
+        "tick": 194,
+        "source_ticks": [
+          194,
+          194
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.7730538845062256,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.96,
+        "tick": 196,
+        "source_ticks": [
+          196,
+          196
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.8053927421569824,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 1.98,
+        "tick": 198,
+        "source_ticks": [
+          198,
+          198
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.8378849029541016,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.0,
+        "tick": 200,
+        "source_ticks": [
+          200,
+          200
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.8705271482467651,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.02,
+        "tick": 202,
+        "source_ticks": [
+          202,
+          202
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.903316617012024,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.04,
+        "tick": 204,
+        "source_ticks": [
+          204,
+          204
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.9362502098083496,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.06,
+        "tick": 206,
+        "source_ticks": [
+          206,
+          206
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              1.9693251848220825,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.08,
+        "tick": 208,
+        "source_ticks": [
+          208,
+          208
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.0025386810302734,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.1,
+        "tick": 210,
+        "source_ticks": [
+          210,
+          210
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.0358879566192627,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.12,
+        "tick": 212,
+        "source_ticks": [
+          212,
+          212
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.0693700313568115,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.14,
+        "tick": 214,
+        "source_ticks": [
+          214,
+          214
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.102982521057129,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.16,
+        "tick": 216,
+        "source_ticks": [
+          216,
+          216
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.1367228031158447,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.18,
+        "tick": 218,
+        "source_ticks": [
+          218,
+          218
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.170588254928589,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.2,
+        "tick": 220,
+        "source_ticks": [
+          220,
+          220
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.2045764923095703,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.22,
+        "tick": 222,
+        "source_ticks": [
+          222,
+          222
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.238684892654419,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.24,
+        "tick": 224,
+        "source_ticks": [
+          224,
+          224
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.272911310195923,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.2600000000000002,
+        "tick": 226,
+        "source_ticks": [
+          226,
+          226
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.307253122329712,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.2800000000000002,
+        "tick": 228,
+        "source_ticks": [
+          228,
+          228
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.341707944869995,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.3000000000000003,
+        "tick": 230,
+        "source_ticks": [
+          230,
+          230
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.3762736320495605,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.32,
+        "tick": 232,
+        "source_ticks": [
+          232,
+          232
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.4109480381011963,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.34,
+        "tick": 234,
+        "source_ticks": [
+          234,
+          234
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.4457290172576904,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.36,
+        "tick": 236,
+        "source_ticks": [
+          236,
+          236
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.480614423751831,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.38,
+        "tick": 238,
+        "source_ticks": [
+          238,
+          238
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.5156021118164062,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.4,
+        "tick": 240,
+        "source_ticks": [
+          240,
+          240
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.550690174102783,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.42,
+        "tick": 242,
+        "source_ticks": [
+          242,
+          242
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.58587646484375,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.44,
+        "tick": 244,
+        "source_ticks": [
+          244,
+          244
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.621159076690674,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.46,
+        "tick": 246,
+        "source_ticks": [
+          246,
+          246
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.6565358638763428,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.48,
+        "tick": 248,
+        "source_ticks": [
+          248,
+          248
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.692004919052124,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.5,
+        "tick": 250,
+        "source_ticks": [
+          250,
+          250
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.727564573287964,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.52,
+        "tick": 252,
+        "source_ticks": [
+          252,
+          252
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.7632133960723877,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.54,
+        "tick": 254,
+        "source_ticks": [
+          254,
+          254
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.7989490032196045,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.56,
+        "tick": 256,
+        "source_ticks": [
+          256,
+          256
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.8347699642181396,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.58,
+        "tick": 258,
+        "source_ticks": [
+          258,
+          258
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.8706746101379395,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.6,
+        "tick": 260,
+        "source_ticks": [
+          260,
+          260
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.90666127204895,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.62,
+        "tick": 262,
+        "source_ticks": [
+          262,
+          262
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.942728042602539,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.64,
+        "tick": 264,
+        "source_ticks": [
+          264,
+          264
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              2.9788734912872314,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.66,
+        "tick": 266,
+        "source_ticks": [
+          266,
+          266
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.0150959491729736,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.68,
+        "tick": 268,
+        "source_ticks": [
+          268,
+          268
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.051393985748291,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.7,
+        "tick": 270,
+        "source_ticks": [
+          270,
+          270
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.08776593208313,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.72,
+        "tick": 272,
+        "source_ticks": [
+          272,
+          272
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.1242105960845947,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.74,
+        "tick": 274,
+        "source_ticks": [
+          274,
+          274
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.160726308822632,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.7600000000000002,
+        "tick": 276,
+        "source_ticks": [
+          276,
+          276
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.1973116397857666,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.7800000000000002,
+        "tick": 278,
+        "source_ticks": [
+          278,
+          278
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.2339653968811035,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.8000000000000003,
+        "tick": 280,
+        "source_ticks": [
+          280,
+          280
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.270686149597168,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.82,
+        "tick": 282,
+        "source_ticks": [
+          282,
+          282
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.3074722290039062,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.84,
+        "tick": 284,
+        "source_ticks": [
+          284,
+          284
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.344322681427002,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.86,
+        "tick": 286,
+        "source_ticks": [
+          286,
+          286
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.3812363147735596,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.88,
+        "tick": 288,
+        "source_ticks": [
+          288,
+          288
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.4182116985321045,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.9,
+        "tick": 290,
+        "source_ticks": [
+          290,
+          290
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.455247402191162,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.92,
+        "tick": 292,
+        "source_ticks": [
+          292,
+          292
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.492342472076416,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.94,
+        "tick": 294,
+        "source_ticks": [
+          294,
+          294
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.5294957160949707,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.96,
+        "tick": 296,
+        "source_ticks": [
+          296,
+          296
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.5667059421539307,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 2.98,
+        "tick": 298,
+        "source_ticks": [
+          298,
+          298
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.6039717197418213,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.0,
+        "tick": 300,
+        "source_ticks": [
+          300,
+          300
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.641292095184326,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.02,
+        "tick": 302,
+        "source_ticks": [
+          302,
+          302
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.678666114807129,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.04,
+        "tick": 304,
+        "source_ticks": [
+          304,
+          304
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.716092824935913,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.06,
+        "tick": 306,
+        "source_ticks": [
+          306,
+          306
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.753571033477783,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.08,
+        "tick": 308,
+        "source_ticks": [
+          308,
+          308
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.7910995483398438,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.1,
+        "tick": 310,
+        "source_ticks": [
+          310,
+          310
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.8286774158477783,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.12,
+        "tick": 312,
+        "source_ticks": [
+          312,
+          312
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.8663036823272705,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.14,
+        "tick": 314,
+        "source_ticks": [
+          314,
+          314
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.903977394104004,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.16,
+        "tick": 316,
+        "source_ticks": [
+          316,
+          316
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.941697835922241,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.18,
+        "tick": 318,
+        "source_ticks": [
+          318,
+          318
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              3.979463815689087,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.2,
+        "tick": 320,
+        "source_ticks": [
+          320,
+          320
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.017274379730225,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.22,
+        "tick": 322,
+        "source_ticks": [
+          322,
+          322
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.055129051208496,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.24,
+        "tick": 324,
+        "source_ticks": [
+          324,
+          324
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.093026161193848,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.2600000000000002,
+        "tick": 326,
+        "source_ticks": [
+          326,
+          326
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.130965232849121,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.2800000000000002,
+        "tick": 328,
+        "source_ticks": [
+          328,
+          328
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.168945789337158,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.3000000000000003,
+        "tick": 330,
+        "source_ticks": [
+          330,
+          330
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.206966400146484,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.3200000000000003,
+        "tick": 332,
+        "source_ticks": [
+          332,
+          332
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.2450270652771,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.34,
+        "tick": 334,
+        "source_ticks": [
+          334,
+          334
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.283126354217529,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.36,
+        "tick": 336,
+        "source_ticks": [
+          336,
+          336
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.321263790130615,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.38,
+        "tick": 338,
+        "source_ticks": [
+          338,
+          338
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.359438419342041,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.4,
+        "tick": 340,
+        "source_ticks": [
+          340,
+          340
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.397649765014648,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.42,
+        "tick": 342,
+        "source_ticks": [
+          342,
+          342
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.435896873474121,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.44,
+        "tick": 344,
+        "source_ticks": [
+          344,
+          344
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.474178791046143,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.46,
+        "tick": 346,
+        "source_ticks": [
+          346,
+          346
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.512495517730713,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.48,
+        "tick": 348,
+        "source_ticks": [
+          348,
+          348
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.550845623016357,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.5,
+        "tick": 350,
+        "source_ticks": [
+          350,
+          350
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.589228630065918,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.52,
+        "tick": 352,
+        "source_ticks": [
+          352,
+          352
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.627644062042236,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.54,
+        "tick": 354,
+        "source_ticks": [
+          354,
+          354
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.666090965270996,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.56,
+        "tick": 356,
+        "source_ticks": [
+          356,
+          356
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.704568862915039,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.58,
+        "tick": 358,
+        "source_ticks": [
+          358,
+          358
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.743077278137207,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.6,
+        "tick": 360,
+        "source_ticks": [
+          360,
+          360
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.781615734100342,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.62,
+        "tick": 362,
+        "source_ticks": [
+          362,
+          362
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.820183277130127,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.64,
+        "tick": 364,
+        "source_ticks": [
+          364,
+          364
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.8587799072265625,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.66,
+        "tick": 366,
+        "source_ticks": [
+          366,
+          366
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.897404193878174,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.68,
+        "tick": 368,
+        "source_ticks": [
+          368,
+          368
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.936056137084961,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.7,
+        "tick": 370,
+        "source_ticks": [
+          370,
+          370
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              4.974735260009766,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.72,
+        "tick": 372,
+        "source_ticks": [
+          372,
+          372
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.0134406089782715,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.74,
+        "tick": 374,
+        "source_ticks": [
+          374,
+          374
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.05217170715332,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.7600000000000002,
+        "tick": 376,
+        "source_ticks": [
+          376,
+          376
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.090928554534912,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.7800000000000002,
+        "tick": 378,
+        "source_ticks": [
+          378,
+          378
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.1297101974487305,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.8000000000000003,
+        "tick": 380,
+        "source_ticks": [
+          380,
+          380
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.168515682220459,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.8200000000000003,
+        "tick": 382,
+        "source_ticks": [
+          382,
+          382
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.207345485687256,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.84,
+        "tick": 384,
+        "source_ticks": [
+          384,
+          384
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.2461981773376465,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.86,
+        "tick": 386,
+        "source_ticks": [
+          386,
+          386
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.285073757171631,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.88,
+        "tick": 388,
+        "source_ticks": [
+          388,
+          388
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.323972225189209,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.9,
+        "tick": 390,
+        "source_ticks": [
+          390,
+          390
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.3628926277160645,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.92,
+        "tick": 392,
+        "source_ticks": [
+          392,
+          392
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.401834487915039,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.94,
+        "tick": 394,
+        "source_ticks": [
+          394,
+          394
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.440797328948975,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.96,
+        "tick": 396,
+        "source_ticks": [
+          396,
+          396
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.479781150817871,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 3.98,
+        "tick": 398,
+        "source_ticks": [
+          398,
+          398
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.51878547668457,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.0,
+        "tick": 400,
+        "source_ticks": [
+          400,
+          400
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.557809829711914,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.0200000000000005,
+        "tick": 402,
+        "source_ticks": [
+          402,
+          402
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.596853256225586,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.04,
+        "tick": 404,
+        "source_ticks": [
+          404,
+          404
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.635915756225586,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.0600000000000005,
+        "tick": 406,
+        "source_ticks": [
+          406,
+          406
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.674997329711914,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.08,
+        "tick": 408,
+        "source_ticks": [
+          408,
+          408
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.714097499847412,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.1,
+        "tick": 410,
+        "source_ticks": [
+          410,
+          410
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.753215312957764,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.12,
+        "tick": 412,
+        "source_ticks": [
+          412,
+          412
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.792350769042969,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.14,
+        "tick": 414,
+        "source_ticks": [
+          414,
+          414
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.831503391265869,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.16,
+        "tick": 416,
+        "source_ticks": [
+          416,
+          416
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.870673179626465,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.18,
+        "tick": 418,
+        "source_ticks": [
+          418,
+          418
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.909859657287598,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.2,
+        "tick": 420,
+        "source_ticks": [
+          420,
+          420
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.949062347412109,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.22,
+        "tick": 422,
+        "source_ticks": [
+          422,
+          422
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              5.98828125,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.24,
+        "tick": 424,
+        "source_ticks": [
+          424,
+          424
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.027515411376953,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.26,
+        "tick": 426,
+        "source_ticks": [
+          426,
+          426
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.066764831542969,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.28,
+        "tick": 428,
+        "source_ticks": [
+          428,
+          428
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.106029510498047,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.3,
+        "tick": 430,
+        "source_ticks": [
+          430,
+          430
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.145308971405029,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.32,
+        "tick": 432,
+        "source_ticks": [
+          432,
+          432
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.184602737426758,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.34,
+        "tick": 434,
+        "source_ticks": [
+          434,
+          434
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.223910808563232,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.36,
+        "tick": 436,
+        "source_ticks": [
+          436,
+          436
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.263232231140137,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.38,
+        "tick": 438,
+        "source_ticks": [
+          438,
+          438
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.302567481994629,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.4,
+        "tick": 440,
+        "source_ticks": [
+          440,
+          440
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.341915607452393,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.42,
+        "tick": 442,
+        "source_ticks": [
+          442,
+          442
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.381277084350586,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.44,
+        "tick": 444,
+        "source_ticks": [
+          444,
+          444
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.420651435852051,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.46,
+        "tick": 446,
+        "source_ticks": [
+          446,
+          446
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.460038185119629,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.48,
+        "tick": 448,
+        "source_ticks": [
+          448,
+          448
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.49943733215332,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.5,
+        "tick": 450,
+        "source_ticks": [
+          450,
+          450
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.538848400115967,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.5200000000000005,
+        "tick": 452,
+        "source_ticks": [
+          452,
+          452
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.578271389007568,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.54,
+        "tick": 454,
+        "source_ticks": [
+          454,
+          454
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.617705821990967,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.5600000000000005,
+        "tick": 456,
+        "source_ticks": [
+          456,
+          456
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.657151699066162,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.58,
+        "tick": 458,
+        "source_ticks": [
+          458,
+          458
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.696608543395996,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.6000000000000005,
+        "tick": 460,
+        "source_ticks": [
+          460,
+          460
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.736076354980469,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.62,
+        "tick": 462,
+        "source_ticks": [
+          462,
+          462
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.775554656982422,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.64,
+        "tick": 464,
+        "source_ticks": [
+          464,
+          464
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.8150434494018555,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.66,
+        "tick": 466,
+        "source_ticks": [
+          466,
+          466
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.854542255401611,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.68,
+        "tick": 468,
+        "source_ticks": [
+          468,
+          468
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.894051551818848,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.7,
+        "tick": 470,
+        "source_ticks": [
+          470,
+          470
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.933570384979248,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.72,
+        "tick": 472,
+        "source_ticks": [
+          472,
+          472
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              6.9730987548828125,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.74,
+        "tick": 474,
+        "source_ticks": [
+          474,
+          474
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.012636661529541,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.76,
+        "tick": 476,
+        "source_ticks": [
+          476,
+          476
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.052184104919434,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.78,
+        "tick": 478,
+        "source_ticks": [
+          478,
+          478
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.091740131378174,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.8,
+        "tick": 480,
+        "source_ticks": [
+          480,
+          480
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.13130521774292,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.82,
+        "tick": 482,
+        "source_ticks": [
+          482,
+          482
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.170878887176514,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.84,
+        "tick": 484,
+        "source_ticks": [
+          484,
+          484
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.210461139678955,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.86,
+        "tick": 486,
+        "source_ticks": [
+          486,
+          486
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.250051975250244,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.88,
+        "tick": 488,
+        "source_ticks": [
+          488,
+          488
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.289650917053223,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.9,
+        "tick": 490,
+        "source_ticks": [
+          490,
+          490
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.329257965087891,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.92,
+        "tick": 492,
+        "source_ticks": [
+          492,
+          492
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.36887264251709,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.94,
+        "tick": 494,
+        "source_ticks": [
+          494,
+          494
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.40849494934082,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.96,
+        "tick": 496,
+        "source_ticks": [
+          496,
+          496
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.448124885559082,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 4.98,
+        "tick": 498,
+        "source_ticks": [
+          498,
+          498
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.487762451171875,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "schema_version": 1,
+        "kind": "frame",
+        "world_id": 0,
+        "episode_id": 0,
+        "time_s": 5.0,
+        "tick": 500,
+        "source_ticks": [
+          500,
+          500
+        ],
+        "poses": [
+          {
+            "position_ned_m": [
+              7.527407169342041,
+              0.0,
+              -1000.0
+            ],
+            "quaternion_nb": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        ]
+      }
+    ],
+    "source": "World/RK4 rigid velocity experiment; schematic fighter asset"
+  },
   "dt_s": 0.02,
   "device": "cpu:0",
   "time_s": [

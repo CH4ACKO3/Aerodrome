@@ -1,6 +1,6 @@
 # 渲染数据接口：离线、在线与 FPS/TPS
 
-`aerodrome.rendering` 提供渲染器无关的数据协议，不在物理积分中调用 GUI、文件或网络。当前已提供 JAX 姿态投影、JSONL 场景/轨迹文件、在线最新帧缓冲、离线插值以及 FPS/TPS 计数；没有内置 WebGL/Unity/Blender 渲染器或 WebSocket 服务。现已补上 [可替换后端与消息桥](renderer-backends.md)，统一生命周期、相机/关节请求和完成回执。
+`aerodrome.rendering` 提供渲染器无关的数据协议，不在物理积分中调用 GUI、文件或网络。当前已提供 JAX 姿态投影、JSONL 场景/轨迹文件、在线最新帧缓冲、离线插值以及 FPS/TPS 计数；浏览器实现位于 `website/src/rendering`，支持 Three.js、CesiumJS 与 MapLibre。WebSocket 运输、Unity/Blender 运行时仍需适配。现已补上 [可替换后端与消息桥](renderer-backends.md)，统一生命周期、相机/关节请求和完成回执。
 
 ## 数据流与时间含义
 

@@ -61,6 +61,19 @@ Connection and result messages use `role="status"`. Local execution stays disabl
 
 The chart has an accessible title and description. Solid velocity and dashed target lines distinguish meaning independently of color; quantitative axis labels include velocity bounds and elapsed time. A native details/summary exposes reproducible parameters and sampled data, and a JSON download exposes the full result. Reference trajectories are visibly labelled as precomputed. Keep native Starlight navigation and mobile behavior.
 
+### Scene viewer
+
+The inline scene viewer retains the same lesson styling. Engines load after the
+explicit load button; data-source configuration lives in a native disclosure.
+Backend and environment selectors precede playback, time and articulation controls.
+The canvas is 440px high on desktop and 340px below 600px viewport width; fields
+wrap through an auto-fit 210px grid. Status text distinguishes loading, ready,
+error and released states. File import remains disabled until initialization.
+Three.js, Cesium and MapLibre are alternative views; map views do not imply the
+Three.js environment preset is active. Original schematic assets and real data
+sources remain explicitly distinguished. Subagent reviews are disabled by user
+instruction; this addition is verified directly in the browser by the main agent.
+
 ## Do's and Don'ts
 
 - **Do** inherit Starlight theme and typography for new teaching content.

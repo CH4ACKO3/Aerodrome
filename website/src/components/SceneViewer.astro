@@ -1,0 +1,40 @@
+<section class="scene-viewer" aria-label="场景与飞机预览">
+  <div class="scene-fields">
+    <label>视图后端<select data-backend><option value="three">Three.js · 飞行场景</option><option value="cesium">CesiumJS · 地理场景</option><option value="maplibre">MapLibre · 航迹地图</option></select></label>
+    <label>环境<select data-preset><option value="city">城市（示意建筑）</option><option value="mountains">山地（程序地形）</option><option value="ocean">海洋</option><option value="altitude">高空天空</option></select></label>
+  </div>
+  <details><summary>真实数据与自定义模型</summary>
+    <p>空配置使用离线示例。填写 URL 会从浏览器访问该服务；服务需允许 CORS。地图/地形数据的许可与来源由你配置。密钥请使用仅限读取且限制来源的公开令牌。</p>
+    <div class="scene-fields">
+      <label>3D Tiles tileset URL<input data-tiles type="url" placeholder="https://…/tileset.json" /></label>
+      <label>瓦片坐标<select data-tile-frame><option value="ecef">ECEF（真实地理数据）</option><option value="local-y-up">局部 Three.js Y-up</option></select></label>
+      <label>MapLibre 样式 URL<input data-style type="url" placeholder="https://…/style.json" /></label>
+      <label>地形 URL（Cesium 服务 / MapLibre DEM TileJSON）<input data-terrain type="url" placeholder="https://…" /></label>
+      <label>来源与版权说明<input data-attribution placeholder="数据提供方、许可与署名" /></label>
+      <label>替换飞机 GLB（米；-Z 前、+Y 上）<input data-model type="url" placeholder="https://…/aircraft.glb" /></label>
+    </div>
+    <p>自定义 GLB 替换当前资产，沿用其轴向约定；不同模型轴向需要修改 Scene 的资产四元数。MapLibre 当前展示位置与航向，三维飞机请使用另外两个后端。</p>
+  </details>
+  <div class="scene-actions"><button data-load type="button">加载场景</button><button data-play type="button" disabled>播放轨迹</button><button data-reset type="button" disabled>回到起点</button><button data-unload type="button" disabled>释放场景</button></div>
+  <label class="scene-file">导入 Scene/Frame 轨迹或本地实验结果 JSON<input data-file type="file" accept=".json,application/json" disabled /></label>
+  <label>回放时间<input data-time type="range" min="0" max="10" step="0.02" value="0" disabled /></label>
+  <label data-joint-row>升降舵预览（仅改变模型外观，不输入动力学）<input data-joint type="range" min="-25" max="25" value="0" step="1" disabled /></label>
+  <p data-status role="status">按需加载图形库。默认轨迹来自刚体 World 的预计算转弯。</p>
+  <div data-canvas class="scene-canvas"></div>
+  <p data-metrics>回放尚未开始；离线轨迹不代表当前仿真 TPS。</p>
+  <p data-source></p>
+  <p>鼠标拖动旋转，滚轮或双指缩放；也可用上方按钮和时间滑块查看轨迹。几何模型是教学示意，不是完整 F-16 外形或物理模型。</p>
+</section>
+<script>
+  // No GPU or scene engines load until the user explicitly opens a scene.
+  for(const host of document.querySelectorAll<HTMLElement>('.scene-viewer')) {
+    const button=host.querySelector<HTMLButtonElement>('[data-load]')!;
+    button.addEventListener('click',async()=>{
+      if(host.dataset.initialized)return;
+      button.disabled=true;
+      try { const {mount}=await import('../rendering/viewer');host.dataset.initialized='true';await mount(host); }
+      catch(error){host.querySelector('[data-status]')!.textContent=`初始化失败：${String(error)}`;delete host.dataset.initialized;}
+      finally {button.disabled=false;}
+    });
+  }
+</script>

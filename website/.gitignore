@@ -3,3 +3,4 @@ dist/
 .astro/
 src/content/docs/reference/
 public/teaching-manifest.json
+public/vendor/

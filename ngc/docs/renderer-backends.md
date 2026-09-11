@@ -1,6 +1,6 @@
 # 可替换渲染器模块
 
-现有 Scene/Frame 数据协议之上新增 `RendererBackend`、`RendererSession`、`MessageBackend` 和 `HeadlessBackend`。本次实现引擎适配边界，不包含 Three.js/UE 程序、网络服务或图形资源。用户可以提供任意满足协议的适配器。
+现有 Scene/Frame 数据协议之上提供 `RendererBackend`、`RendererSession`、`MessageBackend` 和 `HeadlessBackend`。`website/src/rendering` 现已接入 Three.js、3D Tiles、CesiumJS 与 MapLibre 的浏览器适配器，读取同一份 Scene/Frame；教学站「三维场景与飞机」提供可运行回放。UE 与跨进程实时网络运输仍由用户适配器接入。
 
 ## 分层
 

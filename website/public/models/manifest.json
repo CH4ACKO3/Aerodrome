@@ -1,0 +1,21 @@
+{
+  "asset_uri": "asset://aircraft/training-fighter",
+  "url": "training-fighter.glb",
+  "units": "m",
+  "forward": "-Z",
+  "up": "+Y",
+  "body_from_asset_quaternion": [
+    0.5,
+    -0.5,
+    -0.5,
+    0.5
+  ],
+  "nodes": [
+    "elevator",
+    "rudder",
+    "aileron_left",
+    "aileron_right"
+  ],
+  "source": "Original procedural teaching geometry; not a dimensionally accurate F-16",
+  "license": "CC0-1.0"
+}

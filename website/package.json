@@ -8,6 +8,8 @@
   },
   "scripts": {
     "prepare-content": "node scripts/prepare-content.mjs",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "generate-models": "node scripts/generate-scene-assets.mjs",
     "dev": "npm run prepare-content && astro dev --host 127.0.0.1",
     "build": "npm run prepare-content && astro build && node scripts/check-output.mjs",
     "preview": "astro preview --host 127.0.0.1",
@@ -16,13 +18,18 @@
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.0",
     "@astrojs/starlight": "0.42.0",
+    "3d-tiles-renderer": "^0.5.2",
     "astro": "7.3.2",
+    "cesium": "^1.145.0",
     "katex": "^0.16.22",
+    "maplibre-gl": "^6.9.0",
     "rehype-katex": "^7.0.1",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "three": "^0.186.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "@types/three": "^0.185.4",
     "typescript": "^5.9.3"
   }
 }

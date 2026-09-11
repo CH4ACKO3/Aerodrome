@@ -36,6 +36,7 @@
   }
   function show(data: any, source: string) {
     result = data;
+    window.dispatchEvent(new CustomEvent('aerodrome:result',{detail:data}));
     const values = [...data.velocity_m_s, data.config.target_velocity_m_s];
     const lo = Math.min(...values) - 0.2, hi = Math.max(...values) + 0.2;
     const duration = data.time_s.at(-1);

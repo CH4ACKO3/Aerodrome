@@ -18,6 +18,10 @@ def test_feedback_matches_sampled_equation():
     np.testing.assert_allclose(result["velocity_m_s"], expected, atol=3e-6)
     assert result["time_s"][-1] == 5
     assert len(result["force_N"]) == 250
+    assert len(result["render"]["frames"]) == 251
+    last = result["render"]["frames"][-1]
+    assert last["tick"] == 500
+    np.testing.assert_allclose(last["poses"][0]["position_ned_m"][0], .01*sum(a+b for a,b in zip(expected,expected[1:])), atol=3e-5)
 
 
 @pytest.mark.parametrize("config", [{"gain_per_s":float("nan")},{"mass_kg":0},{"max_force_N":1e9},{"python":"print(1)"}])

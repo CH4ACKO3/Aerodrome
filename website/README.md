@@ -34,8 +34,9 @@ API v1: `GET /api/v1/hello`, `POST /api/v1/jobs`, `GET /api/v1/jobs/{id}`.
 POST accepts `{manifest, experiment, config}`; download parameters from the lesson
 for a complete example. Adding an experiment requires an explicitly registered
 server runner, a capability ID, validation and a corresponding lesson component.
-The current version exposes `rigid-velocity-v1` only. Rendering/streaming of full
-World scenes is a later extension of this protocol.
+The current version exposes `rigid-velocity-v1` only. Its result now includes
+Scene/Frame v1 recording data for the browser's 3D viewer. Continuous streaming
+of running World instances is a later transport extension.
 
 Regenerate the committed static reference with
 `uv run --locked --all-extras python examples/export_teaching_baseline.py` from
@@ -45,3 +46,26 @@ body World, not a separate JavaScript approximation.
 The GitHub workflow builds on `docs` and uploads a Pages artifact. Deployment
 requires the repository's Pages source to be set to GitHub Actions. No deployment
 or remote branch change happens merely by building this directory locally.
+
+## Scene backends
+
+`src/rendering` contains engine-neutral protocol validation/interpolation and
+lazy Three.js, CesiumJS and MapLibre adapters. Three.js includes Sky, Water,
+GLTFLoader, OrbitControls and 3d-tiles-renderer. Open the scene-viewer lesson to
+play the committed real World recording and load optional data URLs.
+
+Regenerate original GLB fixtures using `npm run generate-models`; regenerate the
+turn recording using `python examples/export_scene_demo.py` from `ngc`.
+`npm test` verifies axes, ECEF transforms, quaternion interpolation and the Python
+serialization fixture. New local velocity results can be downloaded and imported.
+
+Cesium's worker/assets directories are copied from the locked npm package by
+prepare-content; do not edit or commit generated `public/vendor`. All engines are
+loaded on demand. Cesium is a substantial optional download; no imagery, global
+terrain subscription or private API key is bundled. MapLibre defaults to a blank
+offline map. Real terrain/city content must be supplied with attribution and CORS.
+
+Renderers expose `update`, `draw`, `resize`, `dispose`. ThreeBackend also accepts
+RenderRequest v1 camera/joints and produces receipts. API callers supply an
+explicit logical-URI-to-GLB URL map. The teaching UI can override the default
+asset URL; arbitrary imported assets still require compatible asset axes.

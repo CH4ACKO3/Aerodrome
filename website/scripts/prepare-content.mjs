@@ -1,6 +1,9 @@
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 const root = path.resolve(import.meta.dirname, '../..');
+for(const name of ['Assets','ThirdParty','Widgets','Workers']) {
+  await cp(path.join(root,'website/node_modules/cesium/Build/Cesium',name),path.join(root,'website/public/vendor/cesium',name),{recursive:true});
+}
 const source = path.join(root, 'ngc/docs');
 const target = path.join(root, 'website/src/content/docs/reference');
 await mkdir(target, {recursive:true});
