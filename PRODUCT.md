@@ -20,7 +20,7 @@ Online pages offer full reading and clearly identified precomputed experiments. 
 ngc/docs, ngc/examples, ngc/src and cross-platform validation. The F-16 model is a longitudinal teaching subset, not a complete aircraft. Aerodynamics and materials courses are future topics, not completed lessons.
 
 ## Brand Commitments
-Probabilistic Aviation; Chinese teaching content with English technical terminology. The existing code and legacy documentation remain available.
+概率飞行工程 · Probabilistic Aviation; Chinese teaching content with English technical terminology. The existing code and legacy documentation remain available.
 
 ## Product Principles
 Keep equations visible. Separate teaching tasks from physics. Label static and computed results accurately. Preserve readable content when disconnected. Keep Node.js builds independent of Python.

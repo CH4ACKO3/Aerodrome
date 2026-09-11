@@ -37,3 +37,11 @@ Current limits: only the rigid-velocity lesson runs through the bridge; no job c
 - Local experiment returned a fresh CPU result with final velocity error 0.0176 m/s; inspected browser error log was empty.
 - Local review screenshots: .impeccable/review/redesign-home-desktop.png, redesign-home-mobile.png and redesign-lab-desktop.png. No subagents were used.
 - Style detector reported only undocumented radius values; DESIGN.md now records the intentional 4/6/8/12px scale.
+
+## Navigation corrections
+
+- Unified computed sidebar link/group-label font family and size (14px).
+- Removed the unconditional right-sidebar padding that displaced the desktop TOC behind the header; removed the extra main-frame inline padding.
+- Verified 1280px desktop, 1000px compact navigation after an anchor jump, and 390px mobile with expanded TOC. Header/desktop TOC boundary is 68px; compact navigation stays directly below the header and its current-section text stays inside its line box. Mobile document width remains 375px within a 390px viewport.
+- Added bilingual site title: 概率飞行工程 · Probabilistic Aviation.
+- Astro check reports 0 errors/warnings/hints; production build and link/math validation pass for 39 pages.

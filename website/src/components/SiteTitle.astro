@@ -1,0 +1,12 @@
+---
+const siteTitleHref = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+<a class="site-title" href={siteTitleHref} aria-label="概率飞行工程 · Probabilistic Aviation">
+  <span class="site-title-zh" lang="zh-CN">概率飞行工程</span>
+  <span class="site-title-en" lang="en" translate="no">Probabilistic Aviation</span>
+</a>
+<style>
+  .site-title { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: .15rem; min-width: 0; text-decoration: none; line-height: 1.25; }
+  .site-title-zh { font-size: 1.05rem; font-weight: 650; letter-spacing: .025em; }
+  .site-title-en { font-size: .72rem; font-weight: 500; letter-spacing: 0; color: var(--pa-muted); }
+</style>

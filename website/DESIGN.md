@@ -41,3 +41,7 @@ Connection and result messages retain role=status. Reference and local results r
 ## Review
 
 The primary agent performs visual and functional review directly; the user's no-subagent instruction applies. Review desktop/mobile layouts and both themes when changing shared styling. This design is recorded in PRODUCT.md and website/.impeccable/design.json; screenshots are local review evidence, not source assets.
+
+## Navigation correction and bilingual title
+
+Use 概率飞行工程 as the primary Chinese title, with Probabilistic Aviation retained as the secondary English name. The shared SiteTitle component stacks both names within the existing header height. Sidebar links and group labels use the same 14px font; nested group-label spans must inherit it instead of Starlight's large style. Preserve Starlight's header-dependent fixed TOC offset: never add unconditional padding to .right-sidebar. Compact TOC labels have an explicit 1.6 line height for Chinese glyphs.
