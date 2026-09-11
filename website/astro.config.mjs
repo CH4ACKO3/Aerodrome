@@ -8,7 +8,7 @@ export default defineConfig({
   site: 'https://ch4acko3.github.io', base: '/Aerodrome', output: 'static',
   markdown: { processor: unified({ remarkPlugins: [remarkMath], rehypePlugins: [rehypeKatex] }) },
   integrations: [starlight({
-    title: 'Probabilistic Aeronautics', defaultLocale: 'root',
+    title: 'Probabilistic Aviation', defaultLocale: 'root',
     locales: {root: {label: '简体中文', lang: 'zh-CN'}},
     description: '从航空力学与统计方法，到可以运行的控制实验。',
     customCss: ['katex/dist/katex.min.css', './src/styles/teaching.css'],

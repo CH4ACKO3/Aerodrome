@@ -1,4 +1,4 @@
-# Probabilistic Aeronautics
+# Probabilistic Aviation
 
 One static Astro + Starlight build, two execution modes. Node 24 is used to build;
 end users of the local textbook only need the built files and the Python runtime.

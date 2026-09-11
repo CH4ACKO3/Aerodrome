@@ -136,7 +136,7 @@ def main():
     parser.add_argument("--port", type=int, default=8765)
     args = parser.parse_args()
     with TeachingServer(args.site, args.port) as server:
-        print(f"Probabilistic Aeronautics: http://127.0.0.1:{server.server_port}/Aerodrome/", flush=True)
+        print(f"Probabilistic Aviation: http://127.0.0.1:{server.server_port}/Aerodrome/", flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:

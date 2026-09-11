@@ -1,5 +1,5 @@
 ---
-name: Probabilistic Aeronautics
+name: Probabilistic Aviation
 description: Chinese aerospace teaching documentation in the native Starlight reading interface.
 rounded:
   control: "0.25rem"
@@ -19,7 +19,7 @@ components:
     width: "100%"
 ---
 
-# Design System: Probabilistic Aeronautics
+# Design System: Probabilistic Aviation
 
 ## Overview
 
