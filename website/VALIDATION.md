@@ -51,3 +51,8 @@ Current limits: only the rigid-velocity lesson runs through the bridge; no job c
 - Removed network-font dependence from logo/sidebar; kept selected sidebar weight unchanged and reserved the document scrollbar gutter. Body font now uses optional display rather than late swap.
 - At 1280px, measured the logo and chapter 1/6 rectangles before and after scene loading, navigating to chapter 6, and opening search: coordinates and dimensions were identical in all four snapshots. This verifies settled layout, not every intermediate browser paint.
 - Checked the 390px scene layout visually. Astro check: 0 errors/warnings/hints; 39-page production build and internal path/math validation pass.
+
+## Compact reading layout — 2026-09-12
+
+- Verified 1280px desktop with both panels visible/hidden and preference restoration after navigation. At 390px, the native menu still opens despite saved desktop collapse preferences; chapter 1.1 is correctly highlighted.
+- Astro check has 0 errors/warnings/hints; static build and path/math validation pass for 45 pages.

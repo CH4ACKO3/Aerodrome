@@ -49,3 +49,9 @@ Use 概率飞行工程 as the primary Chinese title, with Probabilistic Aviation
 ## Stable navigation metrics
 
 The fixed site title and sidebar use --pa-navigation-font (Segoe UI / Microsoft YaHei / sans-serif), independent of network fonts. Sidebar active rows retain weight 500; color and background indicate selection without changing line breaks. The document reserves a stable scrollbar gutter. Body Inter uses font-display: optional to avoid a late font swap during reading; unavailable subsets fall back to system fonts. Do not restore swap-based webfonts in fixed navigation.
+
+## Reading layout refinement
+
+Following the DDIA reference, sidebar rows use .35rem vertical padding, .1rem sibling gaps and tighter appendix separation. Body paragraphs use theme gray-1, 1.8 line height and 1.15rem block margins. Keep chapter/unit URLs unchanged.
+
+Two labelled icon buttons beside the brand independently collapse the left manual navigation (desktop >=50rem) and right page TOC (>=72rem). Preferences persist in localStorage and restore before the main content is parsed. Mobile keeps Starlight's native menu and compact TOC regardless of desktop preferences. Buttons stay hidden without JavaScript. Keyboard focus and aria-expanded communicate state; header column geometry stays independent of panel visibility.
