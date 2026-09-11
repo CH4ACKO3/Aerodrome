@@ -15,7 +15,15 @@ export default defineConfig({
     social: [{icon: 'github', label: 'GitHub', href: 'https://github.com/CH4ACKO3/Aerodrome'}],
     sidebar: [
       {label: '手册目录', slug: ''},
-      'chapters/01-mathematical-tools',
+      {label: '1.数学工具基础', items: [
+        {label: '本章目录', slug: 'chapters/01-mathematical-tools'},
+        'chapters/01-mathematical-tools/01-linear-algebra',
+        'chapters/01-mathematical-tools/02-probability',
+        'chapters/01-mathematical-tools/03-statistics',
+        'chapters/01-mathematical-tools/04-decision-theory',
+        'chapters/01-mathematical-tools/05-optimization',
+        'chapters/01-mathematical-tools/06-dynamic-programming'
+      ]},
       'chapters/02-statistical-learning',
       'chapters/03-aircraft-control-models',
       'chapters/04-navigation',
