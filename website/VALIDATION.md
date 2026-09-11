@@ -56,3 +56,10 @@ Current limits: only the rigid-velocity lesson runs through the bridge; no job c
 
 - Verified 1280px desktop with both panels visible/hidden and preference restoration after navigation. At 390px, the native menu still opens despite saved desktop collapse preferences; chapter 1.1 is correctly highlighted.
 - Astro check has 0 errors/warnings/hints; static build and path/math validation pass for 45 pages.
+
+## Manual 1.1 content draft — 2026-09-12
+
+- Authored linear algebra and matrix calculus material in chapter 1.1, with explicit column-gradient / output-by-input Jacobian / Frobenius-gradient conventions. Original engineering examples and derivations; source checked against Murphy chapter 7, supplied April 18, 2025 PDF revision (printed pp. 229–274).
+- Extracted and ran the exact displayed Python example in WSL Ubuntu with the project JAX environment and x64 enabled on CPU. All nine example checks passed. Downloadable example matches the displayed code.
+- Additional numerical checks passed for the nonsymmetric quadratic gradient, inverse differential, log-absolute-determinant gradient, matrix chain rule, covariance gradient, symmetric parameter gradient, and full nonlinear weighted least-squares Hessian.
+- Browser inspection at 1440px and 390px: all inspected tables retain three columns, no KaTeX errors, and mobile document width remains 375px within the 390px viewport. Long math remains locally scrollable. No source PDF or book artwork is included in the site.
