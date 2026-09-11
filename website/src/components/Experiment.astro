@@ -1,5 +1,5 @@
 <section class="experiment" aria-label="速度控制实验">
-  <p id="connection" role="status">在线教材 · 使用预计算参考轨迹</p>
+  <p id="connection" role="status">在线手册 · 使用预计算参考轨迹</p>
   <button id="connect" type="button">检查本地连接</button>
   <form id="experiment-form">
     <fieldset><legend>实验参数</legend>
@@ -52,14 +52,14 @@
   async function connect() {
     connected = false; run.disabled = true;
     if (!['localhost','127.0.0.1'].includes(location.hostname)) {
-      status('在线教材 · 请按「开始使用」启动本地教学服务'); return;
+      status('在线手册 · 请按「开始使用」启动本地教学服务'); return;
     }
     status('正在检查本地版本…');
     try {
       const remote = await api('/api/v1/hello');
       connected = ['api_version','core_version','curriculum_version'].every(key => remote[key]===manifest[key]) && remote.experiments.includes('rigid-velocity-v1');
-      status(connected ? '本地已连接 · 可以运行实验' : '版本不匹配 · 请使用同一版本的教材和核心');
-    } catch { status('未连接本地服务 · 当前仍可阅读教材和参考结果'); }
+      status(connected ? '本地已连接 · 可以运行实验' : '版本不匹配 · 请使用同一版本的手册和核心');
+    } catch { status('未连接本地服务 · 当前仍可阅读手册和参考结果'); }
     run.disabled = !connected || busy;
   }
   get('connect').addEventListener('click', connect);

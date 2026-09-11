@@ -14,7 +14,7 @@ export default defineConfig({
     customCss: ['./src/styles/fonts.css', 'katex/dist/katex.min.css', './src/styles/teaching.css', './src/styles/editorial.css'],
     social: [{icon: 'github', label: 'GitHub', href: 'https://github.com/CH4ACKO3/Aerodrome'}],
     sidebar: [
-      {label: '课程目录', slug: ''},
+      {label: '手册目录', slug: ''},
       'chapters/01-mathematical-tools',
       'chapters/02-statistical-learning',
       'chapters/03-aircraft-control-models',

@@ -51,7 +51,7 @@ export async function mount(host:HTMLElement) {
   joint.addEventListener('input',()=>{if(Number(joint.value)===0) {
     const b=backend as SceneBackend & {submit?:(r:unknown)=>unknown};b?.submit?.({protocol_version:1,kind:'render',sequence:++sequence,frame:at(time),joints:[{entity_id:recording.scene.entities[0].id,node:'elevator',angle_rad:0,axis_local:[1,0,0]}]});
   }else update();});
-  unload.addEventListener('click',()=>{stop();++generation;backend?.dispose();backend=undefined;controls();status('图形资源已释放。教材与轨迹文件仍保留。');});
+  unload.addEventListener('click',()=>{stop();++generation;backend?.dispose();backend=undefined;controls();status('图形资源已释放。手册与轨迹文件仍保留。');});
   field<HTMLInputElement>('file').addEventListener('change',async event=>{
     const file=(event.target as HTMLInputElement).files?.[0];if(!file)return;
     try{if(file.size>20*1024*1024)throw Error('轨迹文件最多 20 MiB');const value=JSON.parse(await file.text());recording=validateRecording(value.render??value);await open();}catch(error){status(`导入失败：${String(error)}`);}

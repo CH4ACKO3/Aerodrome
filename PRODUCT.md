@@ -24,3 +24,7 @@ ngc/docs, ngc/examples, ngc/src and cross-platform validation. The F-16 model is
 
 ## Product Principles
 Keep equations visible. Separate teaching tasks from physics. Label static and computed results accurately. Preserve readable content when disconnected. Keep Node.js builds independent of Python.
+
+## Editorial terminology
+
+User-facing self-reference is 手册 (manual), including 手册目录 and 在线手册. Do not call this project a 课程 or 教材 in its own interface. Chapter 1 now has six approved section headings: 1.1 线性代数与矩阵计算, 1.2 概率论, 1.3 统计, 1.4 决策论, 1.5 优化, 1.6 动态规划. Their bodies remain placeholders until discussed with the user.
