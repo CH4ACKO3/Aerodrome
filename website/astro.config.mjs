@@ -11,7 +11,7 @@ export default defineConfig({
     title: 'Probabilistic Aviation', defaultLocale: 'root',
     locales: {root: {label: '简体中文', lang: 'zh-CN'}},
     description: '从航空力学与统计方法，到可以运行的控制实验。',
-    customCss: ['katex/dist/katex.min.css', './src/styles/teaching.css'],
+    customCss: ['@fontsource-variable/inter', 'katex/dist/katex.min.css', './src/styles/teaching.css', './src/styles/editorial.css'],
     social: [{icon: 'github', label: 'GitHub', href: 'https://github.com/CH4ACKO3/Aerodrome'}],
     sidebar: [
       {label: '课程目录', slug: ''},

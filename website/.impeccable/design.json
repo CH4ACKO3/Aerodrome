@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-11T14:31:08.9990205Z",
+  "generatedAt": "2026-09-11T15:33:57.1441248Z",
   "title": "Design System: Probabilistic Aviation",
   "extensions": {},
   "components": [
@@ -8,9 +8,9 @@
       "name": "Experiment button",
       "kind": "button",
       "refersTo": "experiment-button",
-      "description": "Neutral, theme-aware teaching experiment action.",
+      "description": "Bordered secondary experiment action; primary run/load actions use teal.",
       "html": "<button class=\"ds-experiment-button\" type=\"button\">下载参数</button>",
-      "css": ".ds-experiment-button { padding: .5rem .8rem; color: var(--sl-color-text); background: var(--sl-color-gray-6); border: 1px solid var(--sl-color-gray-3); border-radius: .25rem; cursor: pointer; } .ds-experiment-button:disabled { opacity: .5; cursor: not-allowed; } .ds-experiment-button:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 3px; }"
+      "css": ".ds-experiment-button { min-height: 40px; padding: .55rem .9rem; color: var(--sl-color-white); background: var(--sl-color-bg); border: 1px solid var(--pa-border); border-radius: 6px; } .ds-experiment-button:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 4px; }"
     },
     {
       "name": "Experiment numeric input",
@@ -18,11 +18,11 @@
       "refersTo": "experiment-input",
       "description": "Labelled numeric parameter with native bounds and validation.",
       "html": "<label class=\"ds-experiment-label\">初始速度 (m/s)<input class=\"ds-experiment-input\" type=\"number\" min=\"-20\" max=\"20\" step=\"0.1\" value=\"0\" required></label>",
-      "css": ".ds-experiment-label { display: grid; gap: .35rem; margin: 0; } .ds-experiment-input { width: 100%; padding: .5rem; background: var(--sl-color-bg); color: var(--sl-color-text); border: 1px solid var(--sl-color-gray-3); border-radius: .25rem; } .ds-experiment-input:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 3px; }"
+      "css": ".ds-experiment-label { display: grid; gap: .5rem; } .ds-experiment-input { width: 100%; min-height: 42px; padding: .6rem .75rem; background: var(--sl-color-bg); color: var(--sl-color-white); border: 1px solid var(--sl-color-gray-4); border-radius: 6px; }"
     }
   ],
   "narrative": {
-    "overview": "Preserve the native Astro/Starlight documentation interface. Chinese aerospace teaching content, English technical terms, visible equations and reproducible experiment data determine the reading experience. No separate creative metaphor or custom brand has been approved.",
+    "overview": "User-approved textbook redesign: clear numbered chapters, restrained teal accents, self-hosted Inter with Chinese system fallbacks, and integrated experiment surfaces. Preserve Starlight navigation and all existing lesson functionality.",
     "keyCharacteristics": [
       "Familiar documentation navigation and reading hierarchy.",
       "Theme-aware controls integrated into the lesson.",
@@ -30,13 +30,13 @@
     ],
     "rules": [],
     "dos": [
-      "Do inherit Starlight theme and typography for new teaching content.",
-      "Do preserve visible units, keyboard focus, status text and downloadable numerical results.",
-      "Do label precomputed and local results accurately and retain readable content when disconnected."
+      "Keep the seven approved chapter titles and appendices A–D.",
+      "Use editorial.css semantic colors and the documented 4/6/8/12px radius scale.",
+      "Preserve focus, units, statuses and reference/local result distinctions."
     ],
     "donts": [
-      "Don't imply that parameter edits recompute a reference chart.",
-      "Don't introduce a separate brand palette or speculative component system without an approved direction."
+      "Do not invent lesson subsections during visual work.",
+      "Do not imply that parameter edits recompute a reference chart."
     ]
   }
 }

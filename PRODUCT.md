@@ -5,7 +5,7 @@
 web
 
 ## Stack
-User confirmed Astro + Starlight, built with Node.js. The standard Starlight reading interface is retained; this work adds teaching content and an experiment panel rather than a new visual identity.
+User confirmed Astro + Starlight, built with Node.js. The user approved a visual redesign inspired by GitBook reading patterns: a restrained teal palette, self-hosted Inter typography, chapter-first navigation and integrated experiment panels. Starlight supplies responsive navigation and search.
 
 ## Users
 Aerospace undergraduates and beginning graduate students learning statistical control methods.

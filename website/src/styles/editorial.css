@@ -1,0 +1,111 @@
+/* Probabilistic Aviation: a quiet textbook shell with a distinct lab surface. */
+:root {
+  --sl-font: 'Inter Variable', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  --sl-content-width: 48rem;
+  --sl-sidebar-width: 18rem;
+  --sl-nav-height: 4.25rem;
+  --sl-text-base: 1rem;
+  --sl-color-accent-low: #10393c;
+  --sl-color-accent: #57bfc3;
+  --sl-color-accent-high: #b5e6e6;
+  --pa-surface: #192328;
+  --pa-border: #35454d;
+  --pa-muted: #adbdc5;
+  --pa-primary: #9bdddf;
+  --pa-primary-text: #142d33;
+  --pa-shadow: 0 8px 24px #00000020;
+}
+:root[data-theme='light'] {
+  --sl-color-white: #192b35;
+  --sl-color-gray-1: #263c47;
+  --sl-color-gray-2: #435963;
+  --sl-color-gray-3: #647881;
+  --sl-color-gray-4: #a6b4bb;
+  --sl-color-gray-5: #dce3e7;
+  --sl-color-gray-6: #f3f6f7;
+  --sl-color-black: #ffffff;
+  --sl-color-accent-low: #e9f3f2;
+  --sl-color-accent: #08747b;
+  --sl-color-accent-high: #125f65;
+  --sl-color-bg-nav: #ffffff;
+  --sl-color-bg-sidebar: #f8fafb;
+  --pa-surface: #f7f9fa;
+  --pa-border: #dce3e7;
+  --pa-muted: #536b76;
+  --pa-primary: #17656d;
+  --pa-primary-text: #ffffff;
+  --pa-shadow: 0 8px 24px #23394208;
+}
+html { scroll-padding-top: 6rem; scrollbar-color: var(--sl-color-gray-4) transparent; }
+body { -webkit-font-smoothing: antialiased; }
+::selection { background: var(--sl-color-accent-low); color: var(--sl-color-accent-high); }
+input,textarea { caret-color: var(--sl-color-text-accent); }
+:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 4px; }
+.header { column-gap: 2rem; }
+.site-title { font-size: 1.12rem; font-weight: 650; letter-spacing: -.025em; color: var(--sl-color-white); }
+.sidebar-pane { border-inline-end: 1px solid var(--pa-border); }
+.sidebar-content { padding: 1.75rem 1rem; }
+.sidebar-content a, .sidebar-content summary { font-size: .83rem; line-height: 1.65; padding: .65rem .8rem; border-radius: 6px; }
+.sidebar-content li + li { margin-top: .2rem; }
+.sidebar-content a[aria-current='page'] { color: var(--sl-color-accent-high); background: var(--sl-color-accent-low); font-weight: 650; }
+.sidebar-content a:not([aria-current='page']):hover { color: var(--sl-color-white); background: var(--sl-color-gray-6); }
+.sidebar-content ul ul { border-inline-start-color: var(--pa-border); }
+.sidebar-content .top-level > li:nth-last-child(4) { padding-top: 1.2rem; margin-top: 1.2rem; border-top: 1px solid var(--pa-border); }
+.right-sidebar { padding-top: 2.5rem; }
+.right-sidebar h2 { font-size: .75rem; font-weight: 600; color: var(--pa-muted); }
+.right-sidebar a { font-size: .78rem; line-height: 1.65; }
+.content-panel { border: none; padding-top: 2.75rem; }
+.content-panel + .content-panel { padding-top: 1.25rem; }
+h1#_top { font-size: clamp(1.85rem, 3.1vw, 2.65rem); line-height: 1.3; letter-spacing: -.035em; font-weight: 650; text-wrap: balance; }
+.sl-markdown-content { line-height: 1.9; }
+.sl-markdown-content > p { color: var(--sl-color-gray-2); }
+.sl-markdown-content h2 { font-size: 1.4rem; font-weight: 650; letter-spacing: -.025em; margin-top: 3rem; padding-bottom: .8rem; border-bottom: 1px solid var(--pa-border); }
+.sl-markdown-content h3 { font-size: 1.12rem; font-weight: 650; margin-top: 2rem; }
+.sl-markdown-content a { text-underline-offset: .23em; text-decoration-thickness: 1px; }
+.sl-markdown-content :not(pre) > code { font-size: .86em; border: 1px solid var(--pa-border); padding: .12em .35em; border-radius: 4px; }
+.sl-markdown-content table { font-size: .88rem; width: 100%; border-collapse: collapse; }
+.sl-markdown-content th { background: var(--pa-surface); font-size: .8rem; font-weight: 650; }
+.sl-markdown-content td,.sl-markdown-content th { padding: .85rem 1rem; border-bottom: 1px solid var(--pa-border); }
+.sl-markdown-content details { border: 1px solid var(--pa-border); border-radius: 8px; padding: .9rem 1.1rem; background: var(--sl-color-bg); }
+.sl-markdown-content summary { font-size: .88rem; font-weight: 600; cursor: pointer; }
+.pagination-links { gap: 1rem; margin-top: 3rem; }
+.pagination-links a { box-shadow: none; border-color: var(--pa-border); border-radius: 8px; padding: 1.2rem; }
+.pagination-links a:hover { border-color: var(--sl-color-accent); background: var(--pa-surface); }
+.pagination-links .link-title { font-size: .95rem; }
+.expressive-code { margin-block: 1.5rem; }
+.katex-display { padding: 1.1rem; background: var(--pa-surface); border-radius: 6px; overflow-x: auto; }
+
+/* The same control vocabulary for numerical and graphical experiments. */
+.experiment,.scene-viewer { margin-block: 2rem; border: 1px solid var(--pa-border); border-radius: 12px; padding: 1.5rem; background: var(--pa-surface); box-shadow: var(--pa-shadow); }
+.experiment label,.scene-viewer label { font-size: .8rem; font-weight: 550; color: var(--sl-color-gray-2); line-height: 1.6; gap: .5rem; }
+.experiment input,.scene-viewer input:not([type=range]),.scene-viewer select { font: inherit; font-size: .9rem; min-height: 42px; padding: .6rem .75rem; border: 1px solid var(--sl-color-gray-4); border-radius: 6px; background: var(--sl-color-bg); color: var(--sl-color-white); }
+.experiment input:hover,.scene-viewer input:hover,.scene-viewer select:hover { border-color: var(--sl-color-accent); }
+.experiment button,.scene-actions button,.scene-viewer input::file-selector-button { font: inherit; font-size: .82rem; font-weight: 550; min-height: 40px; padding: .55rem .9rem; border: 1px solid var(--pa-border); border-radius: 6px; color: var(--sl-color-white); background: var(--sl-color-bg); transition: background .15s, border-color .15s; }
+.experiment button:hover:not(:disabled),.scene-actions button:hover:not(:disabled) { background: var(--sl-color-accent-low); border-color: var(--sl-color-accent); }
+.experiment #run,.scene-actions [data-load] { background: var(--pa-primary); color: var(--pa-primary-text); border-color: var(--pa-primary); }
+.experiment #run:hover:not(:disabled),.scene-actions [data-load]:hover:not(:disabled) { background: var(--sl-color-accent-high); color: var(--sl-color-bg); }
+.scene-viewer input::file-selector-button { min-height: 30px; padding: .2rem .65rem; margin-right: .75rem; }
+.experiment button:disabled,.scene-actions button:disabled { opacity: .55; }
+.experiment [role=status],.scene-viewer [role=status] { font-size: .84rem; line-height: 1.7; color: var(--sl-color-accent-high); }
+.scene-viewer > p { font-size: .79rem; color: var(--pa-muted); line-height: 1.8; }
+.scene-fields { gap: 1rem; }
+.scene-fields label { margin: 0; }
+.scene-canvas { border-radius: 8px; height: 440px; margin-block: 1rem; }
+.scene-canvas:empty { height: 160px; display: grid; place-items: center; border: 1px dashed var(--sl-color-gray-4); background: var(--sl-color-bg); }
+.scene-canvas:empty::before { content: '选择环境，加载三维场景'; font-size: .85rem; color: var(--pa-muted); }
+.scene-viewer [data-metrics] { font-variant-numeric: tabular-nums; }
+.scene-secondary { margin-top: 1.5rem; }
+.scene-secondary label { margin-bottom: 1rem; }
+.scene-viewer input[type=range] { min-height: 28px; }
+@media (min-width: 72rem) { .main-frame { padding-inline-end: .5rem; } }
+@media (max-width: 50rem) {
+  :root { --sl-nav-height: 3.75rem; }
+  .site-title { font-size: 1rem; }
+  .content-panel { padding-top: 1.75rem; }
+  .experiment,.scene-viewer { padding: 1rem; border-radius: 8px; margin-inline: 0; }
+  .scene-canvas { height: 320px; }
+  .scene-fields { grid-template-columns: minmax(0,1fr); }
+  .scene-actions { gap: .5rem; }
+  .scene-actions button { flex: 1 0 auto; }
+}
+@media(prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior: auto !important; transition: none !important; } }

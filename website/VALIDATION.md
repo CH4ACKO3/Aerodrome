@@ -27,3 +27,13 @@ Current limits: only the rigid-velocity lesson runs through the bridge; no job c
 - Cesium (~4.9 MB minified JavaScript before transfer compression) and MapLibre (~1.1 MB) remain lazy chunks. Vite reports the large optional chunks; this is not evidence of those engines loading on ordinary lesson pages.
 - 3D Tiles Renderer warns that 1.1 feature support is partial; the bundled simple glTF-content fixture was exercised, not all 3D Tiles 1.1 extensions.
 - Mobile 390px viewport has no horizontal document overflow; ocean/aircraft visible. Deliberately missing GLB returns a readable error, corrected URL recovers, release removes all canvases, and reload succeeds.
+
+## Textbook visual redesign
+
+- Added self-hosted Inter Variable and a theme-aware editorial stylesheet; preserved chapter titles and lesson URLs.
+- Astro check: 0 errors, warnings or hints. Production build and internal-path/math validation pass for 39 pages. Existing optional i18n/404 and lazy engine chunk warnings remain.
+- Direct browser review: homepage at desktop and 390px mobile; chapter navigation page; light and dark scene layouts; Three.js loading and playback; numerical experiment controls and chart.
+- Mobile scene document width is 375px within a 390px viewport (15px native scrollbar), with no horizontal document overflow.
+- Local experiment returned a fresh CPU result with final velocity error 0.0176 m/s; inspected browser error log was empty.
+- Local review screenshots: .impeccable/review/redesign-home-desktop.png, redesign-home-mobile.png and redesign-lab-desktop.png. No subagents were used.
+- Style detector reported only undocumented radius values; DESIGN.md now records the intentional 4/6/8/12px scale.

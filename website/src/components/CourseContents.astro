@@ -1,0 +1,41 @@
+---
+const chapters = [
+  ['01','数学工具基础','01-mathematical-tools'],
+  ['02','统计学习方法','02-statistical-learning'],
+  ['03','飞行器的控制模型','03-aircraft-control-models'],
+  ['04','导航——从测量推断状态','04-navigation'],
+  ['05','控制——在噪声下保持行为','05-control'],
+  ['06','制导与策略——寻找最优动作规划','06-guidance-and-policy'],
+  ['07','综合实验','07-integrated-experiments'],
+];
+const appendices = [
+  ['A','符号约定','a-notation'],
+  ['B','工程编程与程序设计基础','b-engineering-programming'],
+  ['C','Aerodrome 框架','c-aerodrome'],
+  ['D','参考材料','d-references'],
+];
+---
+<nav class="course-contents" aria-label="课程章节与附录">
+  <h2 id="课程章节">课程章节</h2>
+  <ol class="chapter-list">
+    {chapters.map(([number,title,slug])=><li><a href={`/Aerodrome/chapters/${slug}/`}><span class="chapter-number">{number}</span><span>{title}</span><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></li>)}
+  </ol>
+  <h2 id="附录">附录</h2>
+  <ul class="appendix-list">
+    {appendices.map(([number,title,slug])=><li><a href={`/Aerodrome/appendices/${slug}/`}><span class="chapter-number">{number}</span><span>{title}</span></a></li>)}
+  </ul>
+</nav>
+<style>
+  .course-contents { margin-block:2.5rem; }
+  .course-contents h2 { font-size:.88rem;letter-spacing:.03em;color:var(--pa-muted);border:0;padding:0;margin-block:2rem 1rem; }
+  .course-contents ol,.course-contents ul { list-style:none;padding:0;margin:0; }
+  .course-contents li { margin:0; }
+  .chapter-list { border-top:1px solid var(--pa-border); }
+  .chapter-list a { display:grid;grid-template-columns:2.5rem 1fr 18px;gap:1rem;align-items:center;padding:1.25rem .6rem;border-bottom:1px solid var(--pa-border);text-decoration:none;color:var(--sl-color-white);font-size:1rem;font-weight:550; }
+  .chapter-list a:hover,.appendix-list a:hover { background:var(--sl-color-accent-low);color:var(--sl-color-accent-high); }
+  .chapter-number { font-size:.78rem;font-weight:500;font-variant-numeric:tabular-nums;color:var(--pa-muted); }
+  .chapter-list svg { color:var(--pa-muted); }
+  .appendix-list { display:grid;grid-template-columns:1fr 1fr;gap:.5rem 1.5rem; }
+  .appendix-list a { display:flex;gap:1rem;padding:.75rem .6rem;text-decoration:none;color:var(--sl-color-gray-2);font-size:.86rem; }
+  @media(max-width:40rem) { .appendix-list {grid-template-columns:1fr;} .chapter-list a {grid-template-columns:1.5rem 1fr 16px;gap:.6rem;font-size:.92rem;} }
+</style>
