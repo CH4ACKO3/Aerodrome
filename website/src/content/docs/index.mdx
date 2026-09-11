@@ -1,28 +1,29 @@
 ---
-title: 从公式到一次可复现的飞行实验
-description: 航空力学、统计方法与可运行的控制课程。
+title: Probabilistic Aviation
+description: 从工程实际出发，学习统计学习方法在飞行器专业中的应用。
 ---
 
-**Probabilistic Aviation** 是面向航空专业本科生与低年级研究生的学习手册。我们从模型假设和坐标约定出发，建立导航、制导与控制链路，再用可复现的实验检验它。
+本课程面向航空专业本科生与低年级研究生，从工程实际出发，逐步介绍统计学习方法在飞行器专业中的应用。
 
-你现在阅读的是同一套教材的网页版本。在线时可以阅读全部内容、查看参考轨迹；从本地 Aerodrome 启动时，同一页还可以调用本机的 Python / JAX 实例。
+正文按章、节组织：先学习数学工具与统计学习方法，再进入飞行器建模、导航、控制、制导与综合实验。程序设计、框架用法与工程文档放在附录，供需要时查阅。
 
-## 从这里开始
+目前已确定章标题，各章小节与正文将逐步编写。
 
-1. [准备运行环境](/Aerodrome/getting-started/)：了解在线阅读和本地实验的区别。
-2. [完成刚体速度控制实验](/Aerodrome/experiments/velocity-control/)：从牛顿第二定律到比例反馈，修改参数并观察响应。
-3. [建立 World](/Aerodrome/reference/world/)：理解实体、状态、tick 和决策步。
-4. [进入 F-16 纵向实验](/Aerodrome/reference/f16-level-flight/)：学习配平、线性化与反馈控制。
+## 课程章节
 
-## 阅读路线
+- [1.数学工具基础](/Aerodrome/chapters/01-mathematical-tools/)
+- [2.统计学习方法](/Aerodrome/chapters/02-statistical-learning/)
+- [3.飞行器的控制模型](/Aerodrome/chapters/03-aircraft-control-models/)
+- [4.导航——从测量推断状态](/Aerodrome/chapters/04-navigation/)
+- [5.控制——在噪声下保持行为](/Aerodrome/chapters/05-control/)
+- [6.制导与策略——寻找最优动作规划](/Aerodrome/chapters/06-guidance-and-policy/)
+- [7.综合实验](/Aerodrome/chapters/07-integrated-experiments/)
 
-| 你想回答的问题 | 对应内容 |
-|---|---|
-| 力和力矩如何改变飞行器状态？ | [六自由度刚体](/Aerodrome/reference/rigid-body/) · [坐标与姿态](/Aerodrome/reference/simulation-tools/) |
-| 如何描述和设计控制系统？ | [状态空间与传递函数](/Aerodrome/reference/linear-control/) · [公式与代码](/Aerodrome/reference/equations/) |
-| 如何组织多个模型与外部模块？ | [计算图](/Aerodrome/reference/dataflow/) · [跨 tick 编译](/Aerodrome/reference/module-compiler/) |
-| 如何让实验可复现、可比较？ | [配置系统](/Aerodrome/reference/configuration/) · [批量实验](/Aerodrome/reference/batch/) · [Gymnasium](/Aerodrome/reference/gymnasium/) |
+## 附录
 
-## 模型有边界，结论也有边界
+- [A.符号约定](/Aerodrome/appendices/a-notation/)
+- [B.工程编程与程序设计基础](/Aerodrome/appendices/b-engineering-programming/)
+- [C.Aerodrome 框架](/Aerodrome/appendices/c-aerodrome/)
+- [D.参考材料](/Aerodrome/appendices/d-references/)
 
-目前的 F-16 是纵向教学子模型，并非完整六自由度飞机。每次实验都需要明确状态、输入、单位、适用范围和数值假设。空气动力学与材料力学的统计学习课程将作为独立学习单元扩展，现阶段尚未完成。
+在线版与本地版使用同一套教材。本地实验的运行方式及已有示例见[附录 C](/Aerodrome/appendices/c-aerodrome/)。

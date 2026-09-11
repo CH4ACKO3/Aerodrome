@@ -14,10 +14,23 @@ export default defineConfig({
     customCss: ['katex/dist/katex.min.css', './src/styles/teaching.css'],
     social: [{icon: 'github', label: 'GitHub', href: 'https://github.com/CH4ACKO3/Aerodrome'}],
     sidebar: [
-      {label: '开始学习', items: [{label: '课程导读', slug: ''}, {label: '在线与本地', slug: 'getting-started'}, {label: '刚体速度控制实验', slug: 'experiments/velocity-control'}, {label:'三维场景与飞机',slug:'experiments/scene-viewer'}]},
-      {label: '模型与算法', items: ['reference/equations', 'reference/rigid-body', 'reference/simulation-tools', 'reference/geography-atmosphere', 'reference/linear-control', 'reference/f16-level-flight']},
-      {label: 'World 与实验管线', items: ['reference/world', 'reference/dataflow', 'reference/module-compiler', 'reference/batch', 'reference/configuration', 'reference/gymnasium']},
-      {label: '全部工程文档', collapsed: true, items: [{autogenerate: {directory: 'reference'}}]}
+      {label: '课程目录', slug: ''},
+      'chapters/01-mathematical-tools',
+      'chapters/02-statistical-learning',
+      'chapters/03-aircraft-control-models',
+      'chapters/04-navigation',
+      'chapters/05-control',
+      'chapters/06-guidance-and-policy',
+      'chapters/07-integrated-experiments',
+      'appendices/a-notation',
+      'appendices/b-engineering-programming',
+      {label: 'C.Aerodrome 框架', collapsed: true, items: [
+        {label: '附录说明', slug: 'appendices/c-aerodrome'},
+        {label: '在线与本地使用', slug: 'getting-started'},
+        {label: '现有程序示例', collapsed: true, items: ['experiments/velocity-control', 'experiments/scene-viewer']},
+        {label: '工程文档', collapsed: true, items: [{autogenerate: {directory: 'reference'}}]}
+      ]},
+      'appendices/d-references'
     ]
   })]
 });

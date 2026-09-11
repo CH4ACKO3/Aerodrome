@@ -1,5 +1,15 @@
 # Probabilistic Aviation
 
+## Course authoring
+
+The main navigation follows seven chapters and appendices A–D, as confirmed by
+the author. Chapter landing pages are in `src/content/docs/chapters`, appendix
+landing pages in `src/content/docs/appendices`. Their titles are fixed; sections
+and prose will be agreed and written incrementally. Do not automatically fill
+chapter outlines or promote existing engineering notes into course sections.
+Existing framework documentation and program examples remain under appendix C
+in the sidebar, retaining their original URLs.
+
 One static Astro + Starlight build, two execution modes. Node 24 is used to build;
 end users of the local textbook only need the built files and the Python runtime.
 
