@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-11T14:31:08.9990205Z",
+  "title": "Design System: Probabilistic Aeronautics",
+  "extensions": {},
+  "components": [
+    {
+      "name": "Experiment button",
+      "kind": "button",
+      "refersTo": "experiment-button",
+      "description": "Neutral, theme-aware teaching experiment action.",
+      "html": "<button class=\"ds-experiment-button\" type=\"button\">下载参数</button>",
+      "css": ".ds-experiment-button { padding: .5rem .8rem; color: var(--sl-color-text); background: var(--sl-color-gray-6); border: 1px solid var(--sl-color-gray-3); border-radius: .25rem; cursor: pointer; } .ds-experiment-button:disabled { opacity: .5; cursor: not-allowed; } .ds-experiment-button:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 3px; }"
+    },
+    {
+      "name": "Experiment numeric input",
+      "kind": "input",
+      "refersTo": "experiment-input",
+      "description": "Labelled numeric parameter with native bounds and validation.",
+      "html": "<label class=\"ds-experiment-label\">初始速度 (m/s)<input class=\"ds-experiment-input\" type=\"number\" min=\"-20\" max=\"20\" step=\"0.1\" value=\"0\" required></label>",
+      "css": ".ds-experiment-label { display: grid; gap: .35rem; margin: 0; } .ds-experiment-input { width: 100%; padding: .5rem; background: var(--sl-color-bg); color: var(--sl-color-text); border: 1px solid var(--sl-color-gray-3); border-radius: .25rem; } .ds-experiment-input:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 3px; }"
+    }
+  ],
+  "narrative": {
+    "overview": "Preserve the native Astro/Starlight documentation interface. Chinese aerospace teaching content, English technical terms, visible equations and reproducible experiment data determine the reading experience. No separate creative metaphor or custom brand has been approved.",
+    "keyCharacteristics": [
+      "Familiar documentation navigation and reading hierarchy.",
+      "Theme-aware controls integrated into the lesson.",
+      "Explicit distinction between precomputed references and local simulation results."
+    ],
+    "rules": [],
+    "dos": [
+      "Do inherit Starlight theme and typography for new teaching content.",
+      "Do preserve visible units, keyboard focus, status text and downloadable numerical results.",
+      "Do label precomputed and local results accurately and retain readable content when disconnected."
+    ],
+    "donts": [
+      "Don't imply that parameter edits recompute a reference chart.",
+      "Don't introduce a separate brand palette or speculative component system without an approved direction."
+    ]
+  }
+}

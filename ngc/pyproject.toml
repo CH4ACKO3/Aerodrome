@@ -28,6 +28,7 @@ gym = [
 ]
 
 [project.scripts]
+aerodrome-teach = "aerodrome.teaching.server:main"
 aerodrome = "aerodrome.configuration.cli:main"
 aerodrome-hydra = "aerodrome.configuration.hydra_cli:main"
 

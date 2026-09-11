@@ -1,0 +1,89 @@
+<section class="experiment" aria-label="速度控制实验">
+  <p id="connection" role="status">在线教材 · 使用预计算参考轨迹</p>
+  <button id="connect" type="button">检查本地连接</button>
+  <form id="experiment-form">
+    <fieldset><legend>实验参数</legend>
+      <label>初始速度 (m/s)<input name="initial_velocity_m_s" type="number" min="-20" max="20" step="0.1" value="0" required /></label>
+      <label>目标速度 (m/s)<input name="target_velocity_m_s" type="number" min="-20" max="20" step="0.1" value="2" required /></label>
+      <label>比例增益 (s⁻¹)<input name="gain_per_s" type="number" min="0.05" max="10" step="0.05" value="1" required /></label>
+      <label>质量 (kg)<input name="mass_kg" type="number" min="1" max="100000" step="1" value="1000" required /></label>
+      <label>推力上限 (N)<input name="max_force_N" type="number" min="1" max="100000" step="1" value="1000" required /></label>
+    </fieldset>
+    <div class="actions"><button id="run" disabled>运行本地实验</button><button id="config" type="button">下载参数</button><button id="download" type="button" disabled>下载结果</button></div>
+  </form>
+  <p id="result-status" role="status">正在加载参考数据…</p>
+  <svg id="trajectory" viewBox="0 0 640 260" role="img" aria-labelledby="chart-title chart-desc">
+    <title id="chart-title">速度随时间变化</title><desc id="chart-desc">横轴时间秒，纵轴速度米每秒。实线为速度，虚线为目标。</desc>
+  </svg>
+  <details><summary>结果数据与可复现参数</summary><pre id="result-data"></pre></details>
+</section>
+<script>
+  const get = (id: string) => document.getElementById(id)!;
+  const form = get('experiment-form') as HTMLFormElement;
+  const run = get('run') as HTMLButtonElement;
+  let manifest: Record<string, unknown>, result: any, connected = false, busy = false;
+  const status = (text: string) => { get('connection').textContent = text; };
+  const api = async (url: string, options?: RequestInit) => {
+    const response = await fetch(url, { ...options, signal: AbortSignal.timeout(15000) });
+    if (!response.ok) throw new Error(`请求失败 (${response.status})`);
+    return response.json();
+  };
+  const config = () => Object.fromEntries([...new FormData(form)].map(([key, value]) => [key, Number(value)]));
+  function download(data: unknown, name: string) {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+    const link = document.createElement('a'); link.href = url; link.download = name; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function show(data: any, source: string) {
+    result = data;
+    const values = [...data.velocity_m_s, data.config.target_velocity_m_s];
+    const lo = Math.min(...values) - 0.2, hi = Math.max(...values) + 0.2;
+    const duration = data.time_s.at(-1);
+    const x = (t: number) => 60 + t / duration * 555;
+    const y = (v: number) => 210 - (v-lo)/(hi-lo)*185;
+    const points = data.time_s.map((t: number, i: number) => `${x(t)},${y(data.velocity_m_s[i])}`).join(' ');
+    // Only numeric simulation data enters SVG; no user text is interpreted as markup.
+    get('trajectory').innerHTML = `<title id="chart-title">速度随时间变化</title><desc id="chart-desc">实线为速度，虚线为目标；完整数值可下载。</desc><path d="M60 20V210H615" fill="none" stroke="currentColor"/><polyline points="${points}" fill="none" stroke="var(--sl-color-text-accent)" stroke-width="3"/><path d="M60 ${y(data.config.target_velocity_m_s)}H615" stroke="currentColor" stroke-dasharray="5 5"/><text x="60" y="12" fill="currentColor">m/s</text><path d="M55 ${y(hi)}H60 M55 ${y(lo)}H60" stroke="currentColor"/><text x="10" y="${y(hi)}" dominant-baseline="middle" fill="currentColor">${hi.toFixed(1)}</text><text x="10" y="210" fill="currentColor">${lo.toFixed(1)}</text><text x="60" y="240" fill="currentColor">0</text><text x="560" y="240" fill="currentColor">${duration.toFixed(1)} s</text>`;
+    get('result-status').textContent = `${source} · 末端误差 ${data.final_error_m_s.toFixed(4)} m/s · ${data.device}`;
+    get('result-data').textContent = JSON.stringify({config:data.config, dt_s:data.dt_s, manifest:data.manifest, samples:data.time_s.filter((_:number,i:number)=>i%25===0).map((t:number,i:number)=>({time_s:t,velocity_m_s:data.velocity_m_s[i*25]}))},null,2);
+    (get('download') as HTMLButtonElement).disabled = false;
+  }
+  async function connect() {
+    connected = false; run.disabled = true;
+    if (!['localhost','127.0.0.1'].includes(location.hostname)) {
+      status('在线教材 · 请按「开始使用」启动本地教学服务'); return;
+    }
+    status('正在检查本地版本…');
+    try {
+      const remote = await api('/api/v1/hello');
+      connected = ['api_version','core_version','curriculum_version'].every(key => remote[key]===manifest[key]) && remote.experiments.includes('rigid-velocity-v1');
+      status(connected ? '本地已连接 · 可以运行实验' : '版本不匹配 · 请使用同一版本的教材和核心');
+    } catch { status('未连接本地服务 · 当前仍可阅读教材和参考结果'); }
+    run.disabled = !connected || busy;
+  }
+  get('connect').addEventListener('click', connect);
+  get('config').addEventListener('click', () => download({experiment:'rigid-velocity-v1',manifest,config:config()}, 'velocity-config.json'));
+  get('download').addEventListener('click', () => download(result, 'velocity-result.json'));
+  form.addEventListener('input', () => { get('result-status').textContent = '参数已修改；图中仍是上一次结果。运行本地实验后更新。'; });
+  form.addEventListener('submit', async event => {
+    event.preventDefault(); if (!connected || busy) return;
+    busy = true; run.disabled = true;
+    try {
+      const job = await api('/api/v1/jobs', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({experiment:'rigid-velocity-v1',manifest,config:config()})});
+      get('result-status').textContent = '正在计算 · 首次 JAX 编译可能需要较长时间';
+      for (;;) {
+        await new Promise(resolve => setTimeout(resolve,1000));
+        const state = await api(`/api/v1/jobs/${job.job_id}`);
+        if (state.status==='complete') { show(state.result, '本地仿真结果'); break; }
+        if (state.status==='failed') throw new Error(state.error);
+      }
+    } catch (error) {
+      get('result-status').textContent = `${error instanceof Error ? error.message : '连接中断'}；已保留上次结果。不会自动重新提交实验。`;
+      connected = false; status('连接或计算异常 · 请检查本地服务并重新连接');
+    } finally { busy=false; run.disabled=!connected; }
+  });
+  const base = import.meta.env.BASE_URL.replace(/\/$/,'');
+  Promise.all([api(`${base}/teaching-manifest.json`), api(`${base}/examples/rigid-velocity-v1.json`)])
+    .then(([info,data]) => { manifest=info; show(data,'参考轨迹 · 预计算，非当前参数实时结果'); return connect(); })
+    .catch(() => { get('result-status').textContent='参考数据加载失败，请刷新页面重试。'; });
+</script>

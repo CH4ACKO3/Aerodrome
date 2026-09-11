@@ -41,3 +41,4 @@ legacy/
 site/
 node_modules
 torchlight.config.js
+.impeccable/review/

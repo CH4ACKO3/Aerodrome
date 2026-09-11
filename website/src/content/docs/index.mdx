@@ -1,0 +1,28 @@
+---
+title: 从公式到一次可复现的飞行实验
+description: 航空力学、统计方法与可运行的控制课程。
+---
+
+**Probabilistic Aeronautics** 是面向航空专业本科生与低年级研究生的学习手册。我们从模型假设和坐标约定出发，建立导航、制导与控制链路，再用可复现的实验检验它。
+
+你现在阅读的是同一套教材的网页版本。在线时可以阅读全部内容、查看参考轨迹；从本地 Aerodrome 启动时，同一页还可以调用本机的 Python / JAX 实例。
+
+## 从这里开始
+
+1. [准备运行环境](/Aerodrome/getting-started/)：了解在线阅读和本地实验的区别。
+2. [完成刚体速度控制实验](/Aerodrome/experiments/velocity-control/)：从牛顿第二定律到比例反馈，修改参数并观察响应。
+3. [建立 World](/Aerodrome/reference/world/)：理解实体、状态、tick 和决策步。
+4. [进入 F-16 纵向实验](/Aerodrome/reference/f16-level-flight/)：学习配平、线性化与反馈控制。
+
+## 阅读路线
+
+| 你想回答的问题 | 对应内容 |
+|---|---|
+| 力和力矩如何改变飞行器状态？ | [六自由度刚体](/Aerodrome/reference/rigid-body/) · [坐标与姿态](/Aerodrome/reference/simulation-tools/) |
+| 如何描述和设计控制系统？ | [状态空间与传递函数](/Aerodrome/reference/linear-control/) · [公式与代码](/Aerodrome/reference/equations/) |
+| 如何组织多个模型与外部模块？ | [计算图](/Aerodrome/reference/dataflow/) · [跨 tick 编译](/Aerodrome/reference/module-compiler/) |
+| 如何让实验可复现、可比较？ | [配置系统](/Aerodrome/reference/configuration/) · [批量实验](/Aerodrome/reference/batch/) · [Gymnasium](/Aerodrome/reference/gymnasium/) |
+
+## 模型有边界，结论也有边界
+
+目前的 F-16 是纵向教学子模型，并非完整六自由度飞机。每次实验都需要明确状态、输入、单位、适用范围和数值假设。空气动力学与材料力学的统计学习课程将作为独立学习单元扩展，现阶段尚未完成。

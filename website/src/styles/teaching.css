@@ -1,0 +1,11 @@
+.experiment { border-block: 1px solid var(--sl-color-gray-5); padding-block: 1.5rem; }
+.experiment fieldset { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; border: 0; padding: 1rem 0; }
+.experiment label { display: grid; gap: .35rem; margin: 0; }
+.experiment input { width: 100%; padding: .5rem; background: var(--sl-color-bg); color: var(--sl-color-text); border: 1px solid var(--sl-color-gray-3); border-radius: .25rem; }
+.experiment button { padding: .5rem .8rem; color: var(--sl-color-text); background: var(--sl-color-gray-6); border: 1px solid var(--sl-color-gray-3); border-radius: .25rem; cursor: pointer; }
+.experiment button:disabled { opacity: .5; cursor: not-allowed; }
+.experiment :focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 3px; }
+.experiment .actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.experiment .actions > * { margin: 0; }
+.experiment svg { width: 100%; height: auto; margin-block: 1rem; }
+.experiment pre { max-height: 24rem; overflow: auto; }

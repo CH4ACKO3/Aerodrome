@@ -1,0 +1,28 @@
+{
+  "name": "probabilistic-aeronautics",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "scripts": {
+    "prepare-content": "node scripts/prepare-content.mjs",
+    "dev": "npm run prepare-content && astro dev --host 127.0.0.1",
+    "build": "npm run prepare-content && astro build && node scripts/check-output.mjs",
+    "preview": "astro preview --host 127.0.0.1",
+    "check": "npm run prepare-content && astro check"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.0",
+    "@astrojs/starlight": "0.42.0",
+    "astro": "7.3.2",
+    "katex": "^0.16.22",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.9.3"
+  }
+}
