@@ -27,6 +27,8 @@ Keep equations visible. Separate teaching tasks from physics. Label static and c
 
 ## Editorial terminology
 
+Chapter 1 should explain mathematical concepts gradually, starting with theory and simple mathematical examples, then adding engineering examples. NumPy and PyTorch comparisons should distinguish mathematical objects from array shapes and data types. Revise individual subsections collaboratively; do not automatically rewrite the rest of the chapter.
+
 User-facing self-reference is 手册 (manual), including 手册目录 and 在线手册. Do not call this project a 课程 or 教材 in its own interface. Chapter 1 now has six approved section headings: 1.1 线性代数与矩阵计算, 1.2 概率论, 1.3 统计, 1.4 决策论, 1.5 优化, 1.6 动态规划. Their bodies are authored only when requested by the user; 1.1 now contains a review draft, while 1.2–1.6 remain placeholders.
 
 Numbered units such as 1.1 and 1.2 are individual pages nested under the chapter in the left sidebar. More detailed headings belong within those pages and appear in the on-page TOC. Chapter landing pages link to their units; do not put all units in one chapter article. Chapter 1's six approved units follow this structure; 1.1 has a content draft and the other units remain placeholders.

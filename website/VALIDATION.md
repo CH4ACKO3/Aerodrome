@@ -63,3 +63,10 @@ Current limits: only the rigid-velocity lesson runs through the bridge; no job c
 - Extracted and ran the exact displayed Python example in WSL Ubuntu with the project JAX environment and x64 enabled on CPU. All nine example checks passed. Downloadable example matches the displayed code.
 - Additional numerical checks passed for the nonsymmetric quadratic gradient, inverse differential, log-absolute-determinant gradient, matrix chain rule, covariance gradient, symmetric parameter gradient, and full nonlinear weighted least-squares Hessian.
 - Browser inspection at 1440px and 390px: all inspected tables retain three columns, no KaTeX errors, and mobile document width remains 375px within the 390px viewport. Long math remains locally scrollable. No source PDF or book artwork is included in the site.
+
+## Manual 1.1.1 theory-first revision — 2026-09-12
+
+- Preserved the user's introduction and expanded notation: vector spaces (including zero and infinite dimensions), vectors, matrices, tensors, and NumPy/PyTorch shape conventions, followed by a state-recording example. Sections 1.1.2 onward remain unchanged.
+- Ran the exact NumPy block and verified shapes, element counts, explicit row/column construction and reduction values. Checked PyTorch syntax and official API documentation; PyTorch is absent from the available Python environments, so its example was not executed.
+- Astro check: zero errors, warnings or hints. Production build and internal-link/math checks pass for 45 pages. Run check/build sequentially: their shared prepare-content step writes the same generated assets.
+- Browser inspection at the existing 979px viewport: no KaTeX errors or document-wide horizontal overflow; the three new tables contain 3, 4 and 3 columns respectively.
