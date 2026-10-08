@@ -2,7 +2,7 @@
 
 这是独立的本地设计原型，尚未合并进旧 Aerodrome，也没有推送或发布。
 
-目标是让“导航估计 → 制导参考 → 控制指令”成为可读、可换、可测的代码。基础示例是**假设系数的二状态俯仰模型**；另有基于 ISRL/NASA1538 气动数据的 F-16 纵向子模型实验，尚非完整六自由度飞机。
+目标是让“导航估计 → 制导参考 → 控制指令”成为可读、可换、可测的代码。基础示例是**假设系数的二状态俯仰模型**；F-16 已有基于 ISRL/NASA1538 气动数据的六自由度机体与配平，以及纵向子模型的闭环实验。发动机和舵机动态仍待接入。
 
 ## 阅读入口
 
@@ -22,15 +22,21 @@
 14. **[python-control 与线性模型](docs/linear-control.md)**：TF/SS 适配、宿主离散化、纯 JAX 矩阵执行、批量梯度和性能对照。
 15. **[Control System Toolbox 对齐范围](docs/control-toolbox-coverage.md)**：实际覆盖、模型扩展、性能约束与分阶段验收计划。
 16. **[F-16 纵向平飞实验](docs/f16-level-flight.md)**：已锁定气动表、非线性纵向模型、配平、DLQR 与批量扰动恢复。
-17. **[通用六自由度刚体](docs/rigid-body.md)**：NED/FRD、四元数或 Euler321、合力矩组合、每子阶段载荷与 World 批量积分。
-18. **[仿真基础工具](docs/simulation-tools.md)**：坐标/姿态/载荷变换、风轴与气动角、杆臂运动学、单位和角差，兼容 JIT/vmap。
-19. **[地理位置与空气物理量](docs/geography-atmosphere.md)**：经纬高、地心距离、高度基准与查表、相对方向、标准大气、温压湿度与气象网格。
-20. **[离线/在线渲染数据接口](docs/rendering.md)**：Scene/Frame、JAX 投影、JSONL、SLERP 回放、最新帧缓冲与独立 FPS/TPS/RTF。
-21. **[可替换渲染器后端](docs/renderer-backends.md)**：生命周期、能力协商、消息桥、相机/部件动画、回执及 Three/UE 坐标边界。
-22. **[外部设备输入输出](docs/external-device-io.md)**：键鼠、摄像头、WorldIO、图内 host/JAX 输入模块、新鲜度与输出通道。
-23. **[统一配置与实验运行](docs/configuration.md)**：Pydantic + YAML、可选 Hydra 3.14t 兼容入口、配置组、参数扫描和实验快照。
-24. **[Gymnasium World 适配器](docs/gymnasium.md)**：独立环境接口、共享 Task、种子与 reset、动作映射、终止/超时及原生 JAX transition。
-25. **[三平台构建检查](docs/platform-builds.md)**：Windows/Linux/macOS 实机验证、独立 wheel 检查及 Windows 3.14t 依赖限制。
+17. **[F-16 六自由度机体](docs/f16-six-dof.md)**：完整气动表、横侧向耦合、六轴配平、World/配置入口与三舵面脉冲实验。
+18. **[最简单的 F-16 姿态控制](docs/f16-attitude-hold.md)**：滚转/俯仰 PD、偏航阻尼和空速 P，正负扰动恢复与固定输入对照。
+19. **[通用六自由度刚体](docs/rigid-body.md)**：NED/FRD、四元数或 Euler321、合力矩组合、每子阶段载荷与 World 批量积分。
+20. **[仿真基础工具](docs/simulation-tools.md)**：坐标/姿态/载荷变换、风轴与气动角、杆臂运动学、单位和角差，兼容 JIT/vmap。
+21. **[地理位置与空气物理量](docs/geography-atmosphere.md)**：经纬高、地心距离、高度基准与查表、相对方向、标准大气、温压湿度与气象网格。
+22. **[离线/在线渲染数据接口](docs/rendering.md)**：Scene/Frame、JAX 投影、JSONL、SLERP 回放、最新帧缓冲与独立 FPS/TPS/RTF。
+23. **[可替换渲染器后端](docs/renderer-backends.md)**：生命周期、能力协商、消息桥、相机/部件动画、回执及 Three/UE 坐标边界。
+24. **[外部设备输入输出](docs/external-device-io.md)**：键鼠、摄像头、WorldIO、图内 host/JAX 输入模块、新鲜度与输出通道。
+25. **[统一配置与实验运行](docs/configuration.md)**：Pydantic + YAML、可选 Hydra 3.14t 兼容入口、配置组、参数扫描和实验快照。
+26. **[Gymnasium World 适配器](docs/gymnasium.md)**：独立环境接口、共享 Task、种子与 reset、动作映射、终止/超时及原生 JAX transition。
+27. **[三平台构建检查](docs/platform-builds.md)**：Windows/Linux/macOS 实机验证、独立 wheel 检查及 Windows 3.14t 依赖限制。
+
+**[零号工程与固定小节入口](docs/project-zero.md)** 包含组件示例和三种代码写法；**[五个可运行实战工程](docs/teaching-projects.md)** 包含命令、方法比较、训练评测与具体实现边界。
+
+教学工程规划见 [零号工程与数学问题驱动的实战工程方案](design/teaching-projects.md)，包含组件示例、五类数学问题、传统/数据方法比较、调优评测和教程站接线；该方案尚未作为教材章节发布。
 
 ## 安装与执行
 
@@ -80,6 +86,6 @@ uv run --locked python examples/compiled_modules.py
 
 正式教学 baseline 采用 F-16 六自由度非线性模型。课程中的局部线性和纵向/横侧向模型将从选定版本的 baseline 配平与线性化得到，并注明简化假设和有效范围；当前二状态示例仍仅用于架构验证。
 
-完整飞机模型、真正的航路制导、INS/GNSS/EKF、丢包/延迟、LQR/MPC/RL、配置文件加载、完整实验产物管理以及真实 MATLAB/FMU 传输适配器都尚未实现。动态发动机只有一维协议演示，不是 F16 发动机。
+F-16 六自由度机体、局部姿态 PD 示例、纵向 DLQR、配置入口和实验产物保存已实现。完整飞机系统仍缺匹配的发动机/舵机、更完整的六自由度飞控、航路制导和 INS/GNSS/EKF；真实 MATLAB/FMU 传输适配器也尚未实现。动态发动机只有一维协议演示，不是 F16 发动机。
 
 World 的 Assembly 接口接受不同状态 PyTree；Pitch 的专业信号仍只适用于二状态例子。不要让所有估计器或不同维度模型继承这个二状态数据结构。材料/流体课程使用独立领域接口，最多共享实验记录与统计工具。

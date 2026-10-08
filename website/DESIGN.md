@@ -1,57 +1,181 @@
----
-name: Probabilistic Aviation
-description: A restrained textbook interface with integrated engineering experiments.
-rounded:
-  code: "4px"
-  control: "6px"
-  surface: "8px"
-  laboratory: "12px"
-spacing:
-  label-gap: "0.5rem"
-  field-gap: "1rem"
-  section-padding: "1.5rem"
----
+# 概率飞行工程：全站渲染与插图规范
 
-# Design System: Probabilistic Aviation
+本规范适用于章节、附录、零号工程和实验页面。读者以低年级工科本科生为主；图像首先帮助读者理解关系、对比变化、辨认假设。页面沿用现有 Astro / Starlight 阅读布局，中文名称为“概率飞行工程”，英文副标题为 Probabilistic Aviation，界面自称“手册”。
 
-## Direction
+## 1. 页面与排版
 
-The user requested a visual redesign with a GitBook-like reading experience. Keep the Astro/Starlight navigation and accessibility behavior, with a quiet textbook layout, clear chapter hierarchy and an integrated laboratory surface. Course content remains the seven approved chapter placeholders and appendices A–D. Do not invent subsections during visual work.
+正文最大宽度 48rem，字号 1rem，行高 1.8，段间距 1.15rem。中文长段不使用两端强制对齐，不用大面积加粗代替解释。字体沿用自托管 Inter Variable；中文使用 Segoe UI / Microsoft YaHei / 系统无衬线字体。网络字体使用 `font-display: optional`，避免阅读过程中跳动。
 
-## Typography and layout
+具体小节页面采用连续层级编号：页标题为 `2.3`，正文 H2 为 `2.3.1`；编号最多到 `x.y.z`，H3 及更深层标题只保留文字，不再编号。导读、阅读路线和参考阅读可不编号；章节首页的叙述性导览不套用此层级。修改标题时保留已有语义锚点，使旧链接仍能定位；编号直接写入标题，不靠 CSS 生成。
 
-Self-hosted Inter Variable covers Latin text, with Segoe UI and Microsoft YaHei fallbacks for Chinese. Body text is 1rem with 1.9 line height; headings use weight 650. The reading column has a 48rem maximum, the desktop sidebar is 18rem, and the header is 4.25rem. Below 50rem, the header is 3.75rem and experiment controls stack. Preserve Starlight's mobile navigation and search.
+标题沿用章节编号。页标题 1.85–2.65rem，二级标题 1.4rem，三级标题 1.12rem；标题字重 650。二级标题上方留 3rem，下方细分隔线。图注、表格为 0.875rem 左右，不能用过浅颜色或过小字号处理长说明。
 
-The homepage chapter list uses numbered flat rows separated by fine rules. Appendices form a quieter two-column list, becoming one column on mobile. The sidebar separates chapters from appendices; framework details remain under C.
+桌面左侧目录 18rem，顶部栏 4.25rem；窄屏顶部栏 3.75rem。保留现有左右目录独立收起按钮、主题切换和 Starlight 移动导航。目录统一 14px、字重 500，不通过改变字重造成选中项换行；导航使用稳定的系统字体，正文保留滚动条槽位。右侧目录的偏移继续由 Starlight 管理。
 
-## Colors and surfaces
+页面只在实际有操作时使用实验面板；正文、图注和普通例子不套多层卡片。行内代码圆角 4px，控件与图框 6px，折叠说明 8px，桌面实验面板 12px。
 
-`src/styles/editorial.css` owns the overrides after `teaching.css`. Light mode uses white paper, #192b35 ink, #536b76 secondary text, #dce3e7 borders, and #17656d primary controls with white text. Selection uses pale teal. Dark mode uses theme-native backgrounds, #adbdc5 secondary text, #35454d borders, and #9bdddf primary controls with #142d33 text. Use the semantic `--pa-*` and `--sl-*` variables rather than independent component palettes.
+## 2. 界面颜色
 
-Rounded corners use 4px for inline code, 6px for controls, 8px for disclosures and canvases, and 12px for desktop laboratory panels. Panels use a restrained shadow and tinted surface; chapter rows remain flat.
+`src/styles/editorial.css` 是网页样式的维护入口，位于 `teaching.css` 之后。已有组件使用 `--pa-*` 与 `--sl-*` 变量，不另设一套主题。
 
-## Experiments
+| 用途 | 浅色主题 | 深色主题 |
+| --- | --- | --- |
+| 正文背景 | 白色 `#ffffff` | Starlight 主题背景 |
+| 主要文字 | `#192b35`，段落 `#263c47` | Starlight 主题前景 |
+| 次要说明、图注 | `#536b76` | `#adbdc5` |
+| 边框 | `#dce3e7` | `#35454d` |
+| 公式、实验表面 | `#f7f9fa` | `#192328` |
+| 主要操作 | `#17656d`，白字 | `#9bdddf`，`#142d33` 字 |
 
-Labels retain units and native validation. Inputs are at least 42px high and action buttons 40px high. The run/load action is teal; secondary actions use bordered theme surfaces. Disabled states, visible focus outlines, status text and reduced-motion handling are required.
+青绿色用于链接、选中状态和操作。错误、成功和警告保留文字说明，不靠颜色单独传达。正文与图注对比度至少 4.5:1；键盘焦点使用清晰的 2px 轮廓。减少动态效果的系统偏好继续生效。
 
-Scene order is environment selection, actions, status, canvas and metrics, then import, playback details and advanced resource configuration. The loaded canvas is 440px high on desktop and 320px on mobile; the empty state is 160px with a visible loading invitation. Engines remain lazy and physics remains independent of rendering.
+## 3. 公式、代码与表格
 
-Connection and result messages retain role=status. Reference and local results remain explicitly distinguished. Parameter edits must not imply a recomputed trajectory. Keep quantitative chart axes, solid/dashed line distinction, accessible chart descriptions and downloadable data.
+- 公式使用现有 remark-math + KaTeX，保留可访问的 MathML；公式不截图。变量、维度、单位和成立条件在首次使用处解释。
+- 独立公式使用淡色底、1.1rem 内边距，长公式在自身范围横向滚动。作者优先用 `aligned` 拆开推导，不能为塞入页面缩小全部公式字号，也不在任意字符间强行断行。
+- 代码使用 Expressive Code 的 GitHub 浅色/深色语法主题，跟随全站主题切换。统一标题栏显示名称、语言和复制按钮，长行在代码区域滚动；缩进为 4 个空格。新增围栏写明语言及 `title="文件名或算例名称"`（例如 `python title="quadrotor_loads.py"`）；终端命令用 `sh`，程序输出用 `text`。既有无名称的代码块自动采用最近的小标题，同段多个示例附加序号；显式名称优先。复制保留原有代码和注释。代码示例链接零号工程的小节，不在多个章节复制完整程序。
+- 表格使用浅色表头和横向细线，数值使用等宽数字；单位放在表头。宽表只在表格区域滚动，不撑宽整个页面。不把推导写成大表格。
+- 进阶推导和练习解答可使用 `details`，核心定义和必要假设保持可见；摘要应说明折叠内容是什么。
 
-## Review
+## 4. 插图的教学职责
 
-The primary agent performs visual and functional review directly; the user's no-subagent instruction applies. Review desktop/mobile layouts and both themes when changing shared styling. This design is recorded in PRODUCT.md and website/.impeccable/design.json; screenshots are local review evidence, not source assets.
+借鉴 Murphy 教材中“同一对象的不同表示”和“改变一个条件后的对照”方式，自行制作本项目的算例和图。每幅图只回答一个主要问题，正文先提出这个问题，图后解释变化的原因。无需给每小节机械配图，也不使用装饰插画填空。
 
-## Navigation correction and bilingual title
+默认选二维线图、散点、直方图或几何示意。只有三维结构本身是教学对象时才使用三维视图；不能用透视图替代可读的等高线。比较图尽量保持坐标范围、采样条件和图例一致；确需不同范围时明确标注。
 
-Use 概率飞行工程 as the primary Chinese title, with Probabilistic Aviation retained as the secondary English name. The shared SiteTitle component stacks both names within the existing header height. Sidebar links and group labels use the same 14px font; nested group-label spans must inherit it instead of Starlight's large style. Preserve Starlight's header-dependent fixed TOC offset: never add unconditional padding to .right-sidebar. Compact TOC labels have an explicit 1.6 line height for Chinese glyphs.
+多面板按从左到右、从上到下标记 `(a)`、`(b)` 等。先画 1–2 个面板，4 个面板仅用于紧密相关的操作链；更多内容拆图。图内保留短标题、坐标、单位和必要标注，推导与长解释留在正文。箭头表达方向或对应关系，不作装饰。
 
-## Stable navigation metrics
+## 5. 科学图配色与线型
 
-The fixed site title and sidebar use --pa-navigation-font (Segoe UI / Microsoft YaHei / sans-serif), independent of network fonts. Sidebar active rows retain weight 500; color and background indicate selection without changing line breaks. The document reserves a stable scrollbar gutter. Body Inter uses font-display: optional to avoid a late font swap during reading; unavailable subsets fall back to system fonts. Do not restore swap-based webfonts in fixed navigation.
+静态图统一使用白色画布、深色文字，在网页深色模式下也保留白底；不自动反色，不把白色当成透明背景。这样网页版、原图和后续文档导出的图形含义一致。图注跟随网页主题。
 
-## Reading layout refinement
+| 图内角色 | 色值 | 辅助编码 |
+| --- | --- | --- |
+| 第一组、主要曲线 | 蓝 `#2563a6` | 实线，必要时圆点 |
+| 第二组、对照或变换结果 | 橙 `#bc5930` | 虚线，必要时方点 |
+| 参考、基准、辅助几何 | 灰 `#6e7b86` | 点线或直接文字标注 |
+| 确需的第三组数据 | 紫 `#775da6` | 点划线或三角标记 |
+| 坐标文字 | `#192b35` / `#536b76` | 不使用半透明文字 |
+| 网格 | `#dce3e7` | 细线，按需显示 |
 
-Following the DDIA reference, sidebar rows use .35rem vertical padding, .1rem sibling gaps and tighter appendix separation. Body paragraphs use theme gray-1, 1.8 line height and 1.15rem block margins. Keep chapter/unit URLs unchanged.
+颜色表达组别，不自动表达好坏。同一个跨章节算例维持相同组别颜色；具体对象由图例或直接标注说明。新增多条曲线必须同时区分线型或点形；现有面积图可依靠位置、图例和数值标签区分。避免红绿二选一和“彩虹”连续色图。连续非负量优先 `cividis` 或 `viridis`；正负偏差使用以零为中心、对称范围的发散色图，并保留带单位的色条。
 
-Two labelled icon buttons beside the brand independently collapse the left manual navigation (desktop >=50rem) and right page TOC (>=72rem). Preferences persist in localStorage and restore before the main content is parsed. Mobile keeps Starlight's native menu and compact TOC regardless of desktop preferences. Buttons stay hidden without JavaScript. Keyboard focus and aria-expanded communicate state; header column geometry stays independent of panel visibility.
+概率密度与概率质量必须区分：密度轴标单位，直方图说明归一化方式。误差带注明覆盖含义与计算方法；协方差椭圆不能默认称为 95% 区域。面积图和条形图默认从零起，截断坐标必须说明。
+
+## 6. 图注、原图与窄屏
+
+图号使用“图 1.2-1”：章号、小节号、页内顺序。交叉引用链接稳定的语义锚点，例如 `#fig-conditioning`；新增图时检查图号与正文引用，不依赖仅在屏幕上可见的 CSS 自动编号。
+
+图注放在图下，由“图号 + 简短标题 + 必要条件/来源”组成。说明是解析曲线、教学设定、仿真还是实测；涉及随机结果时给出样本数、种子和关键参数。完整实验配置可放在相邻正文并链接零号工程。不要在图注和正文连续重复同一段解释。
+
+`alt` 描述图形关系和关键差异，图注给出读图条件，两者各有作用。保留“查看原图”链接。简单图可随容器缩放；目前含中文标注的数学图采用标准宽度 40rem，多面板采用 48rem 最小宽度，窄屏在图框内横向滚动，保证标签不被压成细字。图框可用键盘聚焦与横向滚动，整页仍保持正常宽度。新图应优先减少面板或拆图来适应阅读列。
+
+新配图统一使用 `src/components/TeachingFigure.astro`。Astro 页面可直接导入，章节使用 MDX 导入；扩展名从 `.md` 改为 `.mdx` 不改变页面路径。组件将图片、图号、图注和源码链接组织成一个语义化 `figure`，全站查看器读取同一份图注。
+
+```mdx
+import TeachingFigure from '../../../../components/TeachingFigure.astro';
+
+<TeachingFigure
+  id="fig-conditioning"
+  src="/Aerodrome/figures/math-tools/conditioning.svg"
+  alt="异常在全部样本中占 1%，在报警样本中约占 15.4%"
+  number="1.2-1"
+  title="条件改变计数范围"
+  caption="教学设定；两条分别以各自样本数为分母，均归一化到 100%。"
+  source="/Aerodrome/figures/sources/math-tools.json"
+  size="standard"
+/>
+```
+
+示例导入路径适用于本章小节目录，其他目录按实际位置调整。
+
+| 属性 | 作用 |
+| --- | --- |
+| `id` | 必填，稳定的图锚点，同时生成图注 ID |
+| `src`、`alt` | 必填，图片地址与替代描述 |
+| `title` | 必填，简短图名 |
+| `number` | 可选，图号，不含“图”字 |
+| `caption` | 可选，图注正文，图号和图名由组件组合 |
+| `source` | 可选，源码文件或源码包地址 |
+| `size` | `standard`（默认，40rem）、`wide`（48rem）或 `fluid`（随容器缩放） |
+
+图注需要链接、强调或公式时，使用默认插槽替代 `caption` 属性；MDX 中可在插槽里正常编写 Markdown 和数学公式。两者同时提供时插槽优先。正文和悬浮窗都保留渲染后的格式。现有普通 Markdown 图片和手写 `figure` 仍能被全站查看器打开；新教学图优先使用组件，避免重复编写 HTML。
+
+## 7. 生成与维护
+
+静态科学图使用 Matplotlib，公共配置位于 `scripts/teaching.mplstyle`。现有数学图的生成入口是 `scripts/plot-math-intuitions.py`。主线宽 2pt、坐标线 0.8pt、标注至少 12pt；导出后按网页实际显示宽度检查可读性和图例遮挡，不能只检查绘图窗口。
+
+从 `website/` 执行（Python 环境需有 NumPy、Matplotlib）：
+
+```sh
+python scripts/plot-math-intuitions.py --font /path/to/chinese-font.ttf
+npm run build
+```
+
+macOS 本机可用 `/System/Library/Fonts/Supplemental/Arial Unicode.ttf`。SVG 将字形转为路径，读者无需安装该字体；相邻 PNG 用于检查和预览。优先 SVG 作为线图资产，照片和复杂栅格结果使用合适分辨率的 PNG/WebP。路径化 SVG 不提供可选中文字，所以页面必须保留 `alt`、图注及正文解释。
+
+图形程序、参数或所用结果应能追溯；已有数值例子直接复用其数据，不能在绘图脚本内重新维护另一套计算。Node 构建只消费已生成资产，不增加 Python 构建依赖。
+
+修改共享样式后运行网站构建，并集中查看桌面/窄屏、浅色/深色下的正文、公式、表格、图片与图注；检查中文缺字、轴比例、图例遮挡、断链与页面横向溢出。无需为颜色常量和每个 CSS 声明新增针对性测试。
+
+## 8. 实验页面
+
+保留现有实验面板、标签单位、运行/载入按钮、状态文本和结果下载。静态参考结果与本地计算结果明确区分，编辑参数不能让旧结果看起来已重新计算。输入高度至少 42px，按钮至少 40px。三维画布桌面高 440px，窄屏 320px，空状态 160px。
+
+交互曲线使用主题中可读的前景色，实线表示当前结果、虚线表示目标等语义继续由图例说明。科学量的轴向、单位与状态含义不因主题而改变；Three.js / Cesium / MapLibre 场景不套用静态图的白色画布规则。
+
+## 9. 图片查看器与源码
+
+正文中的图片和 `role="img"` 的 SVG 图表自动支持点击悬浮查看，键盘 Enter / 空格也可打开。滚轮围绕鼠标位置缩放，拖动平移；工具栏提供缩放和适应窗口，画布支持方向键、加减键与 0 复位。Esc、关闭按钮或遮罩可退出，焦点返回原图。窄屏使用全屏查看器。
+
+`src/components/ImageViewer.astro` 由全站 Footer 挂载。查看器不改变图形数值；动态图表在打开时保存当前 SVG 快照。源码视图按需加载，用文本呈现并复制当前文件，不执行代码。返回图片会重新适应窗口。
+
+从程序生成的图片给 `TeachingFigure` 传入 `source="/Aerodrome/figures/sources/math-tools.json"`，组件自动输出 `data-figure-source`。该 JSON 的格式为 `{ "note": "运行说明", "files": [{ "name": "源文件路径", "content": "完整源码" }] }`，也可直接指向单个文本源文件。现有数学图的包由 `scripts/prepare-content.mjs` 从绘图脚本、样式和算例原文件生成，不手动复制源码。显示完整多图生成脚本时明确说明覆盖范围。普通 SVG 无生成脚本时提供 SVG 标记源码；普通位图未提供源文件时禁用源码按钮。复制依赖浏览器剪贴板权限，失败时显示手动复制说明。
+
+放大界面的图注放在画布下方，缩放和拖动不改变其位置，查看源码时仍显示。图注过长时在自身区域滚动，不遮盖图片或关闭按钮。无图注的普通图片不显示空白图注区。
+
+## 10. 数学基础章节的配图位置与复现
+
+已写出的 1.1–1.6 六节共使用 23 个图框（22 幅独立图，测量几何图跨章节复用）。新增图放在读者刚得到定义、需要辨认其含义的位置，或紧接一个可手算例子的结果；正文指出先看哪里、什么变化值得解释。图号按页内出现顺序维护，交叉引用使用 `fig-*` 语义锚点。
+
+本轮参考本机 Murphy《Probabilistic Machine Learning: An Introduction》PDF 的插图职责与位置，独立设计以下算例。该文件页脚版本为 2025-04-18，故下表以图号为定位依据；不是照搬原图，也不要求本站覆盖原书全部主题。
+
+| 章节与新图 | 参考位置或方法 | 本站的调整 |
+| --- | --- | --- |
+| 1.1 基的线性组合、观测零空间 | 图 7.3 向量运算、图 7.4 零空间与值域 | 用二维位移与两次位置观测，显示“坐标”“信息丢失”的具体含义 |
+| 1.1 三种范数的单位球 | 7.1.3 范数定义之后的几何解释 | 先按位置、速度尺度无量纲化；同一范围并排画三个误差区域 |
+| 1.1 局部线性近似 | 8.2 的局部近似插图思路 | 在雅可比公式之前，先用 x² 的切线与精确遗漏项搭桥 |
+| 1.2 概率质量与密度 | 图 2.1、2.2 | 用正文的三点误差和均匀误差，明确单点高度与区间面积 |
+| 1.2 零相关与独立 | 图 3.1 | 用可精确手算的联合分布，保持两图的边缘分布相同，排除抽样噪声干扰 |
+| 1.2 融合权重 | 第 3、4 章用图解释概率模型变化的方法 | 直接画本站两传感器的融合方差，避免额外引入高斯假设 |
+| 1.3 平均与偏差、直线与残差 | 第 4 章估计量性质和回归对照图的安排 | 与本站固定偏移和三个位置读数衔接；残差另设纵轴放大 |
+| 1.4 风险阈值、信息价值 | 5.1 贝叶斯决策论，图 5.1 的决策区域解释 | 用同一报警频数，先画风险交点，再画观察后的分支与总账 |
+| 1.4 损失与最优预测 | 图 5.3，5.1.5 的损失与估计 | 画期望损失而非单次残差损失；标出同一分布下均值与中位数的不同最优位置 |
+| 1.5 步长、凸性与驻点 | 图 8.11、8.5 | 一维二次目标保留带符号误差；双井函数显示驻点不一定是最小值 |
+| 1.6 时间层、随机后继 | 延续同一对象不同表示的插图方法，非原书对应图 | 原书未系统讲解本站的有限时域 Bellman 算例；依据本站程序独立画出求值、执行和概率分支 |
+
+全部新图由 `scripts/plot-math-foundations.py` 生成，既有六幅由 `scripts/plot-math-intuitions.py` 生成。两者共用 `scripts/teaching.mplstyle`，不引入其他绘图框架。在 `website/` 目录运行：
+
+```sh
+python scripts/plot-math-intuitions.py --font '/System/Library/Fonts/Supplemental/Arial Unicode.ttf'
+python scripts/plot-math-foundations.py --font '/System/Library/Fonts/Supplemental/Arial Unicode.ttf'
+npm run build
+```
+
+其他系统把 `--font` 改为本机中文字体路径；Python 环境需有 NumPy 和 Matplotlib。SVG 和核对用 PNG 一起写入 `public/figures/math-tools/`。新脚本不采样随机数据；拟合参数和动态规划值表直接复用 `ngc/examples/math_tools.py`、`ngc/examples/finite_horizon_dp.py`，图内手算设定与对应章节一致。
+
+`prepare-content.mjs` 在构建时分别发布 `math-tools.json` 与 `math-foundations.json`：当前绘图脚本排在首位，随后是共用样式和所需算例。修改图后重新运行对应脚本，再构建；不能只改生成的 SVG。检查新图的中文字体、单位、标注遮挡、坐标比例，并在正文与悬浮查看器中各看一次；窄屏保留图框内横向滚动，不缩小到无法阅读。
+
+## 11. 统计学习章节的内容与配图
+
+第二章按五个主题组织：2.1 统计学习简介，2.2 线性模型，2.3 深度神经网络，2.4* 非参数方法与其它方法（选读），2.5 强化学习简介。Murphy 第 1 章对应简介，第 9–12 章归入线性模型，第 13–15、19 章归入神经网络，第 16–18、20–23 章归入其它方法。2.5 从参数化动态规划引入强化学习；具体方法移入第三章，原 2.6 参数化控制的增益例并入 2.5。旧的十五个页面入口由 Astro redirects 转到新页主题锚点，原图的语义 ID 保留，图号按归并后的页内顺序重排。信息论不另增节，交叉熵在逻辑回归中从负对数似然解释。
+
+内容面向低年级工科本科生，沿用第一章修订后的平实语气。先解释数据、输入输出和成立条件，再引入公式；不使用角色对话、拟人化或连续设问推动内容。线性模型、序列、降维与聚类建立基本操作直觉，图像、推荐和图表示控制展开深度，不追逐架构与模型版本。
+
+原十五个方法主题保留各自的原创 SVG，共 15 幅，绘图入口为 `scripts/plot-statistical-learning.py`，数据与数值逻辑复用 `ngc/examples/statistical_learning.py`。GP 阴影仅表示固定超参数下潜在函数的逐点后验区间；训练残差图不宣称泛化提升；所有给定权重的网络图明确标注未训练。图形复用 `TeachingFigure` 与源码查看器，源码包为 `statistical-learning.json`。
+
+在 `website/` 运行 `python scripts/plot-statistical-learning.py --font /path/to/chinese-font.ttf` 后再构建。算例使用 NumPy，绘图增加 Matplotlib；不引入新的前端绘图依赖。零号工程 `#statistical-learning` 作为统一入口，具体运行说明维护在 `ngc/docs/statistical-learning.md`，经构建导入 reference。
+
+强化学习与参数化控制新增两幅图，复用 `ngc/examples/learning_control.py`，绘图脚本为 `scripts/plot-learning-control.py`，源码包为 `learning-control.json`。Q 学习曲线注明采样设定与种子，参数搜索图区分训练、验证与留出轨迹。
+
+2.3 的前向/反向计算图由 `scripts/plot-neural-computation.py` 生成，数值直接读取 `ngc/examples/mlp_backprop.py`，源码包为 `neural-computation.json`。前向与反向用不同颜色、明确箭头及文字区分；图中文字转置符号使用数学排版，避免中文字体缺字。手算、程序输出和图采用同一列向量约定，NumPy 的一维数组表示在运行文档中单独说明。

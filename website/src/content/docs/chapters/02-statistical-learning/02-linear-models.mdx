@@ -1,0 +1,454 @@
+---
+title: "2.2 线性模型"
+description: 从工程预测中的输入、参数和损失出发，理解线性回归、判别分析、逻辑回归与广义线性模型。
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 3
+---
+
+import TeachingFigure from '../../../../components/TeachingFigure.astro';
+
+拿到设备每分钟记录的平均负载、温度和振动强度后，可以先试一个直接的办法：给每项输入乘一个系数，再相加，看看能否预测下一分钟的处理时间。若要改成判断设备是否异常，或估计下一分钟出现多少次报警，输出形式也要跟着改。这三个目标分别是连续量、二值标签和非负整数，对应不同的概率分布。
+
+从处理时间预测开始，先写出输入与输出的关系，再用数据确定系数，就得到线性模型的基本计算。把一次预测扩展到整批样本后，每个参数怎样进入预测、怎样根据误差更新，都能在矩阵运算中看清。类别概率和计数分布的均值也可以沿这条思路建立。
+
+<a id="linear-regression"></a>
+
+<span id="线性回归与正则化" />
+
+## 2.2.1 线性回归与正则化
+
+设一次记录包含 $d$ 个输入特征。例如 $x_1$ 是负载，$x_2$ 是温度，$x_3$ 是振动强度；目标 $y$ 是下一分钟的处理时间。先用一个容易读懂的预测式：
+
+$$
+\hat y=b+w_1x_1+\cdots+w_dx_d=b+\boldsymbol w^{\mathsf T}\boldsymbol x.
+$$
+
+其中 $\boldsymbol x=(x_1,\ldots,x_d)^{\mathsf T}$ 是**一个样本**的 $d\times1$ 列向量，$\boldsymbol w=(w_1,\ldots,w_d)^{\mathsf T}$ 是待学习的系数，$b$ 是截距。帽号 $\hat y$ 表示预测值，$y$ 表示实际观测值。内积 $\boldsymbol w^{\mathsf T}\boldsymbol x=\sum_jw_jx_j$ 把每项特征的贡献加起来，结果是标量。如果输出以秒计、$x_1$ 以百分比计，那么 $w_1$ 的单位就是秒/百分比；$b$ 的单位为秒。保持其余特征不变，$x_1$ 每增加一个单位，预测值就变化 $w_1$。输入经过标准化或无量纲化时，这个单位指变换后的尺度。
+
+<a id="线性指对参数线性"></a>
+
+这个式子对 $\boldsymbol x$ 严格来说是**仿射函数**，因为有截距 $b$；令 $b=0$ 才是线性映射。机器学习仍惯称它为线性模型。常数项给预测一个基准值：若所有输入为零有实际意义，$b$ 是该条件下的预测；如果零只是标准化后的中心，$b$ 则是该坐标系里的基准。线性结构更重要的特征是：固定输入以后，预测对待估计的 $b,w_1,\ldots,w_d$ 是一次式。
+
+这里每条记录预测一个处理时间，因此目标是标量。如果同时预测处理时间和耗电量，一个样本的目标就成为向量。下面采用单输出模型，将多条记录的标量目标排列起来，得到批量计算所需的向量。
+
+<span id="一条记录与一批记录" />
+
+<span id="2211-单样本与批量数据" />
+
+### 单样本与批量数据
+
+训练时有 $N$ 条记录。记第 $i$ 条为 $(\boldsymbol x_i,y_i)$，其中 $i=1,\ldots,N$。把每条输入转置后放在一行，得到设计矩阵 $X$；把观测目标排成列向量 $\boldsymbol y$：
+
+$$
+X=\begin{bmatrix}\boldsymbol x_1^{\mathsf T}\\\vdots\\\boldsymbol x_N^{\mathsf T}\end{bmatrix}\in\mathbb R^{N\times d},\qquad
+\boldsymbol y=\begin{bmatrix}y_1\\\vdots\\y_N\end{bmatrix}\in\mathbb R^{N\times1},\qquad
+\hat{\boldsymbol y}=X\boldsymbol w+b\boldsymbol1_N.
+$$
+
+$X$ 的**每行是一个样本**，每列是同一种特征；$\boldsymbol1_N$ 是 $N\times1$ 的全 1 向量。乘法 $X\boldsymbol w$ 产生 $N\times1$ 的预测向量，第 $i$ 项正是 $\boldsymbol x_i^{\mathsf T}\boldsymbol w$。因此，粗体 $\boldsymbol y$ 指整批目标，普通 $y_i$ 指第 $i$ 条记录的标量目标。若在 $X$ 最前面添一列 1，得到 $\tilde X=[\boldsymbol1_N,X]\in\mathbb R^{N\times(d+1)}$，并令 $\tilde{\boldsymbol w}=[b,\boldsymbol w^{\mathsf T}]^{\mathsf T}\in\mathbb R^{d+1}$，式子就缩写成 $\hat{\boldsymbol y}=\tilde X\tilde{\boldsymbol w}$。下文推导批量最小二乘时采用这组增广符号。关于矩阵乘法及形状，可回看[第一章的线性组合与矩阵乘法](/Aerodrome/chapters/01-mathematical-tools/01-linear-algebra/#112-线性组合基与矩阵乘法)；此处只需抓住“行乘列，得到该样本的预测”。
+
+| 对象 | 本节含义 | 形状 |
+|---|---|---|
+| $\boldsymbol x_i$、$y_i$ | 第 $i$ 条输入、观测目标 | $d\times1$、标量 |
+| $X$、$\boldsymbol y$ | 一批输入、目标 | $N\times d$、$N\times1$ |
+| $\boldsymbol w$、$b$ | 斜率系数、截距 | $d\times1$、标量 |
+| $\hat y_i$、$\hat{\boldsymbol y}$ | 单条、整批预测 | 标量、$N\times1$ |
+
+<span id="从预测误差求参数" />
+
+<span id="2212-最小二乘的参数求解" />
+
+### 最小二乘的参数求解
+
+一次预测的残差可定义为 $r_i=y_i-\hat y_i$。直接累加残差会使正负误差相互抵消，平方后再求和则能累计各条记录的误差大小。平方残差 $r_i^2$ 非负，误差加倍时惩罚增至四倍。普通最小二乘选择
+
+$$
+(\hat{\boldsymbol w},\hat b)=\arg\min_{\boldsymbol w,b}\sum_{i=1}^N(y_i-b-\boldsymbol w^{\mathsf T}\boldsymbol x_i)^2.
+$$
+
+$\arg\min$ 表示“使右侧最小的参数”。除以 $N$ 得均方误差，不改变最优参数，却便于比较不同样本量的数据集。平方损失还有一个概率解释：若 $y_i=b+\boldsymbol w^{\mathsf T}\boldsymbol x_i+\varepsilon_i$，且各条独立误差 $\varepsilon_i\sim\mathcal N(0,\sigma^2)$、共用同一方差，那么每条的负对数似然中与参数有关的项是 $r_i^2/(2\sigma^2)$。于是固定 $\sigma^2$ 时，最大化数据似然与最小化残差平方和得到相同的 $\boldsymbol w,b$。这是假设下的推导；实际残差若随负载扩大、呈明显弯曲或含大量极端值，应检查模型与损失是否合适。
+
+先手算一个只有截距的模型。若三次处理时间为 $2,3,4\,\mathrm s$，令预测恒为 $b$，目标函数是 $(2-b)^2+(3-b)^2+(4-b)^2$。求导得 $2(b-2)+2(b-3)+2(b-4)=6b-18$，故 $\hat b=3\,\mathrm s$；残差为 $-1,0,1\,\mathrm s$，平方和为 $2\,\mathrm s^2$。再加入一个无量纲负载 $x=0,1,2$，若观测仍为 $2,3,4\,\mathrm s$，取 $b=2\,\mathrm s,w=1\,\mathrm s$ 就使三条预测都与观测相同。新增的斜率参数表达了这三条记录中处理时间随负载增加的趋势。
+
+对一般批量数据，用增广后的 $\tilde X$ 和 $\tilde{\boldsymbol w}$ 写作 $S(\tilde{\boldsymbol w})=\|\boldsymbol y-\tilde X\tilde{\boldsymbol w}\|_2^2$。展开后对参数求导，得到
+
+$$
+\begin{aligned}
+S(\tilde{\boldsymbol w})&=(\boldsymbol y-\tilde X\tilde{\boldsymbol w})^{\mathsf T}(\boldsymbol y-\tilde X\tilde{\boldsymbol w}),\\
+\nabla_{\tilde{\boldsymbol w}}S&=2\tilde X^{\mathsf T}(\tilde X\tilde{\boldsymbol w}-\boldsymbol y)=\boldsymbol0,\\
+\tilde X^{\mathsf T}\tilde X\hat{\tilde{\boldsymbol w}}&=\tilde X^{\mathsf T}\boldsymbol y.
+\end{aligned}
+$$
+
+最后一行称为正规方程。它也说明最优残差 $\boldsymbol r=\boldsymbol y-\tilde X\hat{\tilde{\boldsymbol w}}$ 与 $\tilde X$ 的每一列正交：沿模型能改变预测的任何一个特征方向移动，都不能再降低平方误差。这正是[第一章最小二乘的几何解释](/Aerodrome/chapters/01-mathematical-tools/01-linear-algebra/#线性方程最小二乘与伪逆)在多列特征上的推广。若 $\tilde X$ 的列相关，最优参数可能不唯一；即使 $\tilde X^{\mathsf T}\tilde X$ 可逆，计算时也不必显式形成其逆矩阵，可用 QR 或奇异值分解支持的最小二乘求解器。[零号算例的 `regression_demo()`](/Aerodrome/reference/statistical-learning/#regression)使用 `np.linalg.lstsq`。
+
+<a id="更多特征既能表达规律也能拟合噪声"></a>
+
+<span id="2213-线性与特征变换" />
+
+### “线性”与特征变换
+
+处理时间可能随负载弯曲变化。先由原始输入 $\boldsymbol x$ 构造固定的特征列向量 $\boldsymbol\phi(\boldsymbol x)\in\mathbb R^m$，再预测
+
+$$
+\hat y=\boldsymbol\theta^{\mathsf T}\boldsymbol\phi(\boldsymbol x),
+$$
+
+其中 $\boldsymbol\theta\in\mathbb R^m$ 是新特征的系数。比如单个无量纲输入 $x$ 可取 $\boldsymbol\phi(x)=[1,x,x^2]^{\mathsf T}$，得到 $\hat y=\theta_0+\theta_1x+\theta_2x^2$。预测曲线对 $x$ 是抛物线，对待估计的 $\boldsymbol\theta$ 仍为一次式。若把每条 $\boldsymbol\phi(\boldsymbol x_i)^{\mathsf T}$ 堆成 $\Phi\in\mathbb R^{N\times m}$，前面的批量式只需把 $X$ 换成 $\Phi$。这里的特征变换事先确定；若特征提取器本身也有待学习参数，整体模型未必仍对全部参数线性。
+
+零号算例取 $x=-2,-1,0,1,2$，对应无量纲响应 $4.1,1.2,0.1,0.8,3.8$。直线特征 $[1,x]$ 的最小二乘系数为 $[2,-0.1]$，训练残差平方和为 $13.24$；二次特征 $[1,x,x^2]$ 的系数约为 $[0.057143,-0.1,0.971429]$，训练残差平方和约为 $0.028571$。事先加入的 $x^2$ 提供了中心低、两端高的形状，求解器则从数据确定这一特征的系数。
+
+<TeachingFigure
+  id="fig-regression"
+  src="/Aerodrome/figures/statistical-learning/regression.svg"
+  alt="同一组呈U形分布的数据，直线难以拟合而二次特征曲线更接近训练点。"
+  number="2.2-1"
+  title="增加一个特征，改变模型能够表达的形状"
+  caption="五个无量纲教学样本，蓝色用特征 [1,x]，橙色用 [1,x,x²]；参数来自最小二乘。两条曲线比较同一组训练点上的拟合效果。"
+  source="/Aerodrome/figures/sources/statistical-learning.json"
+  size="wide"
+/>
+
+这组数据中，二次曲线比直线更贴近训练观测。增加高次项会进一步丰富曲线形状，也会增加追随测量噪声的机会。为判断哪些特征有助于新负载预测，可先划分数据：训练集估计参数，验证集选择特征与正则化强度，测试集评价最终模型。设备轨迹中的相邻时刻往往相关，划分宜按整段实验、设备或时间边界进行。
+
+<span id="2214-岭回归lasso-与鲁棒损失" />
+
+### 岭回归、Lasso 与鲁棒损失
+
+当几个特征高度相关时，许多组大系数也可能给出相近预测；增加特征后，模型还可能用大系数追随噪声。正则化在拟合误差之外为系数增加代价。若 $\boldsymbol w$ 只包含非截距系数，且 $\Phi$ 含一列常数 1，则
+
+$$
+\begin{aligned}
+L_{\rm ridge}&=\|\boldsymbol y-\Phi\boldsymbol\theta\|_2^2+\lambda\|\boldsymbol w\|_2^2,\\
+L_{\rm lasso}&=\|\boldsymbol y-\Phi\boldsymbol\theta\|_2^2+\lambda\|\boldsymbol w\|_1,
+\end{aligned}
+\qquad \lambda\ge0.
+$$
+
+这里 $\|\boldsymbol w\|_2^2=\sum_jw_j^2$，$\|\boldsymbol w\|_1=\sum_j|w_j|$，$\lambda$ 决定贴合训练数据与限制系数之间的权衡，惩罚作用于非截距系数。岭回归通常连续缩小系数，缓解共线特征带来的波动。Lasso 的绝对值在零点有尖角，某些系数可恰好变为零，因而可用于特征筛选；高度相关的特征可以相互替代，保留的特征也可能随样本变化。特征单位会影响惩罚的相对作用，因此标准化尺度从训练集估计后固定用于其他数据，再由验证集选择 $\lambda$，测试集评价选定模型。
+
+平方损失会放大少数很大的残差。Huber 损失在小残差处按平方增长，在超过阈值后按绝对值近似线性增长，可以降低偶发极端观测对拟合的影响；阈值根据测量误差尺度选择。极端观测的来源则通过传感器记录和工况检查判断。除了改变损失，还可以保留参数的后验分布，将参数不确定性传到预测中，这就是下面介绍的贝叶斯线性回归。
+
+<span id="2215-贝叶斯线性回归从参数后验到预测分布" />
+
+### 贝叶斯线性回归：从参数后验到预测分布
+
+最小二乘和 MAP 最后都给出一个参数向量；若想知道“这些数据还允许哪些系数”，就要保留后验分布。沿用设计矩阵 $\Phi\in\mathbb R^{N\times p}$，把截距也计入参数 $\boldsymbol\theta\in\mathbb R^p$。假定给定输入后，观测满足 $\boldsymbol y=\Phi\boldsymbol\theta+\boldsymbol\epsilon$，噪声 $\boldsymbol\epsilon\sim\mathcal N(0,\sigma^2I_N)$ 独立于参数，且 $\sigma^2$ 已知。给参数指定正定高斯先验 $\mathcal N(\boldsymbol m_0,S_0)$，其中 $\boldsymbol m_0\in\mathbb R^p$、$S_0\in\mathbb R^{p\times p}$。将先验与似然相乘、合并关于参数的二次项，得到
+
+$$
+\begin{aligned}
+S_N&=(S_0^{-1}+\sigma^{-2}\Phi^{\mathsf T}\Phi)^{-1},\\
+\boldsymbol m_N&=S_N(S_0^{-1}\boldsymbol m_0+\sigma^{-2}\Phi^{\mathsf T}\boldsymbol y),\\
+p(\boldsymbol\theta\mid\Phi,\boldsymbol y)&=\mathcal N(\boldsymbol m_N,S_N).
+\end{aligned}
+$$
+
+这是[第一章的共轭更新](/Aerodrome/chapters/01-mathematical-tools/02-probability/)在向量参数上的应用：先验精度和数据提供的精度相加。取 $\boldsymbol m_0=0,S_0=\tau^2I$ 时，后验均值也等于 MAP，形式为 $(\Phi^{\mathsf T}\Phi+\sigma^2\tau^{-2}I)^{-1}\Phi^{\mathsf T}\boldsymbol y$，对应给全部系数加二次惩罚的岭回归。前面的岭回归约定让截距自由变化，两种写法的区别就在截距是否参与惩罚。实际计算通过线性方程求得结果。
+
+新输入的特征列向量为 $\boldsymbol\phi_*\in\mathbb R^p$，则潜在平均响应 $\boldsymbol\phi_*^{\mathsf T}\boldsymbol\theta$ 的后验方差为 $\boldsymbol\phi_*^{\mathsf T}S_N\boldsymbol\phi_*$。若新观测还有独立的同方差噪声，则
+
+$$
+y_*\mid\boldsymbol\phi_*,\Phi,\boldsymbol y
+\sim\mathcal N\!\left(\boldsymbol\phi_*^{\mathsf T}\boldsymbol m_N,
+\sigma^2+\boldsymbol\phi_*^{\mathsf T}S_N\boldsymbol\phi_*\right).
+$$
+
+预测方差由两部分相加得到：新测量噪声贡献 $\sigma^2$，参数后验贡献 $\boldsymbol\phi_*^{\mathsf T}S_N\boldsymbol\phi_*$。后一项使系数尚未确定的影响进入预测。整个分布以给定的线性关系、噪声模型和先验为条件；工况变化若改变这些关系，就要相应调整模型。
+
+<span id="2216-练习训练残差与模型选择" />
+
+### 练习：训练残差与模型选择
+
+在普通最小二乘中，保留旧特征并加入新特征，训练残差平方和会不会增大？测试误差呢？试着令新增系数为零，先构造一个新模型可以达到的训练结果。
+
+<details>
+<summary>答案</summary>
+
+在精确求解、同一训练数据且不加入额外惩罚的条件下，新增系数取零就能复现旧解，因此最小训练残差不会增大。测试误差可能增大；测试样本没有参与上述最小化，新特征可能放大对训练噪声的拟合。
+
+</details>
+
+<span id="2217-对应程序与阅读材料" />
+
+### 对应程序与阅读材料
+
+[零号工程：统计学习算例](/Aerodrome/reference/project-zero/#statistical-learning)提供 `--example regression` 入口，计算上述五点的直线与二次特征拟合；[运行说明与结果解读](/Aerodrome/reference/statistical-learning/#regression)给出拟合系数及训练残差。程序输出对应同一组训练样本上的比较。
+
+<a id="discriminant-analysis"></a>
+
+<span id="生成式分类与线性判别" />
+
+## 2.2.2 生成式分类与线性判别
+
+现在把任务改为异常识别。$\boldsymbol x$ 是一次测量的特征列向量，$y\in\{0,1\}$ 分别表示正常、异常。分类模型要回答“看到这条记录后，它属于异常的概率是多少”。一种办法是先学习每个类别中测量值怎样分布，然后反过来推断类别；这叫**生成式分类**。
+
+<span id="从类别内部的分布得到类别概率" />
+
+<span id="2221-类条件分布与贝叶斯分类" />
+
+### 类条件分布与贝叶斯分类
+
+记 $\pi_c=P(y=c)$ 为类别 $c$ 的先验概率，$p(\boldsymbol x\mid y=c)$ 为已知类别时输入的条件密度。生成式模型先描述联合关系 $p(\boldsymbol x,y=c)=p(\boldsymbol x\mid y=c)\pi_c$。这个概率模型对应一个生成过程：先抽取类别，再按该类别的分布产生一条输入记录。观察到输入后，用贝叶斯公式把各类的联合密度归一化：
+
+$$
+P(y=c\mid\boldsymbol x)
+=\frac{p(\boldsymbol x\mid y=c)\pi_c}
+{\sum_j p(\boldsymbol x\mid y=j)\pi_j}.
+$$
+
+分子衡量“这类原本有多常见，以及这条记录在这类中有多常见”；分母把所有候选类加起来，使后验概率之和为 1。若误分类代价相同，选择最大后验概率的类别时比较各类分子即可，因为分母对各类相同；误判代价不同时，应按后验计算各个决定的期望代价。若训练集人为平衡了正常与异常比例，它的样本比例未必等于设备运行时的先验；实际应用中先验变化会影响后验和决策边界。
+
+<span id="共同协方差为什么得到直线边界" />
+
+<span id="2222-共享协方差与线性决策边界" />
+
+### 共享协方差与线性决策边界
+
+线性判别分析（LDA）为每一类的输入采用高斯密度，并假设各类共用一个正定协方差矩阵 $\Sigma$：$\boldsymbol x\mid y=c\sim\mathcal N(\boldsymbol\mu_c,\Sigma)$。$\boldsymbol\mu_c\in\mathbb R^d$ 是该类的特征均值，$\Sigma\in\mathbb R^{d\times d}$ 描述各特征的波动及相关性。对贝叶斯公式的分子取对数，高斯密度中与类别有关的部分为
+
+$$
+\log\pi_c-\frac12(\boldsymbol x-\boldsymbol\mu_c)^{\mathsf T}
+\Sigma^{-1}(\boldsymbol x-\boldsymbol\mu_c).
+$$
+
+展开括号会得到 $-\tfrac12\boldsymbol x^{\mathsf T}\Sigma^{-1}\boldsymbol x+\boldsymbol\mu_c^{\mathsf T}\Sigma^{-1}\boldsymbol x-\tfrac12\boldsymbol\mu_c^{\mathsf T}\Sigma^{-1}\boldsymbol\mu_c+\log\pi_c$。其中第一项对所有类别相同，比较类别时会抵消。剩下的**判别得分**是
+
+$$
+\delta_c(\boldsymbol x)=\boldsymbol\mu_c^{\mathsf T}\Sigma^{-1}\boldsymbol x
+-\frac12\boldsymbol\mu_c^{\mathsf T}\Sigma^{-1}\boldsymbol\mu_c+\log\pi_c.
+$$
+
+两类的边界满足 $\delta_0(\boldsymbol x)=\delta_1(\boldsymbol x)$，这是 $\boldsymbol x$ 的一次方程：二维为直线，高维为超平面。若每类使用不同的协方差 $\Sigma_c$，二次项一般不能抵消，边界可能弯曲，这称为二次判别分析（QDA）。共同协方差既带来线性边界，也让各类样本合起来估计波动，样本少时通常比每类单独估计完整协方差更省参数。
+
+从数据训练 LDA 时，先按标签统计 $\hat\pi_c=N_c/N$ 和该类均值 $\hat{\boldsymbol\mu}_c=(1/N_c)\sum_{i:y_i=c}\boldsymbol x_i$，再把各类样本围绕本类均值的偏差合起来估计共同 $\Sigma$。这里 $N_c$ 是类别 $c$ 的训练样本数。特征数接近或超过样本数时，样本协方差可能难以稳定求逆，可减少特征或采用收缩估计。下面的零号 `lda_demo()` 从给定的解析分布出发，展示这些参数怎样决定后验概率。
+
+取一个无量纲特征 $x$：两类均值分别为 0、2，共同方差为 1，先验均为 $1/2$。类别 1 减类别 0 的得分为 $2x-2$，因此 $x=1$ 时两类后验都是 $0.5$；$x=1.5$ 时，$P(y=1\mid x)=1/(1+e^{-1})\approx0.731$。两条密度曲线在这一位置重叠，其中类别 1 的密度较高，因此后验更偏向类别 1，同时为类别 0 保留约 $0.269$ 的概率。
+
+<TeachingFigure
+  id="fig-lda"
+  src="/Aerodrome/figures/statistical-learning/lda.svg"
+  alt="两个高斯密度在x=1相交，类别1后验随x上升，在x=1为0.5。"
+  number="2.2-2"
+  title="分布重叠如何变成分类的不确定性"
+  caption="解析教学分布：两类均值为 0、2，共同方差为 1，先验均为 0.5；横轴无量纲。左图是类别条件密度，右图是类别 1 后验，两种纵轴含义不同。"
+  source="/Aerodrome/figures/sources/statistical-learning.json"
+  size="wide"
+/>
+
+<span id="2223-朴素贝叶斯与模型选择" />
+
+### 朴素贝叶斯与模型选择
+
+朴素贝叶斯采用条件独立假设构造生成式分类器：给定类别 $c$ 后，$d$ 个特征的联合密度写成 $p(\boldsymbol x\mid y=c)=\prod_{j=1}^d p(x_j\mid y=c)$。独立性针对同一类别内的记录；将不同类别混在一起时，特征可以相关。这个分解减少了需要估计的关联。若温度与振动在同类故障中仍高度相关，相乘可能重复计入相近证据，使后验过于接近 0 或 1。验证数据上的概率损失和校准情况可帮助评价这项简化。
+
+生成式分类通过 $p(\boldsymbol x\mid y)$ 和 $P(y)$ 描述每类输入的分布，再求类别后验；下面的逻辑回归直接拟合条件概率 $P(y\mid\boldsymbol x)$。比较这两条路线时，可以用分类准确率评价类别判断，用对数损失和校准情况评价概率输出。异常稀少的任务还可分别记录漏报与误报，并结合代价选择决策阈值。
+
+<span id="2224-练习改变先验" />
+
+### 练习：改变先验
+
+保持上述两类高斯分布，将异常先验改为 $\pi_1=0.1$、正常先验改为 $\pi_0=0.9$。在误分类代价相同的条件下，令两类得分相等，求新的边界并解释它为何移动。
+
+<details>
+<summary>计算提示</summary>
+
+类别 1 相对类别 0 的得分变为 $2x-2+\log(0.1/0.9)$。等代价边界为 $x=1+\tfrac12\log9\approx2.099$，向类别 1 的均值方向移动。异常越少，需要更强的观测证据才预测为异常；若漏报代价较大，决策阈值还会改变。
+
+</details>
+
+<span id="2225-对应程序与阅读材料" />
+
+### 对应程序与阅读材料
+
+[零号工程：统计学习算例](/Aerodrome/reference/project-zero/#statistical-learning)提供 `--example lda` 入口；[运行说明与结果解读](/Aerodrome/reference/statistical-learning/#lda)明确该例是给定参数后的解析计算。
+
+<a id="logistic-regression"></a>
+
+<span id="逻辑回归" />
+
+## 2.2.3 逻辑回归
+
+逻辑回归沿用异常识别的输入与标签，直接为 $P(y=1\mid\boldsymbol x)$ 建模，因此属于**判别式分类器**。这里“回归”是方法的历史名称，模型输出是类别概率，经过阈值比较后得到类别判断。
+
+<span id="2231-线性得分与概率" />
+
+### 线性得分与概率
+
+先计算无量纲得分 $z=\boldsymbol w^{\mathsf T}\boldsymbol x+b$。若 $x_j$ 带物理单位，$w_j$ 应带相应倒数单位，使 $z$ 无量纲，才可放入指数函数。再通过 sigmoid 函数得到
+
+$$
+p=P(y=1\mid\boldsymbol x)=\sigma(z)=\frac{1}{1+e^{-z}},\qquad
+P(y=0\mid\boldsymbol x)=1-p.
+$$
+
+由 $p/(1-p)=e^z$ 可得 $z=\log[p/(1-p)]$，即类别 1 相对类别 0 的**对数优势**。当 $z=-2,0,2$ 时，$p$ 约为 $0.119,0.5,0.881$；得分可以无限变化，概率始终在 0 与 1 之间。$z=0$ 对应 $\boldsymbol w^{\mathsf T}\boldsymbol x+b=0$，所以 0.5 阈值的决策边界是超平面。经过固定的非线性特征变换后，它在原始输入空间中也可以是曲线。LDA 的两类后验在共同协方差假设下也具有 sigmoid 形式，但 LDA 的系数由类别均值、共同协方差和先验推出来；逻辑回归则直接用带标签样本拟合系数。
+
+0.5 阈值适用于两类误判代价相同、直接按较大后验作决定的场景。漏报异常更昂贵时，降低报警阈值可以提高召回率，同时会增加误报。实际使用时，可在验证数据上检查概率校准，并比较不同阈值对应的总误判代价。
+
+<span id="训练在调整什么" />
+
+<span id="2232-逻辑回归的损失与梯度" />
+
+### 逻辑回归的损失与梯度
+
+对第 $i$ 条样本，令 $p_i=\sigma(\boldsymbol w^{\mathsf T}\boldsymbol x_i+b)$。伯努利模型给真实标签的概率是 $p_i^{y_i}(1-p_i)^{1-y_i}$：$y_i=1$ 时取 $p_i$，$y_i=0$ 时取 $1-p_i$。独立样本的概率相乘，取负对数后乘积变成求和。加入对斜率权重的二次惩罚，得到训练目标
+
+$$
+L(\boldsymbol w,b)=\frac1N\sum_{i=1}^N\big[-y_i\log p_i-(1-y_i)\log(1-p_i)\big]
++\frac{\lambda}{2}\|\boldsymbol w\|_2^2.
+$$
+
+方括号称二分类交叉熵，也是平均负对数似然的单样本项。若真实标签为 1，预测 $p=0.9$ 的损失约为 $0.105$，预测 $p=0.1$ 的损失约为 $2.303$；模型对错误类别越确信，代价越大。正则化系数 $\lambda\ge0$，截距 $b$ 不受惩罚。
+
+梯度可以从单样本损失 $\ell_i$ 推出。先有 $dp_i/dz_i=p_i(1-p_i)$，再用链式法则：
+
+$$
+\frac{d\ell_i}{dz_i}
+=\left(-\frac{y_i}{p_i}+\frac{1-y_i}{1-p_i}\right)p_i(1-p_i)
+=p_i-y_i.
+$$
+
+因此 $\nabla_{\boldsymbol w}L=N^{-1}\sum_i(p_i-y_i)\boldsymbol x_i+\lambda\boldsymbol w$，而 $\partial L/\partial b=N^{-1}\sum_i(p_i-y_i)$。若一条标签为 1 的记录得到低概率，$p_i-y_i<0$，沿这条记录的数据损失梯度下降会推动它的得分上升；整批更新则合并所有记录与正则项的影响。程序的 `fit_logistic()` 反复计算整批概率、平均梯度，再更新参数。本算例采用步长 0.2，执行 1200 步；更换数据尺度或正则化强度时，可根据损失变化重新选择步长与迭代数。
+
+<TeachingFigure
+  id="fig-logistic"
+  src="/Aerodrome/figures/statistical-learning/logistic.svg"
+  alt="左图得分经sigmoid变为概率；右图比较三个正则化强度的验证损失。"
+  number="2.2-3"
+  title="概率映射与验证集选参回答不同问题"
+  caption="左图为解析 sigmoid 曲线，z 无量纲；右图为 seed=7 的合成数据上三个候选正则化强度的验证集平均负对数似然，用于选择正则化强度。"
+  source="/Aerodrome/figures/sources/statistical-learning.json"
+  size="wide"
+/>
+
+<span id="一个完整但小规模的训练流程" />
+
+<span id="2233-逻辑回归训练算例" />
+
+### 逻辑回归训练算例
+
+`logistic_demo(seed=7)` 生成 360 个独立的二维合成输入，并按指定的逻辑概率抽取 0/1 标签，随机分成 216 个训练、72 个验证、72 个测试样本。程序先用训练集计算每列特征的均值和标准差，再用同一组数值变换三个集合，使后续数据都按训练时确定的尺度输入。随后分别以 $\lambda=0,0.03,0.3$ 拟合三个模型，在验证集比较平均负对数似然，选定后读取测试标签。图 2.2-3 右图展示这一验证步骤。
+
+测试阶段报告对数损失、0.5 阈值下的准确率和 Brier 分数。Brier 分数为 $N_{\rm test}^{-1}\sum_i(p_i-y_i)^2$，比较概率与 0/1 标签的差距；恒定输出训练集异常比例的基线模型则提供一个比较起点。[结果页](/Aerodrome/reference/statistical-learning/#logistic)列出 `seed=7` 的实际输出，评价的是同一种合成分布下的新样本预测。将流程用于真实轨迹时，可按实验、设备或时间段划分，以保留相邻帧之间的相关关系。
+
+<span id="2234-多分类-softmax-与交叉熵" />
+
+### 多分类 softmax 与交叉熵
+
+若标签是 $C$ 个互斥且完备的类别之一，令 $\boldsymbol x\in\mathbb R^d$，每类得分 $z_c=\boldsymbol w_c^{\mathsf T}\boldsymbol x+b_c$。把它们放进 $\boldsymbol z=W\boldsymbol x+\boldsymbol b\in\mathbb R^C$，其中 $W\in\mathbb R^{C\times d}$。softmax 将无量纲得分变为类别概率：
+
+$$
+p_c=\frac{e^{z_c}}{\sum_{j=1}^Ce^{z_j}},\qquad
+\ell=-\sum_{c=1}^Ct_c\log p_c=-\log p_y.
+$$
+
+$\boldsymbol t$ 是真实类别的 one-hot 编码：仅 $t_y=1$，其余为零。损失就是分类分布的负对数似然；求导得到 $\partial\ell/\partial z_c=p_c-t_c$。例如三类得分全为零，概率均为 $1/3$；真实类别为第二类时，得分梯度是 $[1/3,-2/3,1/3]^{\mathsf T}$，下降更新会提高第二类相对得分。权重梯度为 $(\boldsymbol p-\boldsymbol t)\boldsymbol x^{\mathsf T}$，形状与 $W$ 相同，这与[神经网络的输出层反传](/Aerodrome/chapters/02-statistical-learning/03-deep-neural-networks/)直接相接。
+
+实现时先令 $m=\max_jz_j$，再计算 $e^{z_c-m}/\sum_je^{z_j-m}$，概率不变，却避免较大正得分导致指数溢出。直接计算损失可用 $-z_y+m+\log\sum_je^{z_j-m}$，避免先得到接近零的概率再取对数。多个故障可同时出现时，标签不满足互斥条件，通常改为每个标签各用一个 sigmoid 和二元损失。
+
+<span id="2235-练习概率与分类可以怎样变化" />
+
+### 练习：概率与分类可以怎样变化
+
+一个真实标签为 1 的样本，预测概率从 0.51 变为 0.90。计算 0.5 阈值下的类别是否改变，以及该样本的负对数似然怎样变化。
+
+<details>
+<summary>答案</summary>
+
+类别预测均为 1，因此这条样本对准确率的贡献不变；损失从 $-\log0.51\approx0.673$ 降到 $-\log0.90\approx0.105$。准确率没有反映预测概率质量的变化。
+
+</details>
+
+<span id="2236-对应程序与阅读材料" />
+
+### 对应程序与阅读材料
+
+[零号工程：统计学习算例](/Aerodrome/reference/project-zero/#statistical-learning)提供 `--example logistic --seed 7` 入口；[运行说明与结果解读](/Aerodrome/reference/statistical-learning/#logistic)给出数据划分、输出字段和本次记录的数值。
+
+<a id="generalized-linear-models"></a>
+
+<span id="广义线性模型" />
+
+## 2.2.4 广义线性模型
+
+前三种模型展示了一个共同结构：从输入特征求出线性得分，再按输出类型解释它。处理时间是连续量，是否异常只有 0/1，一分钟报警次数则必须是非负整数。若对计数也直接套高斯线性回归，预测可能为负，而且平方损失未表达计数的离散性。广义线性模型（GLM）把“线性得分”和“输出分布”明确连接起来。
+
+<span id="用同一种结构连接不同输出" />
+
+<span id="2241-分布线性预测子与链接函数" />
+
+### 分布、线性预测子与链接函数
+
+记 $Y$ 为给定输入时尚未观测的随机输出，$y$ 为一次实际观测值；条件均值 $\mu(\boldsymbol x)=\mathbb E[Y\mid\boldsymbol x]$ 是同一输入条件下的平均输出。令线性预测量 $\eta=\boldsymbol w^{\mathsf T}\boldsymbol x+b$，再选一个**连接函数** $g$，使
+
+$$
+g(\mu)=\eta,\qquad \mu=g^{-1}(\eta).
+$$
+
+$g$ 把均值送到可以用线性式表示的尺度，$g^{-1}$ 再把得分送回目标的取值范围。还要为 $Y\mid\boldsymbol x$ 指定分布，模型才能给出观测值的概率并由似然训练。此处三个常见组合是：
+
+| 目标 | 条件分布 | 连接函数 $g(\mu)$ | 从得分得到均值 |
+|---|---|---|---|
+| 连续响应 | 高斯 | 恒等：$\mu$ | $\mu=\eta$ |
+| 二值标签 | 伯努利 | logit：$\log[\mu/(1-\mu)]$ | $\mu=\sigma(\eta)$，即类别 1 概率 |
+| 固定窗口内的计数 | 泊松 | 对数：$\log\mu$ | $\mu=e^\eta>0$ |
+
+这张表中的 $g(\mu)$ 对特征呈线性关系，原始均值的形状则由逆连接函数决定。高斯模型对应前面的平方残差，伯努利模型对应逻辑回归的交叉熵，泊松模型用于下一段的计数例。标准 GLM 采用指数族输出分布：分布规定观测怎样围绕均值波动，连接函数将均值与线性预测量接起来。
+
+<span id="2242-计数模型的手算例" />
+
+### 计数模型的手算例
+
+设 $x$ 是无量纲负载指标，$Y$ 为固定一分钟内的报警次数。给定一个泊松模型：
+
+$$
+Y\mid x\sim\operatorname{Poisson}(\mu(x)),\qquad
+\log\mu(x)=\log2+x\log2.
+$$
+
+代入 $x=0,1,2$，依次得到 $\mu=2,4,8$ 次/分钟窗口。负载每增加 1，均值乘以 2；这是对数连接使输入的加法变化对应均值的倍数变化。实际计数按泊松概率质量 $P(Y=y\mid x)=e^{-\mu}\mu^y/y!$ 波动，其中 $y=0,1,2,\ldots$。例如 $x=0$ 时，平均每个窗口有 2 次报警，零次概率为 $e^{-2}\approx0.1353$。均值可以是非整数，实际计数取整数。零号 `glm_demo()` 计算的就是这一给定模型的均值和零次概率。
+
+<TeachingFigure
+  id="fig-glm"
+  src="/Aerodrome/figures/statistical-learning/glm.svg"
+  alt="左图负载增加使计数均值指数增长，右图一次窗口的实际计数仍有离散概率分布。"
+  number="2.2-4"
+  title="连续变化的均值与离散出现的计数"
+  caption="解析教学模型，计数窗口固定为一分钟。左图均值为 2×2ˣ，x 无量纲；右图为均值 2 的泊松概率质量，仅显示 0–10 次，余下尾部概率很小但不为零。"
+  source="/Aerodrome/figures/sources/statistical-learning.json"
+  size="wide"
+/>
+
+从带标签的计数数据训练泊松回归时，单条观测的负对数似然为 $-\log P(Y=y\mid\boldsymbol x)=\mu-y\log\mu+\log(y!)$。代入 $\mu=e^\eta$，并去掉不依赖参数的 $\log(y!)$，得到 $\ell(\eta)=e^\eta-y\eta$；其导数是 $d\ell/d\eta=e^\eta-y=\mu-y$。因此，预测均值与观测计数的差可以驱动参数更新，指数映射则在整个训练过程中保持均值为正。
+
+<span id="2243-观测窗口与模型假设" />
+
+### 观测窗口与模型假设
+
+若一些记录持续一分钟、另一些持续两分钟，计数均值会受观察时长影响。令 $T$ 为以分钟计的暴露时长，$\rho(\boldsymbol x)>0$ 为每分钟事件率，可写成 $\mu=T\rho(\boldsymbol x)$，从而 $\log\mu=\log T+\eta$。这里 $\log T$ 是已知的时长修正项，只有 $T$ 用选定的分钟单位表示成无量纲数值后才取对数。比较不同窗口时要先把时长因素放入模型，不能把原始计数直接视作相同条件下的结果。
+
+标准泊松模型假设给定输入时方差等于均值。若报警常成簇出现，或有未记录的工况造成额外波动，实际方差可能更大。检查各负载组的计数分散程度和预测误差，可以帮助判断这项假设是否适合数据，或是否需要允许更大方差的计数模型。
+
+<span id="2244-练习延长记录时间" />
+
+### 练习：延长记录时间
+
+保持单位时间事件率不变、泊松假设成立，把平均计数为 2 的一分钟窗口改为两分钟。求两分钟的均值和零次概率，并说明这是否意味着设备的报警率升高。
+
+<details>
+<summary>答案</summary>
+
+均值变为 4，零次概率为 $e^{-4}\approx0.0183$。这里只是观察时间延长，单位时间事件率没有改变。
+
+</details>
+
+<span id="2245-对应程序与阅读材料" />
+
+### 对应程序与阅读材料
+
+[零号工程：统计学习算例](/Aerodrome/reference/project-zero/#statistical-learning)提供 `--example glm` 入口；[运行说明与结果解读](/Aerodrome/reference/statistical-learning/#glm)列出给定泊松模型的参数、均值和零次概率。
+
+## 延伸阅读
+
+本节依照 Murphy《Probabilistic Machine Learning: An Introduction》第 9 章的高斯判别分析与生成/判别比较、第 10 章的逻辑回归、第 11 章的最小二乘及正则化、第 12 章的广义线性模型组织。书中的高阶优化、完整贝叶斯推断及更多连接函数可在掌握这里的预测、训练和验证过程后继续阅读。

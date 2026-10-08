@@ -75,6 +75,6 @@ force_a, moment_about_a = transform_wrench(a_from_b, force_b, moment_about_b)
 
 ## 验证与来源
 
-测试见 `tests/test_simulation_tools.py`：SciPy 独立旋转对照、组合与逆、零旋转 Jacobian、旋转矩阵导数验证欧拉角速度映射、解析力矩/杆臂、赤道基向量、风轴对齐与升力符号、速度与气动角往返、有限差分梯度、单位及 ±π 边界。旧刚体和 F-16 测试也参与完整回归。
+测试见 `tests/modules/test_simulation_tools.py`：SciPy 独立旋转对照、组合与逆、零旋转 Jacobian、旋转矩阵导数验证欧拉角速度映射、解析力矩/杆臂、赤道基向量、风轴对齐与升力符号、速度与气动角往返、有限差分梯度、单位及 ±π 边界。旧刚体和 F-16 测试也参与完整回归。
 
 局部基方向参考 [ESA Navipedia ECEF/ENU 变换](https://gssc.esa.int/navipedia/index.php/Transformations_between_ECEF_and_ENU_coordinates)，随后按 NED/ENU 轴定义转换；风轴定义参照 [MathWorks body-to-wind DCM](https://www.mathworks.com/help/aerotbx/ug/dcmbody2wind.html)。没有执行 MATLAB 对照程序。

@@ -1,0 +1,136 @@
+---
+title: 4.8 配平、线性化与运动分析
+description: 先确定持续运动的条件，再求解配平、建立局部误差模型，并从模态理解飞机的响应。
+---
+
+飞机以固定速度平飞时，位置一直向前走，升力、推力和舵偏却可以保持稳定。做仿真实验前，先找到这样一组互相匹配的状态与输入，才能分辨随后出现的变化究竟来自扰动、控制动作，还是初始条件本来就没有平衡。这个寻找过程称为配平。
+
+## 4.8.1 配平先指定怎样运动
+
+在恒定质量、局部平直地面和均匀静止大气下，无侧滑直线平飞可要求空速 $V_a$、高度 $H$ 和姿态不变，体轴角速度 $p=q=r=0$。取滚转角 $\phi=0$，则航迹倾角 $\gamma=\theta-\alpha=0$，所以俯仰角 $\theta=\alpha$。机体持续前进，NED 位置导数为 $\dot{\boldsymbol r}_n=R_{nb}\boldsymbol v_b$，通常不为零。
+
+转弯配平指定恒定转弯率 $\Omega=\dot\psi$，并保持 $\phi,\theta,V_a,\alpha,\beta$ 等量恒定。由姿态运动学可得
+
+$$
+\begin{bmatrix}p\\q\\r\end{bmatrix}
+=\Omega\begin{bmatrix}-\sin\theta\\\sin\phi\cos\theta\\\cos\phi\cos\theta\end{bmatrix}.
+$$
+
+这里各角用弧度，$\Omega$ 单位为 $\mathrm{rad/s}$。机体速度分量和角速度分量恒定，意味着它们的导数为零；地面系速度方向随航向旋转，所需向心加速度由合力提供。转弯的力矩还要平衡 $\boldsymbol\omega_b\times I\boldsymbol\omega_b$。这种在持续运动中保持形态的状态称为相对平衡。
+
+多旋翼定点悬停则要求地速、角速度以及位置导数为零，合推力在地面系平衡重力，合力矩为零；若有电机动态，其转速也应处于稳态。平飞、转弯和悬停因此具有不同残差条件。随高度改变的大气密度会使爬升条件不断变化，定高度求出的爬升配平常作为沿航迹的一系列局部工作点。相关旋翼受力见[4.7](/Aerodrome/chapters/04-aircraft-control-models/07-rotorcraft-models/)。
+
+## 4.8.2 把运动条件变成残差
+
+以现有 F-16 对称纵向模型为例，状态和输入采用
+
+$$
+x=[V_a,\alpha,q,\theta,H]^\mathsf T,
+\qquad u=[\delta_e,T]^\mathsf T.
+$$
+
+其中 $V_a$ 单位为 $\mathrm{m/s}$，$H$ 为米，俯仰角速度 $q$ 为 $\mathrm{rad/s}$，迎角、俯仰角和升降舵偏角 $\delta_e$ 为弧度，推力 $T$ 为牛顿。指定 $V_a=150\,\mathrm{m/s}$、$H=3000\,\mathrm m$、无风和固定前缘襟翼后，将 $q=0$、$\theta=\alpha$ 直接代入状态，只需求解 $z=[\alpha,\delta_e,T]^\mathsf T$，使
+
+$$
+r(z)=
+\begin{bmatrix}\dot V_a(z)\\\dot\alpha(z)\\\dot q(z)\end{bmatrix}
+=0.
+$$
+
+前两行要求速度大小和方向稳定，第三行要求俯仰力矩平衡；$\dot\theta=0$ 与 $\dot H=0$ 已由运动约束满足。实际求解可最小化 $\tfrac12\|Wr(z)\|^2$。对角权重 $W$ 按各残差的允许尺度设定，使不同单位的分量得到合适权重；输入上下界则对应舵偏和可用推力范围。
+
+`pipelines/f16_trim.py` 使用带边界的最小二乘与自动微分求解。当前默认工况实算得到：
+
+| 配平量 | 数值 |
+| --- | ---: |
+| 迎角与俯仰角 | $3.506062^\circ$ |
+| 升降舵偏角 | $-1.377779^\circ$ |
+| 推力 | $8401.448\,\mathrm N$ |
+
+这是现有查表纵向模型、理想舵面与直接推力输入的结果。将解代回方程，得到 $\dot V_a\approx4.9\times10^{-16}\,\mathrm{m/s^2}$、$\dot\alpha\approx-4.2\times10^{-17}\,\mathrm{rad/s}$、$\dot q\approx-4.5\times10^{-17}\,\mathrm{rad/s^2}$。检查各分量残差和保持输入后的轨迹，可以把求解状态与物理运动联系起来。
+
+完整六自由度求解器 `f16_six_dof_trim.trim` 还调整侧滑、副翼和方向舵，使三个速度导数与三个角速度导数为零；原始侧向系数中的小偏置会产生小的非零配平侧滑。入口和完整参数见[零号工程的固定翼与配平](/Aerodrome/reference/project-zero/#fixed-wing)。
+
+## 4.8.3 在工作点附近求 A 与 B
+
+对约化状态中的平衡点 $f(x_\star,u_\star)=0$，令 $\delta x=x-x_\star$、$\delta u=u-u_\star$。在光滑邻域内展开并保留一阶项，得到
+
+$$
+\delta\dot x=A\delta x+B\delta u,
+\qquad
+A=\left.\frac{\partial f}{\partial x}\right|_\star,
+\quad B=\left.\frac{\partial f}{\partial u}\right|_\star.
+$$
+
+$A$ 的第 $j$ 列描述第 $j$ 个状态略微改变时，各状态导数怎样变化；$B$ 描述输入的作用。若保留了平飞位置或考虑转弯，则围绕满足原方程的参考轨迹 $x_\star(t)$ 定义误差，从 $f(x,u)-\dot x_\star$ 展开，得到可能随时间变化的 $A(t),B(t)$。在随参考运动的坐标中约化后，适当工况可得到常系数模型。
+
+中心有限差分逐列计算
+
+$$
+A_{:,j}\approx
+\frac{f(x_\star+\varepsilon_j e_j,u_\star)
+-f(x_\star-\varepsilon_j e_j,u_\star)}{2\varepsilon_j},
+$$
+
+其中 $e_j$ 是第 $j$ 个单位向量，$\varepsilon_j$ 与该状态同单位。较大的扰动混入高阶项，过小的扰动会放大舍入误差；按物理尺度选几档扰动，观察导数是否稳定。
+
+现有纵向设计程序用 `jax.jacfwd(rhs, argnums=(0, 1))` 求 $A,B$。自动微分沿实际计算步骤应用链式法则；查表网格面和限幅拐点处，导数可能发生跳变，应说明当前工作点属于哪一段。可用有限差分核对光滑邻域内的导数，方法见 [JAX 自动微分文档](https://docs.jax.dev/en/latest/automatic-differentiation.html)。
+
+从连续模型得到采样周期 $T_s$ 的模型时，零阶保持给出 $A_d=e^{AT_s}$、$B_d=\int_0^{T_s}e^{A\tau}B\,\mathrm d\tau$。这组矩阵可直接接入[3.2 的多维 LQR](/Aerodrome/chapters/03-reinforcement-learning/02-bellman-and-lqr/#327-多维-lqr-的矩阵式从哪里来)。
+
+## 4.8.4 四元数用三维局部姿态误差
+
+六自由度状态中四元数有四个分量，单位范数约束使独立姿态变化只有三个。在线性模型中，用一个小旋转向量 $\delta\vartheta\in\mathbb R^3$ 描述姿态扰动，三个分量均以弧度计。
+
+采用本章的 body→NED 四元数，约定将小旋转乘在参考姿态右侧：
+
+$$
+\boldsymbol q_{\rm att}
+=\boldsymbol q_\star\otimes\delta\boldsymbol q,
+\qquad
+\delta\boldsymbol q\approx
+\begin{bmatrix}1\\\delta\vartheta/2\end{bmatrix}.
+$$
+
+这对应 $R_{nb}=R_\star\exp([\delta\vartheta]_\times)$，局部旋转的分量用参考机体系轴表达；$[a]_\times b=a\times b$。做有限差分时，给 $\delta\vartheta$ 的一个方向施加正负扰动，再通过旋转四元数重建完整姿态，所有被评估的姿态都落在单位四元数表示上。
+
+由 $\delta\boldsymbol q=\boldsymbol q_\star^{-1}\otimes\boldsymbol q_{\rm att}$ 求误差时，先选取靠近单位四元数的符号，再用其向量部分的两倍作为小角度近似。这样，表示同一姿态的 $\boldsymbol q$ 与 $-\boldsymbol q$ 会得到一致的局部误差。
+
+在相同体轴编号下定义 $\delta\omega=\omega-\omega_\star$，一阶误差运动学为
+
+$$
+\delta\dot\vartheta
+=\delta\omega-[\omega_\star]_\times\delta\vartheta.
+$$
+
+参考姿态固定时 $\omega_\star=0$，它化为 $\delta\dot\vartheta=\delta\omega$；转弯参考保留交叉项。用位置、速度、三维姿态误差和角速度误差组成 12 维局部刚体状态，就能在物理自由度上解释特征值。上述纵向程序的姿态状态是俯仰角；六自由度模型可按这组三维误差构造局部模型。
+
+## 4.8.5 特征值怎样对应运动模态
+
+若 $Av_i=\lambda_i v_i$，沿特征向量 $v_i$ 的自由响应含有 $e^{\lambda_i t}$。实部决定增长或衰减；复数对 $\lambda=\sigma\pm j\omega$ 对应振荡，周期为 $2\pi/|\omega|$，阻尼比为 $-\sigma/\sqrt{\sigma^2+\omega^2}$。特征向量给出参与该运动的状态及相位；比较分量大小前，应先按速度、角度等参考尺度归一化。
+
+上述 F-16 纵向工作点的两对特征值为 $-0.89416\pm0.62997j\,\mathrm{s^{-1}}$ 和 $-0.003472\pm0.059137j\,\mathrm{s^{-1}}$，对应约 9.97 秒与 106.25 秒的周期，阻尼比分别约 0.817 与 0.0586。前者衰减快，后者振荡缓慢、衰减很轻。常见固定翼模态可按可观察的响应理解：
+
+| 模态 | 主要运动 |
+| --- | --- |
+| 短周期 | 迎角与俯仰角速度较快变化，速度变化相对较小 |
+| 长周期（沉浮） | 速度与高度缓慢交换，迎角变化较小 |
+| 荷兰滚 | 侧滑、偏航与滚转耦合振荡 |
+| 滚转衰减 | 滚转角速度较快回落 |
+| 螺旋 | 坡度和转弯缓慢变化，可能衰减或增长 |
+
+这些名称帮助解释响应，具体频率和稳定性由工况处的矩阵决定。若需要输入到观测 $y=C\delta x+D\delta u$ 的关系，可写成 $G(s)=C(sI-A)^{-1}B+D$；不同观测会以不同强弱显示同一组模态。
+
+## 4.8.6 运行与练习
+
+在 `ngc/` 下运行现有纵向实验：
+
+```sh
+uv run --locked --extra control python examples/f16_level_flight.py
+```
+
+程序先配平、线性化，再设计离散 LQR，模拟配平初态及正负扰动。`artifacts/f16_level_flight/trajectory.npz` 保存配平值、$A,B$ 和轨迹；`summary.json` 记录采样周期、配平残差与恢复指标。参数选择可接回[3.3 的闭环轨迹敏感度](/Aerodrome/chapters/03-reinforcement-learning/03-parametric-optimization/#335-参数的梯度怎样改变一条闭环轨迹)。
+
+练习：在短程序中调用 `design(tables, speed=130., height=3000.)`，比较配平迎角、推力以及 $A$ 的特征值。再在原工作点施加一个小状态扰动，对比 $f(x_\star+\delta x,u_\star)-f(x_\star,u_\star)$ 与 $A\delta x$；将扰动减半，观察光滑区间内余项是否约缩小至四分之一。
+
+参考：[Stevens、Lewis 与 Johnson，*Aircraft Control and Simulation*，第三版](https://onlinelibrary.wiley.com/doi/book/10.1002/9781119174882)，§2.4、§2.6；§3.6–3.8，pp.185–213；§4.2，pp.257–274。

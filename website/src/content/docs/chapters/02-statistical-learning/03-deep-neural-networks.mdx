@@ -1,0 +1,501 @@
+---
+
+title: "2.3 深度神经网络"
+
+description: 可学习表示、反向传播、卷积、序列与少标签学习。
+
+tableOfContents:
+
+  minHeadingLevel: 2
+
+  maxHeadingLevel: 3
+
+---
+
+
+import TeachingFigure from '../../../../components/TeachingFigure.astro';
+
+
+用负载和温度预测处理时间时，我们可以手工挑选特征；输入换成一幅图像或一长段测量记录后，有用的组合就难以逐一列出。**神经网络**把特征变换也写成带参数的计算，通过训练一起调整。输入经过一层层加权求和与激活函数，最终得到预测；训练根据预测误差，逐层计算各参数的调整方向。
+
+把层顺序连接时，可写成 $f_\theta=f_L\circ\cdots\circ f_1$，$\theta$ 收集各层参数。下面先沿一个两层网络算完预测、损失、梯度和一次更新，再看图像与序列为什么需要不同的连接方式。标签不足时，数据增强与迁移等训练方法还能帮助利用已有数据，这些方法也可用于其他模型。
+
+<a id="neural-networks"></a>
+
+<span id="多层感知机" />
+
+## 2.3.1 多层感知机
+
+线性回归可以先由人构造平方项、交叉项等特征，再学习输出权重。当关系较复杂时，选哪些特征可能比拟合权重更难。**多层感知机**（multilayer perceptron，MLP）把特征变换也写成含参数的函数，训练时一起调整中间表示和输出。在这一节，它是单向连接的网络：一层接收上一层的数值，算出一组新数值，再传给下一层。
+
+<details>
+<summary>名称对照：神经网络、层、神经元与激活</summary>
+
+人工神经网络（artificial neural network，ANN）是这类模型的总称；“深度神经网络”（deep neural network，DNN）强调多个可学习变换的逐层组合，具体结构以每层运算为准。MLP 是一种前馈神经网络，信息沿输入到输出的方向单向传播。这里的 MLP 各层通常为**全连接层**，即本层每个输出都使用上一层的全部输入。“前馈”描述传播方向，“全连接”描述连接范围；卷积网络也可以前馈，其连接则采用局部窗口和共享权重。
+
+“感知机”（perceptron）最初指带硬阈值的二分类单元；现代 MLP 通常使用 ReLU、sigmoid 等激活函数。输入层承载数据，输出层产生预测，中间的**隐藏层**由前一层数值计算出模型内部表示。这些表示可以在前向计算中直接读取和分析。
+
+一层包含一组输出分量，每个分量对应一个“神经元”或“单元”：对输入做加权求和、加偏置，再经过激活函数。**权重**控制输入分量的贡献，**偏置**提供与输入无关的平移。加权求和所得的 $z$ 称为激活前的值（pre-activation）；经过非线性函数得到的 $h$ 称为激活值（activation）。分类器最后一层在转成概率之前的得分也常叫 **logit**。“激活函数”指变换本身，“激活值”指变换结果。网络层数有计入输出层、只计隐藏层等不同约定，逐层列出运算可以明确所指结构。
+
+</details>
+
+<span id="从一层变换到可学习的特征" />
+
+<span id="2311-网络层激活函数与特征表示" />
+
+### 网络层、激活函数与特征表示
+
+先固定一个样本的排列方式：$\boldsymbol x$ 是 $d_0\times1$ 的**列向量**，第 $l$ 层有 $d_l$ 个输出。记输入 $\boldsymbol h_0=\boldsymbol x$，全连接层依次计算
+
+$$
+\boldsymbol z_l=W_l\boldsymbol h_{l-1}+\boldsymbol b_l,\qquad
+\boldsymbol h_l=\phi_l(\boldsymbol z_l),
+$$
+
+其中 $W_l\in\mathbb R^{d_l\times d_{l-1}}$，$\boldsymbol b_l,\boldsymbol z_l,\boldsymbol h_l\in\mathbb R^{d_l}$，$\phi_l$ 对每个分量分别作用。第 $i$ 个单元实际算的是 $z_{l,i}=\sum_{j=1}^{d_{l-1}}W_{l,ij}h_{l-1,j}+b_{l,i}$。矩阵的第 $i$ 行收集进入该单元的全部权重，矩阵乘法将所有单元的加权求和一起写出。若这一层有 3 个输入、2 个输出，则 $2\times3$ 权重矩阵左乘 $3\times1$ 输入，得到 $2\times1$ 输出，再加上含 2 个分量的偏置。矩阵乘法与内积、外积的形状区别可回看 [1.1.2 线性组合、基与矩阵乘法](/Aerodrome/chapters/01-mathematical-tools/01-linear-algebra/#112-线性组合基与矩阵乘法)。
+
+最常见的隐藏层非线性之一是 $\operatorname{ReLU}(a)=\max(0,a)$：正值原样通过，负值变为零。没有非线性时，两层仿射运算满足 $W_2(W_1\boldsymbol x+\boldsymbol b_1)+\boldsymbol b_2=(W_2W_1)\boldsymbol x+(W_2\boldsymbol b_1+\boldsymbol b_2)$，可以合并成一层仿射变换。加入 ReLU 后，不同输入区域会有不同的单元开启，从而形成不同的局部线性关系，网络能够表达的函数形状随之丰富。
+
+为了由误差调整参数，需要计算这些变换的导数。**可微**表示在某一点附近，函数的微小变化可以用一个线性关系近似；多层计算的变化通过链式法则衔接。sigmoid 与双曲正切 $\tanh$ 都处处可微，其导数分别为 $\sigma(a)(1-\sigma(a))$ 和 $1-\tanh^2(a)$。两者在输入绝对值较大时趋于平坦，局部导数很小，这会削弱回传的梯度。ReLU 在正半轴导数为 1、负半轴为 0，零点由实现约定一个值。沿这些局部求导规则，程序就可以计算各参数对误差的影响。
+
+输出层和损失共同由任务决定。连续量回归可以直接输出 $\hat y=z_L$，再与目标值组成平方损失；二分类将一个 logit 经 sigmoid 变为概率，多类别分类将一组 logits 经 softmax 变为类别概率，并采用相应的交叉熵损失。这样，输出的取值范围、标签含义和训练目标就对应起来。
+
+<span id="一个直线无法分开的例子" />
+
+<span id="2312-非线性分类xor-算例" />
+
+### 非线性分类：XOR 算例
+
+取两个二值输入，标签为“恰有一个输入为 1”，即 XOR。四个点 $(0,0),(0,1),(1,0),(1,1)$ 的标签分别为 0、1、1、0，不能用一条直线分开。可以构造
+
+$$
+h_1=\max(0,x_1-x_2),\quad h_2=\max(0,x_2-x_1),\quad
+p=\sigma\bigl(4(h_1+h_2)-2\bigr).
+$$
+
+在这些二值输入上，$h_1+h_2$ 等于两个输入的绝对差。转换后，类别 0 落在和为 0 的位置，类别 1 落在和为 1 的位置，输出层就容易区分。
+
+<TeachingFigure
+  id="fig-mlp"
+  src="/Aerodrome/figures/statistical-learning/mlp.svg"
+  alt="左图XOR两类对角交错，右图经过ReLU差分特征后可用直线区分。"
+  number="2.3-1"
+  title="隐藏层如何改变问题的几何形状"
+  caption="四个精确二值输入，固定权重演示前向计算，未进行训练。颜色与点形表示类别；右图中两个类别 0 输入重合在原点。坐标均无量纲。"
+  source="/Aerodrome/figures/sources/statistical-learning.json"
+  size="wide"
+/>
+
+这组给定权重使网络表达了 XOR。两个同类输入在隐藏空间中重合，说明隐藏表示保留了分类所需的差异，并合并了对该任务无关的输入差异。下面转向训练过程，观察权重怎样由预测误差更新。
+
+<span id="把一次前向计算写到每个数字" />
+
+<span id="2313-前向传播数值例" />
+
+### 前向传播：数值例
+
+XOR 例子展示网络能表达什么。接下来用一个连续量回归样本展示网络怎样**学习**。假设输入和目标已经无量纲化，取 $\boldsymbol x=[1,2]^{\mathsf T}$、$y=1$；隐藏层有两个单元，输出层只有一个。初始参数、预测和损失定义为
+
+$$
+W_1=\begin{bmatrix}0.1&0.2\\-0.3&0.4\end{bmatrix},\quad
+\boldsymbol b_1=\begin{bmatrix}0.1\\0.2\end{bmatrix},\quad
+W_2=\begin{bmatrix}0.5&-0.2\end{bmatrix},\quad b_2=0.1,
+$$
+
+$$
+\boldsymbol z_1=W_1\boldsymbol x+\boldsymbol b_1,\quad
+\boldsymbol h_1=\operatorname{ReLU}(\boldsymbol z_1),\quad
+\hat y=W_2\boldsymbol h_1+b_2,\quad
+L=\tfrac12(\hat y-y)^2.
+$$
+
+第一层的两个加权和分别是 $0.1\cdot1+0.2\cdot2+0.1=0.6$ 和 $-0.3\cdot1+0.4\cdot2+0.2=0.7$，所以 $\boldsymbol z_1=\boldsymbol h_1=[0.6,0.7]^{\mathsf T}$。两个值严格大于零，ReLU 在本次计算中都保持原值。输出为 $\hat y=0.5\cdot0.6-0.2\cdot0.7+0.1=0.26$；误差 $\hat y-y=-0.74$，故 $L=0.5\cdot(-0.74)^2=0.2738$。这一遍从输入算到损失，叫**前向传播**。它还没有改变任何参数。
+
+<TeachingFigure
+  id="fig-mlp-computation"
+  src="/Aerodrome/figures/statistical-learning/mlp-computation.svg"
+  alt="两输入、两隐藏单元、一输出的计算图；上方是前向数值，下方按反方向标出梯度。"
+  number="2.3-2"
+  title="同一次计算的前向值与反向梯度"
+  caption="2–2–1 网络在给定初始参数下处理一个无量纲回归样本，采用平方损失；两个 ReLU 激活前值都严格为正。图中前向数值与反向梯度对应同一组初始参数。"
+  source="/Aerodrome/figures/sources/neural-computation.json"
+  size="wide"
+/>
+
+<a id="训练依靠链式法则而非逐层猜答案"></a>
+
+<span id="从损失反推各层参数" />
+
+<span id="2314-反向传播与参数梯度" />
+
+### 反向传播与参数梯度
+
+为了调整参数，需要知道每个参数变化一点会使损失怎样变化。先把输出层激活前值记为 $z_2=\hat y$，定义 $\boldsymbol\delta_l=\partial L/\partial\boldsymbol z_l$，即损失对第 $l$ 层激活前值的列向量梯度。平方损失在输出层给出 $\delta_2=\partial L/\partial z_2=\hat y-y=-0.74$。由 $z_2=W_2\boldsymbol h_1+b_2$，分别对两个输出权重求导，得到 $\partial L/\partial W_{2,1j}=\delta_2h_{1,j}$。合在一起就是
+
+$$
+\nabla_{W_2}L=\delta_2\boldsymbol h_1^{\mathsf T}
+=\begin{bmatrix}-0.444&-0.518\end{bmatrix},\qquad
+\nabla_{b_2}L=\delta_2=-0.74.
+$$
+
+这里的 $\delta_2\boldsymbol h_1^{\mathsf T}$ 是**外积**：$(1\times1)(1\times2)$ 得到 $1\times2$ 的权重梯度，每个位置正好是“该输出的误差敏感度 × 进入该权重的输入”。隐藏层先接收从输出层传回的梯度 $W_2^{\mathsf T}\delta_2=[-0.37,0.148]^{\mathsf T}$。激活函数逐元素作用，故还要逐元素乘上 $\operatorname{ReLU}'(\boldsymbol z_1)$。本例两个 $z_{1,i}>0$，导数都是 1，于是
+
+$$
+\boldsymbol\delta_1=(W_2^{\mathsf T}\delta_2)\odot\operatorname{ReLU}'(\boldsymbol z_1)
+=\begin{bmatrix}-0.37\\0.148\end{bmatrix},
+$$
+
+$$
+\nabla_{W_1}L=\boldsymbol\delta_1\boldsymbol x^{\mathsf T}
+=\begin{bmatrix}-0.37&-0.74\\0.148&0.296\end{bmatrix},\qquad
+\nabla_{\boldsymbol b_1}L=\boldsymbol\delta_1.
+$$
+
+第一个输出层权重为正，所以负的输出误差传回第一个隐藏单元仍为负；第二个输出层权重为负，所以同一误差传回第二个隐藏单元时变为正。这解释了 $\boldsymbol\delta_1$ 两个分量符号不同。$\odot$ 是同形状向量的**逐元素乘法**，它只让每个单元乘自己的局部导数；$W_2^{\mathsf T}\delta_2$ 则是**矩阵乘法**，把下一层所有相关输出的影响汇回当前层。两种运算在含义和形状上都不同。
+
+若还要知道损失对输入的敏感度，继续回传得 $\nabla_{\boldsymbol x}L=W_1^{\mathsf T}\boldsymbol\delta_1=[-0.0814,-0.0148]^{\mathsf T}$。输入通常不是训练参数，因此训练这组权重无需更新 $\boldsymbol x$；这个梯度用于分析输入扰动怎样影响损失。对矩阵变量求导为何出现外积，可回查 [1.1.10 矩阵变量求导](/Aerodrome/chapters/01-mathematical-tools/01-linear-algebra/#1110-矩阵变量求导线性层与控制增益)；转置回传与逐元素激活导数对应 [1.1.8 雅可比、链式法则与模型线性化](/Aerodrome/chapters/01-mathematical-tools/01-linear-algebra/#118-雅可比链式法则与模型线性化)。
+
+矩阵梯度仍是“每个元素各求一次导数，再放回原位置”。以 $\boldsymbol z=W\boldsymbol h+\boldsymbol b$ 为例，固定输入和偏置，只让权重有微小变化 $dW$，则 $d\boldsymbol z=dW\boldsymbol h$。用 $\boldsymbol\delta=\nabla_{\boldsymbol z}L$ 表示已经传到本层的梯度，有
+
+$$
+dL=\boldsymbol\delta^{\mathsf T}(dW)\boldsymbol h
+=\sum_i\sum_j\delta_i h_j\,dW_{ij}.
+$$
+
+另一方面，按梯度的定义，$dL=\sum_{i,j}(\nabla_W L)_{ij}\,dW_{ij}$。比较每个 $dW_{ij}$ 前的系数，就得到 $(\nabla_W L)_{ij}=\delta_i h_j$，即 $\nabla_W L=\boldsymbol\delta\boldsymbol h^{\mathsf T}$。这也是矩阵的 Frobenius 内积：$dL=\langle\nabla_W L,dW\rangle_F$。若改为只扰动输入，则 $dL=\boldsymbol\delta^{\mathsf T}W\,d\boldsymbol h=(W^{\mathsf T}\boldsymbol\delta)^{\mathsf T}d\boldsymbol h$，因此传给前一层的是 $W^{\mathsf T}\boldsymbol\delta$。外积负责收集各个权重的梯度，转置乘法负责把影响沿连接传回；二者都由同一个微分式得出。
+
+**反向传播**就是沿前向计算的反方向反复应用链式法则。推广到多层网络时，若第 $l$ 层采用逐元素激活，则 $\boldsymbol\delta_l=(W_{l+1}^{\mathsf T}\boldsymbol\delta_{l+1})\odot\phi_l'(\boldsymbol z_l)$，随后计算 $\nabla_{W_l}L=\boldsymbol\delta_l\boldsymbol h_{l-1}^{\mathsf T}$、$\nabla_{\boldsymbol b_l}L=\boldsymbol\delta_l$。从输出损失反传的量是标量目标的梯度，程序无需为每层显式构造完整雅可比矩阵。自动微分系统会记录运算的依赖关系，按相同的局部求导规则组合结果；它计算的是程序所表示函数的导数，并非靠微小扰动反复试算的有限差分。
+
+ReLU 在零点不可导，实现通常为该点选定一个约定的次梯度，例如 0。本例两个激活前值都严格为正，手算采用的局部导数均为 1。网络更深时，回传梯度会连续乘多层权重和局部导数，因而可能逐渐缩小或放大；后文据此讨论初始化和残差连接。
+
+<span id="从梯度到一次更新再到整批训练" />
+
+<span id="2315-参数更新与批量训练" />
+
+### 参数更新与批量训练
+
+取学习率 $\eta=0.1$，最直接的梯度下降对**所有参数同时**使用刚才在旧参数处算出的梯度：$\theta_{\rm new}=\theta_{\rm old}-\eta\nabla_\theta L$。本例更新后为
+
+$$
+W_1^{\rm new}=\begin{bmatrix}0.137&0.274\\-0.3148&0.3704\end{bmatrix},\quad
+\boldsymbol b_1^{\rm new}=\begin{bmatrix}0.137\\0.1852\end{bmatrix},\quad
+W_2^{\rm new}=\begin{bmatrix}0.5444&-0.1482\end{bmatrix},\quad b_2^{\rm new}=0.174.
+$$
+
+例如 $W_{1,11}^{\rm new}=0.1-0.1(-0.37)=0.137$。实现时先在旧参数处完成全部反向计算，再一起更新，使所有梯度对应同一个目标函数取值点。用新参数做一次前向计算，可得 $\boldsymbol z_1^{\rm new}=[0.822,0.6112]^{\mathsf T}$、$\hat y^{\rm new}=0.53091696$、$L^{\rm new}\approx0.11002$。在这一个样本、初值和步长下，预测向目标靠近，损失从 $0.2738$ 降到约 $0.11002$。完整训练会对一批样本重复这一过程，再用独立数据评价得到的模型。
+
+一批 $B$ 个样本的训练目标常取平均 $L_B=B^{-1}\sum_{i=1}^B L_i$。因此先对各样本求梯度再取平均；平均所需的 $1/B$ **只除一次**。教材的数据矩阵采用“每行一个样本”：$X\in\mathbb R^{B\times d_0}$，第 $i$ 行是单样本列向量 $\boldsymbol x_i$ 的转置。于是整批第一层可写成 $Z_1=XW_1^{\mathsf T}+\boldsymbol 1\boldsymbol b_1^{\mathsf T}$，其中 $Z_1$ 的形状是 $B\times d_1$；转置只来自样本的排列方式，单样本的 $W_1\boldsymbol x$ 规则没有改变。若将每行的 $\boldsymbol\delta_{1,i}^{\mathsf T}$ 堆成 $D_1$，则 $\nabla_{W_1}L_B=D_1^{\mathsf T}X/B$，形状仍为 $d_1\times d_0$，偏置梯度是各行 $\boldsymbol\delta_{1,i}$ 的平均。
+
+每次用整个训练集求平均梯度，叫**全批量梯度下降**；只抽一条记录更新，是严格意义上的**随机梯度下降**（SGD）；实际常用一个小批量来估计训练集梯度，也常把这种小批量做法统称 SGD。小批量使每步计算成本较低，但梯度随抽到的样本变化，损失不必逐步单调下降。一个 **epoch** 表示按既定采样规则看过一轮训练数据，并不等于一次参数更新。学习率决定每次沿梯度走多远：过大可能震荡或发散，过小则训练很慢。
+
+<span id="2316-梯度下降与优化器" />
+
+### 梯度下降与优化器
+
+反向传播负责计算梯度，**优化器**决定拿到梯度以后怎样更新参数。把所有参数排列成向量 $\boldsymbol\theta$，令 $\boldsymbol g_t$ 是第 $t$ 步在当前参数处计算的小批量梯度。普通 SGD 使用
+
+$$
+\boldsymbol\theta_{t+1}=\boldsymbol\theta_t-\eta_t\boldsymbol g_t.
+$$
+
+$\eta_t$ 是这一步的学习率。它可以固定，也可按训练进度变化。前面的手算正是这条更新规则。
+
+**动量法**保留过去梯度的累积。采用一种常见写法，从 $\boldsymbol m_0=\boldsymbol0$、$t=1$ 开始，计算
+
+$$
+\boldsymbol m_t=\beta\boldsymbol m_{t-1}+\boldsymbol g_t,\qquad
+\boldsymbol\theta_{t+1}=\boldsymbol\theta_t-\eta_t\boldsymbol m_t.
+$$
+
+$0\le\beta<1$ 控制历史影响保留多久。连续同向的梯度会累积，来回变号的分量会相互抵消，因此在狭长、弯曲的损失曲面上可能减少横向摆动。有些教材在当前梯度前再乘 $1-\beta$，其累积量尺度不同，学习率也应配合该约定。
+
+**Adam** 为每个参数记录两组历史量：梯度的滑动平均 $\boldsymbol m_t$，以及梯度平方的滑动平均 $\boldsymbol v_t$。令两者初值为零、$t$ 从 1 开始：
+
+$$
+\begin{aligned}
+\boldsymbol m_t&=\beta_1\boldsymbol m_{t-1}+(1-\beta_1)\boldsymbol g_t,\\
+\boldsymbol v_t&=\beta_2\boldsymbol v_{t-1}+(1-\beta_2)(\boldsymbol g_t\odot\boldsymbol g_t),\\
+\hat{\boldsymbol m}_t&=\frac{\boldsymbol m_t}{1-\beta_1^t},\qquad
+\hat{\boldsymbol v}_t=\frac{\boldsymbol v_t}{1-\beta_2^t},\\
+\boldsymbol\theta_{t+1}&=\boldsymbol\theta_t-\eta_t\frac{\hat{\boldsymbol m}_t}{\sqrt{\hat{\boldsymbol v}_t}+\epsilon}.
+\end{aligned}
+$$
+
+其中 $0\le\beta_1,\beta_2<1$，$\epsilon>0$ 防止分母为零；平方根和除法都逐元素进行。由于从零开始积累，最初的滑动平均会偏小，带帽号的两项修正这种初始化偏差。$\boldsymbol v_t$ 记录梯度的二阶原点矩，即平方的平均。一个参数若过去经常遇到较大的梯度，其分母通常也较大；Adam 因此按梯度历史调整各参数的相对步幅，整体步幅由学习率控制。比较 Adam 与 SGD 时，可在相同数据划分下分别选择学习率，再观察训练效率和验证表现。
+
+<span id="2317-初始化梯度尺度与残差连接" />
+
+### 初始化、梯度尺度与残差连接
+
+反向传播要连续乘各层的权重与激活导数。若这些乘法在相关方向反复缩小向量，早期层得到的梯度会很小；反复放大则会产生很大的梯度，这分别称为梯度消失和梯度爆炸。sigmoid 饱和区的导数接近零，便是前一种现象的来源之一。ReLU 改善正半轴的导数，却也可能让始终处于负半轴的单元不再更新。
+
+初始化同时要打破隐藏单元的对称性并控制尺度。考虑一层的一个输出 $z=\sum_{j=1}^d w_jh_j$，暂不加偏置。若权重彼此独立、均值为零、方差为 $s_w^2$，并独立于输入，且各输入二阶矩均为 $q$，则 $\mathbb E[z^2]=d s_w^2q$。为补偿输入维数的增加，权重方差可相应减小：在线性近似下，$s_w^2\approx1/d$ 可维持前向信号尺度。当 ReLU 前的激活 $z$ 的分布近似关于零对称时，ReLU 会舍去约一半二阶矩，He 初始化因而采用约 $2/d$ 的权重方差。这些统计假设解释了初始尺度的选择；参数更新后，梯度尺度可通过训练记录观察。
+
+残差连接将一个模块写成 $\boldsymbol h+F(\boldsymbol h)$，其雅可比为 $I+J_F$，为梯度增加一条直接路径。两项形状相同时可以直接相加，维度不同时先用投影对齐。直接路径有助于深层网络传递信号，实际回传的放大或抵消则由 $I+J_F$ 共同决定。输入尺度、初始化和残差结构由此从不同环节影响训练中的信号尺度。
+
+<span id="2318-正则化归一化与训练模式" />
+
+### 正则化、归一化与训练模式
+
+训练损失下降而验证损失持续上升，是过拟合的一个信号。早停用验证集选择停止时刻；L2 正则化在损失中增加参数平方惩罚。对普通 SGD，该惩罚等价于先按固定比例缩小权重再做数据梯度更新；Adam 会按梯度历史缩放更新，两者一般不再等价。AdamW 将权重衰减单独处理，不让该项进入自适应梯度的缩放。
+
+Dropout 在训练时随机屏蔽部分激活。若保留概率为 $q\in(0,1]$，常见实现用独立的 $m_j\sim\operatorname{Bernoulli}(q)$，输出 $\widetilde h_j=m_jh_j/q$。给定 $h_j$ 后，它的期望为 $h_j$，因此缩放补偿了该层随机屏蔽带来的平均幅值变化。普通评估关闭屏蔽，直接使用 $h_j$。后续非线性层会继续变换这些值，整个网络的输出期望由完整计算决定。
+
+归一化层调节中间激活的尺度。批归一化（Batch Normalization，BN）在训练小批次中，按特征或通道估计均值 $\mu_B$ 和方差 $s_B^2$，再计算
+
+$$
+\widetilde z_j=a_j\frac{z_j-\mu_B}{\sqrt{s_B^2+\varepsilon}}+b_j.
+$$
+
+这里同一特征共享相应的批统计量，$a_j,b_j$ 是可学习的缩放和平移，$\varepsilon>0$ 是数值常数。普通评估使用训练期间累计的均值、方差。层归一化（Layer Normalization，LN）则在单个样本的指定特征维上计算统计量；例如序列模型可对每个时刻的隐藏向量独立归一化。BN 的统计量来自同批样本，LN 的统计量来自同一样本的多个特征，因此两者对批大小和输入排列的依赖不同。
+
+输入标准化通常在训练前拟合并固定，归一化层则参与网络内部计算。部署到逐步控制时，使用评估模式确定 Dropout 和 BN 的行为，使控制器按关闭屏蔽、采用累计批统计量的规则处理每次观测。
+
+<span id="2319-练习取消非线性" />
+
+### 练习：取消非线性
+
+将 XOR 网络的 ReLU 换为恒等函数，它还能表达 XOR 的分类边界吗？再用上面的数值回归样本核对 $\partial L/\partial W_{1,12}$：输出层传回第一个隐藏单元的梯度是多少，该权重接收的输入是多少？
+
+<details>
+<summary>答案</summary>
+
+不能。两层可合并成一个仿射得分，再用 sigmoid 阈值分类，边界仍是直线。数值回归例中，第一个隐藏单元的 $\delta_{1,1}=-0.37$，而 $W_{1,12}$ 对应输入 $x_2=2$，所以梯度是 $-0.37\times2=-0.74$。
+
+</details>
+
+<span id="23110-对应程序与阅读材料" />
+
+### 对应程序与阅读材料
+
+[零号工程：统计学习算例](/Aerodrome/reference/project-zero/#statistical-learning)提供固定权重 XOR 的 `--example mlp` 入口；[MLP 前向、反向与一次更新](/Aerodrome/reference/statistical-learning/#mlp-backprop)给出上述数值例的可运行命令、梯度核对和结果解读。前者展示表达能力，后者完整计算一次参数更新，均采用本节列出的简单网络层。
+
+
+<a id="image-networks"></a>
+
+<span id="图像与卷积网络" />
+
+## 2.3.2 图像与卷积网络
+
+图像是带空间排列的数据。相邻像素通常比相距很远的像素关系更密切；同一条边缘出现在图像左侧或右侧，也具有相似的局部结构。卷积网络利用这些性质，通过局部连接和参数共享处理图像。
+
+<span id="一个小模板在不同位置重复使用" />
+
+<span id="2321-卷积计算与参数共享" />
+
+### 卷积计算与参数共享
+
+对单通道图像 $I$，取一个 $h\times w$ 的模板 $K$，在每个位置计算
+
+$$
+Z_{r,c}=\sum_{i=0}^{h-1}\sum_{j=0}^{w-1}K_{i,j}I_{r+i,c+j}.
+$$
+
+这在数学上是不翻转模板的互相关，深度学习中通常也称卷积。每次只看一个局部窗口，同一组参数在所有位置使用。多个模板可以产生多个输出通道；输入有多个通道时，还要沿通道维度求和。
+
+取一个 5×5 的教学图像，每行都是 $[0,0,1,1,1]$，模板的三行都是 $[-1,1]$。它比较右列与左列的差异。在跨过明暗边界的窗口中，三行差异相加得到 3；其他窗口得到 0。
+
+<TeachingFigure
+  id="fig-convolution"
+  src="/Aerodrome/figures/statistical-learning/convolution.svg"
+  alt="输入中有一条明暗边界，差分模板在跨越边界的窗口产生3，其余窗口为0。"
+  number="2.3-3"
+  title="局部模板对边缘的响应"
+  caption="解析教学图像，像素和模板值无量纲。手工指定的 3×2 模板不翻转，步幅 1、不补边，输出为 3×4。"
+  source="/Aerodrome/figures/sources/statistical-learning.json"
+  size="wide"
+/>
+
+不补边、步幅为 1 时，输出形状为 $(H-h+1)\times(W-w+1)$，本例为 3×4。手工差分模板使边缘响应可以逐项计算；在可训练的卷积网络中，这些模板元素成为参数，由任务损失调整。
+
+<span id="共享参数保留了什么池化又丢掉什么" />
+
+<span id="2322-平移等变性与池化" />
+
+### 平移等变性与池化
+
+忽略边界、下采样等影响时，输入平移会使卷积响应相应平移，这称为平移等变，空间位置的变化保留在响应图中。池化或全局平均通过汇总区域信息减少位置敏感性，也会损失精确位置。因此，识别“是否有障碍”与定位“障碍在哪个像素”需要不同的输出结构。
+
+一个输入通道、一个输出通道的 3×2 模板只需 6 个权重，与图像大小无关；具有 $C_{\rm in}$ 个输入通道和 $C_{\rm out}$ 个输出通道时，权重数为 $hwC_{\rm in}C_{\rm out}$，另可加偏置。较深的网络通过堆叠局部运算逐渐扩大感受野，残差连接帮助训练较深结构。
+
+<span id="从图像任务回到工程问题" />
+
+<span id="2323-卷积网络的工程应用" />
+
+### 卷积网络的工程应用
+
+图像分类输出整幅图的类别，目标检测输出图像中的对象位置，语义分割输出各像素类别。运动系统通常使用世界坐标中的位置和距离，因此图像输出要结合相机几何、深度信息与坐标变换，形成带测量时刻和不确定性描述的观测。
+
+评测时按场景或采集过程划分数据。同一视频的相邻帧高度相似，将完整采集过程留出，有助于评价模型对新场景的识别表现。局部窗口、共享权重、通道和空间分辨率是读懂这类模型结构的基本要素。
+
+<span id="2324-练习图像尺寸与参数数量" />
+
+### 练习：图像尺寸与参数数量
+
+将输入图像改成 50×50，仍用上述 3×2 模板、步幅 1、不补边。输出多大，模板权重有多少？
+
+<details>
+<summary>答案</summary>
+
+输出为 48×49，模板仍有 6 个权重。计算次数随图像变大，但共享参数的数量不随之增加。
+
+</details>
+
+<span id="2325-对应程序与阅读材料" />
+
+### 对应程序与阅读材料
+
+[零号工程：统计学习算例](/Aerodrome/reference/project-zero/#statistical-learning)提供 `--example convolution` 入口；[运行说明与结果解读](/Aerodrome/reference/statistical-learning/#convolution)列出手工模板在各窗口的响应，可与上述边缘计算逐项对照。
+
+
+<a id="sequence-networks"></a>
+
+<span id="序列模型与注意力" />
+
+## 2.3.3 序列模型与注意力
+
+单个读数只能提供当前局部信息，一段历史还能显示变化趋势。序列模型处理按顺序排列的输入，例如过去若干时刻的位置、速度或振动信号。设计模型前，应先明确每次预测能使用哪些时刻的信息。
+
+<span id="2331-循环状态与一维卷积" />
+
+### 循环状态与一维卷积
+
+循环神经网络把过去的信息压缩到隐藏状态：
+
+$$
+\boldsymbol h_t=\phi(W_x\boldsymbol x_t+W_h\boldsymbol h_{t-1}+\boldsymbol b).
+$$
+
+若每时刻输入有 $d_x$ 个分量、隐藏状态有 $d_h$ 个分量，则 $W_x\in\mathbb R^{d_h\times d_x}$、$W_h\in\mathbb R^{d_h\times d_h}$，偏置有 $d_h$ 个分量。同一组参数沿时间复用。$\boldsymbol h_t$ 是训练任务形成的内部表示，其分量含义由网络计算决定；若用于估计物理状态，可再将它映射到带单位的状态量。长序列通过时间展开反向传播，梯度可能逐渐消失或放大，LSTM、GRU 因而用门控调节信息的保留与更新。
+
+一维卷积在固定长度的时间窗口上使用共享模板。在线预测采用因果窗口，读取当前与过去；离线平滑可以采用居中窗口，同时使用待处理时刻前后的记录。窗口位置由预测时可用的信息确定。
+
+<span id="2332-注意力按当前需要汇总已有信息" />
+
+### 注意力：按当前需要汇总已有信息
+
+注意力为一个查询 $\boldsymbol q$ 比较若干键 $\boldsymbol k_i$，再用归一化权重汇总值 $\boldsymbol v_i$：
+
+$$
+a_i=\frac{\exp(\boldsymbol q^{\mathsf T}\boldsymbol k_i/\sqrt{d_k})}
+{\sum_j\exp(\boldsymbol q^{\mathsf T}\boldsymbol k_j/\sqrt{d_k})},\qquad
+\boldsymbol o=\sum_i a_i\boldsymbol v_i.
+$$
+
+$d_k$ 是查询与键的维度。键决定匹配程度，值提供被汇总的内容；两者可以采用不同表示。权重和为 1，表示各个值在这次加权汇总中所占的比例。
+
+取标量查询 1，键为 $[1,0,2]$，值为 $[10,20,30]$。看到全部三个位置时，权重约为 $[0.245,0.090,0.665]$，输出约为 24.21。若当前只到第二个位置，第三个位置必须屏蔽，前两项重新归一化，输出约为 12.69。
+
+<TeachingFigure
+  id="fig-sequence"
+  src="/Aerodrome/figures/statistical-learning/sequence.svg"
+  alt="下三角注意力矩阵中未来权重为零，每行已知位置权重归一化，输出随可见信息变化。"
+  number="2.3-4"
+  title="因果注意力只汇总当前可见的位置"
+  caption="给定标量查询均为 1，键为 [1,0,2]，值为 [10,20,30]；未训练参数。行表示查询时刻，列表示被读取的位置，未来位置权重为零。数值均为无量纲教学值。"
+  source="/Aerodrome/figures/sources/statistical-learning.json"
+  size="wide"
+/>
+
+<span id="2333-transformer-与时间信息" />
+
+### Transformer 与时间信息
+
+Transformer 将自注意力、逐位置前馈网络、残差连接等组合起来。单独的注意力运算没有自动规定时间先后，通常还需要位置或时间编码。因果掩码将未来位置的注意力得分排除，保证当前输出不读取未来输入。
+
+训练序列生成器时，有时用真实历史输出作为下一步输入，称为 teacher forcing。连续预测时，模型可能把自己的输出送入下一步，使预测误差进入后续输入。评测可分别记录使用真实历史的单步误差，以及使用自身预测的多步滚动误差，观察误差怎样随预测时长累积。
+
+训练、验证、测试宜按整段轨迹或时间划分。窗口长度、预测提前量、采样间隔和是否使用未来信息都属于实验条件；它们的差别可能比网络名称更影响结论。
+
+<span id="2334-练习屏蔽以后要不要重新归一化" />
+
+### 练习：屏蔽以后要不要重新归一化
+
+把三项注意力权重中的第三项直接改成零，保留前两项不变，是否等价于只关注前两个位置？
+
+<details>
+<summary>答案</summary>
+
+不等价。前两项此时和约为 0.335，会改变输出尺度。应在 softmax 前屏蔽未来得分，或对剩余权重重新归一化，得到约 $[0.731,0.269]$。
+
+</details>
+
+<span id="2335-对应程序与阅读材料" />
+
+### 对应程序与阅读材料
+
+[零号工程：统计学习算例](/Aerodrome/reference/project-zero/#statistical-learning)提供 `--example sequence` 入口；[运行说明与结果解读](/Aerodrome/reference/statistical-learning/#sequence)给出固定查询、键和值下的因果注意力权重与汇总结果。
+
+
+<a id="fewer-labels"></a>
+
+<span id="少标签条件下的学习" />
+
+## 2.3.4 少标签条件下的学习
+
+工程记录往往容易获得，可靠标签则需要额外测量、人工检查或昂贵实验。少标签学习利用未标注数据、已有模型和已知结构，减少目标任务对人工标签的依赖。不同方法分别利用样本变换、跨任务共性或数据自身的预测关系。
+
+<span id="2341-数据增强必须与标签含义一致" />
+
+### 数据增强必须与标签含义一致
+
+数据增强根据任务允许的变化，构造新的训练样本。图像分类中的轻微亮度变化可能保持类别不变；运动数据中的坐标旋转则常常需要同步改变标签。
+
+例如，输入位置 $\boldsymbol p=(1,0)$，输出速度 $\boldsymbol v=(2,0)$。将坐标向量同时逆时针旋转 90°，得到 $\boldsymbol p'=(0,1)$ 和 $\boldsymbol v'=(0,2)$。若只改输入、仍保留原速度标签，就构造了不一致的数据。若标签是速率 $\|\boldsymbol v\|$，旋转前后它才保持为 2。
+
+<TeachingFigure
+  id="fig-augmentation"
+  src="/Aerodrome/figures/statistical-learning/augmentation.svg"
+  alt="位置向量从(1,0)转到(0,1)，对应速度也应从(2,0)转到(0,2)。"
+  number="2.3-5"
+  title="增强输入时，标签可能也要一起变换"
+  caption="二维解析坐标变换；位置单位为 m，速度单位为 m/s，两个面板分开显示。所有向量逆时针旋转 90°，速度方向改变但速率保持 2 m/s。"
+  source="/Aerodrome/figures/sources/statistical-learning.json"
+  size="wide"
+/>
+
+划分数据时，将原始样本及其增强版本放在同一组，再用独立原始记录组成测试集。这样测试反映的是模型处理新记录的能力。
+
+<span id="迁移自监督与半监督各使用什么信息" />
+
+<span id="2342-迁移学习自监督与半监督学习" />
+
+### 迁移学习、自监督与半监督学习
+
+迁移学习利用已有模型，在目标数据上固定部分表示或继续微调。源任务与目标任务中的共同结构提供了可复用信息。例如，从仿真迁移到实物时，可以保留学到的几何表示，并通过包含真实噪声、遮挡和延迟的数据评价及调整模型。
+
+自监督学习从数据本身构造训练目标，例如遮住一部分测量后预测它，或根据历史预测后续记录。原记录提供监督信号，模型从大量未标注数据中学习表示。随后把表示用于目标任务，通过分类、回归或异常识别结果评价它的帮助。
+
+半监督学习同时使用少量有标签样本和较多无标签样本。伪标签方法先用已有模型预测未标注样本，再把筛选后的预测加入训练。筛选时可参考置信度，并结合有标签数据检查概率校准和类别覆盖；这是因为伪标签中的系统性错误会随反复训练被强化。
+
+<span id="2343-主动学习与少样本适应" />
+
+### 主动学习与少样本适应
+
+主动学习选择下一批值得标注的数据。模型不确定度高的样本有助于补充未知区域，多样性则有助于让有限预算覆盖不同工况。选样规则可以将这两项与标注成本结合，减少在同一区域重复采集相近信息。
+
+少样本学习关注只有少量标注时如何适应新类别或新任务；元学习则跨多个训练任务学习适应方法。这里的测试单位可以是一个新任务，而不只是同一任务中的新样本。弱监督还可能使用不精确规则或粗粒度标签，评测集应尽量保留独立、可信的标签。
+
+<span id="2344-练习平移是否保持标签" />
+
+### 练习：平移是否保持标签
+
+将一段二维位置记录整体加上同一个位移向量。若标签分别为“速度”和“相对固定目标的位置误差”，是否都能保持不变？
+
+<details>
+<summary>答案</summary>
+
+速度不因恒定平移而改变。若目标位置没有一起平移，位置误差会改变；若只是统一更换坐标原点，目标坐标也应同步变换。是否保持标签取决于变换的物理含义。
+
+</details>
+
+<span id="2345-对应程序与阅读材料" />
+
+### 对应程序与阅读材料
+
+[零号工程：统计学习算例](/Aerodrome/reference/project-zero/#statistical-learning)提供 `--example augmentation` 入口；[运行说明与结果解读](/Aerodrome/reference/statistical-learning/#augmentation)展示位置与速度同时旋转的计算结果。
+
+
+## 延伸阅读
+
+本节按问题归并 Murphy《Probabilistic Machine Learning: An Introduction》第 13–15、19 章的相关主题，独立编写教学例子。原书中的完整推导与高级变体可在掌握上述例子后查阅。

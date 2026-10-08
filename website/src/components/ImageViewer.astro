@@ -1,0 +1,304 @@
+<dialog class="image-viewer" aria-labelledby="image-viewer-title">
+  <header>
+    <h2 id="image-viewer-title">图片</h2>
+    <button type="button" data-close autofocus>关闭 · Esc</button>
+  </header>
+  <div class="viewer-toolbar" aria-label="图片工具">
+    <div class="zoom-tools">
+      <button type="button" data-zoom-out aria-label="缩小图片">−</button>
+      <output data-scale aria-label="当前缩放比例">100%</output>
+      <button type="button" data-zoom-in aria-label="放大图片">+</button>
+      <button type="button" data-fit>适应窗口</button>
+    </div>
+    <button type="button" data-source-toggle aria-pressed="false" disabled>查看源码</button>
+    <a data-original target="_blank" rel="noopener">打开原图</a>
+  </div>
+  <div class="image-stage" tabindex="0" aria-label="图片画布：滚轮缩放，拖动平移；方向键平移，加减键缩放">
+    <img data-preview alt="" draggable="false" hidden />
+  </div>
+  <section class="source-panel" aria-label="图片源码" hidden>
+    <div class="source-tools">
+      <label>源码文件 <select data-source-files></select></label>
+      <button type="button" data-copy disabled>复制当前源码</button>
+    </div>
+    <p data-source-note></p>
+    <pre tabindex="0" aria-label="当前文件源码"><code></code></pre>
+  </section>
+  <div class="viewer-caption" id="image-viewer-caption" role="region" aria-label="图注" tabindex="0" hidden></div>
+  <p class="viewer-status" role="status" aria-live="polite"></p>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('.image-viewer')!;
+  const stage = dialog.querySelector<HTMLDivElement>('.image-stage')!;
+  const preview = dialog.querySelector<HTMLImageElement>('[data-preview]')!;
+  const title = dialog.querySelector<HTMLHeadingElement>('h2')!;
+  const caption = dialog.querySelector<HTMLDivElement>('.viewer-caption')!;
+  const status = dialog.querySelector<HTMLParagraphElement>('[role=status]')!;
+  const toggle = dialog.querySelector<HTMLButtonElement>('[data-source-toggle]')!;
+  const sourcePanel = dialog.querySelector<HTMLElement>('.source-panel')!;
+  const fileSelect = dialog.querySelector<HTMLSelectElement>('[data-source-files]')!;
+  const code = dialog.querySelector<HTMLElement>('code')!;
+  const copy = dialog.querySelector<HTMLButtonElement>('[data-copy]')!;
+  const original = dialog.querySelector<HTMLAnchorElement>('[data-original]')!;
+  const zoomTools = dialog.querySelector<HTMLDivElement>('.zoom-tools')!;
+  type SourceFile = { name: string; content: string };
+  let files: SourceFile[] = [];
+  let sourceUrl = '';
+  let svgSource = '';
+  let sourceRequest: AbortController | undefined;
+  let objectUrl = '';
+  let opener: HTMLImageElement | SVGSVGElement | null = null;
+  let savedOverflow = '';
+  // Coordinates are CSS pixels relative to the stage centre. The image keeps
+  // its intrinsic dimensions, so 100% has the same meaning for every image.
+  let scale = 1, x = 0, y = 0;
+  let drag: { id: number; x: number; y: number } | undefined;
+
+  function render() {
+    preview.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${scale})`;
+    dialog.querySelector('output')!.textContent = `${Math.round(scale * 100)}%`;
+  }
+  function fit() {
+    if (!preview.naturalWidth || stage.hidden) return;
+    scale = Math.min((stage.clientWidth - 32) / preview.naturalWidth,
+      (stage.clientHeight - 32) / preview.naturalHeight);
+    x = y = 0;
+    render();
+  }
+  function zoom(factor: number, anchorX = 0, anchorY = 0) {
+    const next = Math.min(16, Math.max(.05, scale * factor));
+    // Keep the point under the mouse stationary while changing scale.
+    x = anchorX - (anchorX - x) * next / scale;
+    y = anchorY - (anchorY - y) * next / scale;
+    scale = next;
+    render();
+  }
+  function showSource(show: boolean) {
+    stage.hidden = show;
+    zoomTools.hidden = show;
+    sourcePanel.hidden = !show;
+    toggle.textContent = show ? '返回图片' : '查看源码';
+    toggle.setAttribute('aria-pressed', String(show));
+    status.textContent = show ? '可切换文件，复制当前文件的完整源码。' : '滚轮缩放 · 拖动平移 · 双击适应窗口';
+    if (!show) fit();
+  }
+  function selectFile() {
+    code.textContent = files[Number(fileSelect.value)].content;
+    copy.disabled = false;
+    sourcePanel.querySelector('pre')!.scrollTop = 0;
+  }
+  async function loadSource() {
+    if (files.length) return;
+    sourceRequest?.abort();
+    const request = new AbortController();
+    sourceRequest = request;
+    status.textContent = '正在加载源码…';
+    try {
+      if (svgSource) {
+        files = [{ name: '当前图片.svg', content: svgSource }];
+      } else {
+        const response = await fetch(sourceUrl, { signal: request.signal });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (new URL(sourceUrl, location.href).pathname.endsWith('.json')) {
+          const bundle = await response.json();
+          if (request.signal.aborted) return;
+          files = bundle.files;
+          sourcePanel.querySelector('[data-source-note]')!.textContent = bundle.note;
+        } else {
+          const content = await response.text();
+          if (request.signal.aborted) return;
+          files = [{ name: sourceUrl.split('/').pop()!, content }];
+        }
+      }
+      fileSelect.replaceChildren(...files.map((file, i) => new Option(file.name, String(i))));
+      selectFile();
+      status.textContent = '源码已加载，可切换文件或复制。';
+    } catch (error) {
+      if (request.signal.aborted) return;
+      status.textContent = `源码加载失败：${(error as Error).message}。可返回图片后重试。`;
+    }
+  }
+  function open(image: HTMLImageElement | SVGSVGElement) {
+    opener = image;
+    files = [];
+    stage.style.backgroundColor = '';
+    svgSource = '';
+    sourceUrl = image.dataset.figureSource || '';
+    code.textContent = '';
+    fileSelect.replaceChildren();
+    copy.disabled = true;
+    sourcePanel.querySelector('[data-source-note]')!.textContent = '';
+    const figure = image.closest('figure');
+    title.textContent = figure?.dataset.figureTitle ||
+      (image instanceof HTMLImageElement ? image.alt || '图片' : image.querySelector('title')?.textContent || '图表');
+    // Copy the rendered caption, including emphasis, links and math. Keeping it
+    // outside the transform canvas makes it readable at every zoom level.
+    const originalCaption = figure?.querySelector('[data-figure-caption]') || figure?.querySelector('figcaption');
+    caption.replaceChildren(...Array.from(originalCaption?.childNodes || [], node => node.cloneNode(true)));
+    caption.hidden = !originalCaption;
+    if (originalCaption) dialog.setAttribute('aria-describedby', caption.id);
+    else dialog.removeAttribute('aria-describedby');
+    let url: string;
+    if (image instanceof SVGSVGElement) {
+      // Snapshot live charts at the moment they are opened. Resolve inherited
+      // colours before serializing, since the standalone SVG has no page CSS.
+      const snapshot = image.cloneNode(true) as SVGSVGElement;
+      snapshot.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      snapshot.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--sl-color-bg');
+      stage.style.backgroundColor = snapshot.style.backgroundColor;
+      snapshot.removeAttribute('role');
+      snapshot.removeAttribute('tabindex');
+      const originals = [image, ...image.querySelectorAll('*')];
+      [snapshot, ...snapshot.querySelectorAll('*')].forEach((node, i) => {
+        const style = getComputedStyle(originals[i]);
+        for (const property of ['fill', 'stroke', 'color', 'font-family', 'font-size']) {
+          (node as SVGElement).style.setProperty(property, style.getPropertyValue(property));
+        }
+      });
+      svgSource = new XMLSerializer().serializeToString(snapshot);
+      objectUrl = URL.createObjectURL(new Blob([svgSource], { type: 'image/svg+xml' }));
+      url = objectUrl;
+    } else {
+      url = image.currentSrc || image.src;
+      // SVG markup is itself useful source when no generator is supplied.
+      if (!sourceUrl && new URL(url).pathname.endsWith('.svg')) sourceUrl = url;
+    }
+    toggle.disabled = !sourceUrl && !svgSource;
+    toggle.title = toggle.disabled ? '这张图片未提供生成源码' : '查看并复制图片源码';
+    original.href = url;
+    preview.alt = title.textContent;
+    preview.hidden = true;
+    preview.onload = () => {
+      preview.style.width = `${preview.naturalWidth}px`;
+      preview.style.height = `${preview.naturalHeight}px`;
+      preview.hidden = false;
+      fit();
+    };
+    preview.onerror = () => { status.textContent = '图片加载失败，可尝试打开原图。'; };
+    showSource(false);
+    savedOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    dialog.showModal();
+    preview.src = url;
+  }
+
+  dialog.querySelector('[data-close]')!.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+  dialog.addEventListener('close', () => {
+    sourceRequest?.abort();
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    objectUrl = '';
+    drag = undefined;
+    document.documentElement.style.overflow = savedOverflow;
+    opener?.focus({ preventScroll: true });
+  });
+  dialog.querySelector('[data-fit]')!.addEventListener('click', fit);
+  dialog.querySelector('[data-zoom-in]')!.addEventListener('click', () => zoom(1.25));
+  dialog.querySelector('[data-zoom-out]')!.addEventListener('click', () => zoom(.8));
+  toggle.addEventListener('click', () => {
+    const show = sourcePanel.hidden;
+    showSource(show);
+    if (show) void loadSource();
+  });
+  fileSelect.addEventListener('change', selectFile);
+  copy.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(code.textContent || '');
+      status.textContent = `已复制 ${files[Number(fileSelect.value)].name}`;
+    } catch {
+      status.textContent = '无法访问剪贴板，请在源码区域选择文字后复制。';
+    }
+  });
+  stage.addEventListener('wheel', event => {
+    event.preventDefault();
+    const rect = stage.getBoundingClientRect();
+    const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? rect.height : 1);
+    zoom(Math.exp(-delta * .002), event.clientX - rect.left - rect.width / 2,
+      event.clientY - rect.top - rect.height / 2);
+  }, { passive: false });
+  stage.addEventListener('pointerdown', event => {
+    if (event.button !== 0) return;
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    stage.setPointerCapture(event.pointerId);
+    stage.dataset.dragging = '';
+  });
+  stage.addEventListener('pointermove', event => {
+    if (!drag || drag.id !== event.pointerId) return;
+    x += event.clientX - drag.x;
+    y += event.clientY - drag.y;
+    drag.x = event.clientX;
+    drag.y = event.clientY;
+    render();
+  });
+  stage.addEventListener('lostpointercapture', () => { drag = undefined; delete stage.dataset.dragging; });
+  stage.addEventListener('dblclick', fit);
+  stage.addEventListener('keydown', event => {
+    if (event.key === '+' || event.key === '=') zoom(1.25);
+    else if (event.key === '-') zoom(.8);
+    else if (event.key === '0') fit();
+    else if (event.key === 'ArrowLeft') x -= 32;
+    else if (event.key === 'ArrowRight') x += 32;
+    else if (event.key === 'ArrowUp') y -= 32;
+    else if (event.key === 'ArrowDown') y += 32;
+    else return;
+    event.preventDefault();
+    render();
+  });
+  window.addEventListener('resize', () => { if (dialog.open) fit(); });
+  // Enhance content images only; navigation icons and interactive 3D canvases
+  // retain their existing actions. Native image links keep modified-click use.
+  document.querySelectorAll<HTMLImageElement | SVGSVGElement>('.sl-markdown-content img, .sl-markdown-content svg[role="img"]').forEach(image => {
+    image.tabIndex = 0;
+    image.setAttribute('aria-haspopup', 'dialog');
+    image.classList.add('image-zoomable');
+    image.addEventListener('click', e => {
+      const event = e as MouseEvent;
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      open(image);
+    });
+    image.addEventListener('keydown', e => {
+      const event = e as KeyboardEvent;
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      open(image);
+    });
+  });
+</script>
+
+<style>
+  :global(.image-zoomable) { cursor: zoom-in; }
+  dialog { width: min(96vw, 90rem); height: 92dvh; max-width: none; max-height: none; margin: auto; padding: 0; border: 1px solid var(--pa-border); border-radius: 8px; color: var(--sl-color-white); background: var(--sl-color-bg); }
+  dialog::backdrop { background: #10191dcc; }
+  dialog[open] { display: flex; flex-direction: column; }
+  header,.viewer-toolbar,.source-tools { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem 1rem; padding: .75rem 1rem; }
+  header { justify-content: space-between; border-bottom: 1px solid var(--pa-border); }
+  h2 { font-size: 1rem; line-height: 1.5; font-weight: 600; margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  button,select { font: inherit; font-size: .875rem; color: var(--sl-color-white); background: var(--pa-surface); border: 1px solid var(--pa-border); border-radius: 6px; padding: .4rem .7rem; min-height: 40px; }
+  button { cursor: pointer; }
+  button:hover:not(:disabled),button[aria-pressed='true'] { background: var(--sl-color-accent-low); color: var(--sl-color-accent-high); }
+  button:disabled { opacity: .55; cursor: default; }
+  a { font-size: .875rem; color: var(--sl-color-text-accent); text-underline-offset: .2em; }
+  .zoom-tools { display: flex; align-items: center; gap: .5rem; }
+  output { min-width: 4ch; text-align: center; font-size: .875rem; font-variant-numeric: tabular-nums; }
+  .image-stage { flex: 1; min-height: 0; overflow: hidden; position: relative; background: var(--pa-plot-paper); cursor: grab; touch-action: none; }
+  .image-stage[data-dragging] { cursor: grabbing; }
+  .image-stage img { position: absolute; left: 50%; top: 50%; max-width: none; transform-origin: center; user-select: none; pointer-events: none; }
+  .source-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .source-tools { padding-block: .5rem; }
+  label { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; min-width: 0; font-size: .875rem; }
+  select { max-width: 100%; }
+  .source-panel p { margin: .25rem 1rem; color: var(--pa-muted); font-size: .875rem; }
+  pre { flex: 1; min-height: 0; margin: .5rem 1rem; padding: 1rem; overflow: auto; background: var(--pa-surface); font-size: .875rem; line-height: 1.7; tab-size: 4; }
+  .viewer-status { flex-shrink: 0; margin: 0; padding: .6rem 1rem; font-size: .8rem; color: var(--pa-muted); }
+  .viewer-caption { flex: 0 1 auto; min-height: 0; max-height: 22dvh; overflow: auto; padding: .75rem 1rem; border-top: 1px solid var(--pa-border); color: var(--sl-color-gray-1); font-size: .875rem; line-height: 1.75; overflow-wrap: anywhere; }
+  .viewer-caption :global(p) { margin: 0; }
+  .viewer-caption :global(a) { color: var(--sl-color-text-accent); text-underline-offset: .2em; }
+  [hidden] { display: none !important; }
+  @media(max-width: 50rem) {
+    dialog { width: 100%; height: 100dvh; border-radius: 0; }
+    header,.viewer-toolbar { padding: .5rem .75rem; gap: .4rem; }
+    header h2 { font-size: .875rem; }
+  }
+</style>

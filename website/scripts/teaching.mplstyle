@@ -1,0 +1,29 @@
+# Scientific figures use the same white paper in both website themes.
+# The first two series are blue and orange; identity also needs labels/line styles.
+figure.facecolor: white
+axes.facecolor: white
+savefig.facecolor: white
+text.color: 192b35
+axes.labelcolor: 192b35
+xtick.color: 536b76
+ytick.color: 536b76
+axes.edgecolor: 6e7b86
+grid.color: dce3e7
+grid.alpha: 0.6
+grid.linewidth: 0.6
+font.size: 12
+axes.titlesize: 13
+axes.labelsize: 12
+xtick.labelsize: 12
+ytick.labelsize: 12
+legend.fontsize: 12
+legend.frameon: False
+axes.spines.top: False
+axes.spines.right: False
+axes.linewidth: 0.8
+lines.linewidth: 2
+lines.markersize: 5
+axes.prop_cycle: cycler('color', ['2563a6', 'bc5930', '6e7b86', '775da6'])
+svg.fonttype: path
+axes.unicode_minus: False
+savefig.dpi: 160

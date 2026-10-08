@@ -1,0 +1,189 @@
+---
+title: "3.6 直接优化控制策略：从增益搜索到 Actor–Critic"
+description: 从增益搜索、可微动力学到 REINFORCE，理解怎样以闭环代价训练策略参数。
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
+---
+
+import TeachingFigure from '../../../../components/TeachingFigure.astro';
+
+调控制器时，可以换一组增益，运行一次，再比较整条误差曲线和输入消耗。直接策略优化把这个过程写成参数优化：用参数表示控制律，以轨迹代价决定怎样调整。前一节学到的价值函数也能参与计算，作为基线减少策略梯度的采样噪声。
+
+沿用代价最小化约定：状态 $x_k\in\mathbb R^n$ 是列向量，控制 $u_k\in\mathbb R^m$，扰动 $d_k$，动力学为 $x_{k+1}=f_\psi(x_k,u_k,d_k)$，其中 $\psi$ 表示模型参数。策略 $\pi_\theta$ 由参数 $\theta$ 决定，阶段代价为 $c_k$，折扣因子 $0<\gamma\leq1$。有限时域 $T$ 的目标为
+
+$$
+J(\theta)=\mathbb E\!\left[\sum_{k=0}^{T-1}\gamma^k c(x_k,u_k,d_k)+\gamma^T c_T(x_T)\right].
+$$
+
+期望覆盖初值、扰动和随机动作；确定性实验时，对预先指定的初值集合取平均。当前动作改变下一状态，继而影响后续全部动作和代价，因此优化 $J$ 的评价单位是一条完整轨迹。
+
+<span id="从一个增益开始先定义谁可以改变" />
+
+## 3.6.1 策略参数与增益搜索
+
+令固定速度参考为 $v_{\rm ref}$，取速度误差 $x_k=v_k-v_{\rm ref}$，单位 $\mathrm{m/s}$。控制输入 $u_k$ 是加速度，单位 $\mathrm{m/s^2}$。在 $\Delta t=0.1\,\mathrm{s}$ 的零阶保持下，$x_{k+1}=x_k+\Delta t u_k$。取比例策略 $u_k=\operatorname{clip}(-Kx_k,-3,3)$，增益 $K$ 的单位为 $\mathrm{s^{-1}}$。优化和评价都以裁剪后的实际加速度递推轨迹，输入饱和的影响因而直接进入目标函数。
+
+与 [3.2 的 LQR](/Aerodrome/chapters/03-reinforcement-learning/02-bellman-and-lqr/)对齐，本例取 $T=50$，$v_{\rm scale}=1\,\mathrm{m/s}$、$a_{\rm scale}=1\,\mathrm{m/s^2}$、$t_{\rm ref}=1\,\mathrm{s}$ 和 $\rho=0.2$。令 $\gamma=1$，实际计算的无量纲目标是
+
+$$
+J(K;x_0)=\sum_{k=0}^{49}\frac{\Delta t}{t_{\rm ref}}
+\left[\left(\frac{x_k}{v_{\rm scale}}\right)^2+
+\rho\left(\frac{u_k}{a_{\rm scale}}\right)^2\right]
++\left(\frac{x_{50}}{v_{\rm scale}}\right)^2.
+$$
+
+在未饱和且 $0<\Delta tK\leq1$ 的区间内，增大 $K$ 会加快误差衰减，同时增加相同状态下的控制输入。不同初值经历的饱和时间也不同。搜索前固定训练、验证和留出测试初值，可以分别观察参数如何被选中，以及它在新工况下怎样运行。
+
+<span id="3611-从规划器动作学习一个快速策略" />
+
+### 从规划器动作学习一个快速策略
+
+如果已有可运行的 MPC 或 rollout，可在训练状态 $x_i$ 上取得它给出的动作 $u_i^{\rm expert}$，再拟合 $\min_\theta N^{-1}\sum_i\|\pi_\theta(x_i)-u_i^{\rm expert}\|^2$。这是行为克隆：把昂贵规划器的动作映射近似为执行较快的参数函数，与[第二章的监督回归](/Aerodrome/chapters/02-statistical-learning/02-linear-models/)相接；有限时域还需把时刻作为输入。
+
+动作拟合衡量学习策略与专家输出的接近程度。执行时，动作误差会改变下一状态，使策略逐步访问新的区域。运行学习策略、收集新访问状态，再由专家补充这些状态的动作标签，可以让训练数据随实际轨迹扩展。下面的参数搜索和策略梯度使用另一种训练信号：直接以闭环累计代价评价和选择参数。
+
+<span id="网格有限差分与随机搜索各做什么" />
+
+## 3.6.2 网格搜索、有限差分与随机搜索
+
+一维增益有明确搜索范围时，可以对每个网格候选 $K$ 运行同一批训练初值，计算平均 $J$，保留若干低代价候选；再用验证初值选出一个 $K$，固定后运行测试初值。网格越密，参数分辨率越高，所需模拟次数也越多。[可运行例](/Aerodrome/reference/rl-policy-learning/#policy-learning)比较九个候选，训练初值为 $1,2,3\,\mathrm{m/s}$，验证初值为 $1.5,2.5,3.5\,\mathrm{m/s}$，测试初值为 $-5,-4,4,5\,\mathrm{m/s}$。所选增益为 $K=2\,\mathrm{s^{-1}}$，四个测试代价依次约为 $17.894,10.061,10.061,17.894$；预先固定的 $K=0.5\,\mathrm{s^{-1}}$ 对应 $26.912,17.223,17.223,26.912$。在这些留出初值上，搜索所得增益以较低总代价完成纠偏。
+
+若 $J(K)$ 在当前点附近光滑，可以计算中心有限差分
+
+$$
+\widehat{J'(K)}=\frac{J(K+h)-J(K-h)}{2h},\qquad K^+=K-\eta\widehat{J'(K)},
+$$
+
+其中 $h$ 的单位为 $\mathrm{s^{-1}}$，$\eta$ 决定更新幅度。两次评价使用相同初值；随机实验复用同一组外部扰动，以突出参数变化带来的代价差。$h$ 较大时截断误差增加，过小时数值误差或采样噪声的影响增大。输入限幅使 $J$ 呈分段光滑，跨越切换点的差分反映两侧的综合变化。示例在未饱和的 $K=0.8\,\mathrm{s^{-1}}$ 附近比较解析导数与有限差分，可以直接观察两种计算是否一致。
+
+多参数控制器可在参数空间随机抽取候选，再用完整轨迹评价代价。这类搜索适合含饱和或碰撞判定等难以求导的目标。交叉熵方法（cross-entropy method，CEM）进一步利用评价结果调整采样分布：每轮保留低代价的精英样本，用它们的均值和离散程度更新分布，再采样下一批。样本数决定每轮预算，采样范围决定搜索区域，精英比例影响分布收缩速度。它可作为本例网格搜索向多参数问题扩展的一条路线。
+
+<span id="可微模型给出的是整条轨迹的总导数" />
+
+## 3.6.3 可微模型与轨迹总导数
+
+若 $f_\psi$、代价和确定性策略 $u_k=\pi_\theta(x_k)$ 在考察点可微，可沿时间递推参数灵敏度。定义 $S_k=\partial x_k/\partial\theta\in\mathbb R^{n\times p}$，其中 $p$ 是参数个数；若初值不依赖 $\theta$，则 $S_0=0$。令 $F_x=\partial f_\psi/\partial x$、$F_u=\partial f_\psi/\partial u$、$\pi_x=\partial\pi_\theta/\partial x$、$\pi_\theta'=\partial\pi_\theta/\partial\theta$，沿当前轨迹有
+
+$$
+\frac{\mathrm d u_k}{\mathrm d\theta}=\pi_xS_k+\pi_\theta',\qquad
+S_{k+1}=F_xS_k+F_u(\pi_xS_k+\pi_\theta').
+$$
+
+于是 $\mathrm d c_k/\mathrm d\theta=c_xS_k+c_u(\pi_xS_k+\pi_\theta')$；按目标乘 $\gamma^k$ 后对 $k$ 求和，再加 $\gamma^T c_{T,x}S_T$，得到 $\mathrm dJ/\mathrm d\theta$。这里 $c_x$、$c_u$ 分别为 $1\times n$、$1\times m$ 的偏导行向量，总导数为 $1\times p$，转置后为参数梯度。$c_u\pi_\theta'$ 表示参数对当前动作的直接作用，含 $S_k$ 的各项则表示此前动作通过状态传播的作用。自动微分在可微模型和控制器实现上逐步执行这条链式法则。
+
+不饱和的一维例中 $x_k=(1-\Delta t K)^k x_0$。代入上式可直接写为
+
+$$
+J(K;x_0)=\left(\frac{x_0}{v_{\rm scale}}\right)^2
+\left[\frac{\Delta t}{t_{\rm ref}}
+\left(1+\rho\frac{K^2v_{\rm scale}^2}{a_{\rm scale}^2}\right)
+\sum_{k=0}^{T-1}(1-\Delta t K)^{2k}
++(1-\Delta t K)^{2T}\right].
+$$
+
+这个表达式可以独立求导，与灵敏度递推和有限差分核对。梯度对应所用模型 $f_\psi$ 的轨迹；模型存在偏差时，模拟目标与执行代价也会出现差异。因而可将更新前后的参数都放入执行模型，比较实际轨迹代价和误差衰减情况。
+
+<span id="不可微环境中怎样得到-reinforce-梯度" />
+
+## 3.6.4 REINFORCE 策略梯度
+
+真实转移不能微分时，可以令策略输出动作概率 $\pi_\theta(u\mid x)$。将每步实际代价也计入轨迹，记 $\tau=(x_0,u_0,c_0,\ldots,u_{T-1},c_{T-1},x_T)$。用 $P(x_{k+1},c_k\mid x_k,u_k)$ 表示环境给出的后继状态与代价的联合条件分布，其质量函数或密度可分解为
+
+$$
+p_\theta(\tau)=p_0(x_0)\prod_{k=0}^{T-1}
+\pi_\theta(u_k\mid x_k)P(x_{k+1},c_k\mid x_k,u_k).
+$$
+
+假定初值分布、环境分布 $P$ 和给定轨迹上的代价函数不直接依赖 $\theta$，策略概率可微且其支持集不随参数改变，并满足交换导数与期望的条件，则 $\nabla_\theta p_\theta=p_\theta\nabla_\theta\log p_\theta$。由此逐步得到
+
+$$
+\begin{aligned}
+\nabla_\theta J
+&=\nabla_\theta\int p_\theta(\tau)C(\tau)\,\mathrm d\tau\\
+&=\int p_\theta(\tau)C(\tau)\nabla_\theta\log p_\theta(\tau)\,\mathrm d\tau\\
+&=\mathbb E\left[C(\tau)\sum_{k=0}^{T-1}
+\nabla_\theta\log\pi_\theta(u_k\mid x_k)\right],
+\end{aligned}
+$$
+
+其中 $C(\tau)=\sum_k\gamma^k c_k+\gamma^T c_T$。由于 $p_0$ 和 $P$ 对 $\theta$ 的对数导数为零，梯度中的可计算项来自策略概率；环境通过采样轨迹及其代价提供信息。对代价取负梯度，一次采样的 REINFORCE 更新为 $\theta^+=\theta-\eta C(\tau)\sum_k\nabla_\theta\log\pi_\theta(u_k\mid x_k)$。在上述条件下，样本梯度的期望等于真实梯度，单次更新则随采样结果波动。
+
+还可以用动作发生后的代价构造梯度。定义 $G_k=\sum_{t=k}^{T-1}\gamma^{t-k}c_t+\gamma^{T-k}c_T$。在第 $k$ 步动作发生前，过去代价已经确定，它与本步对数概率梯度的乘积在动作分布下的期望为零，因此
+
+$$
+\nabla_\theta J=\mathbb E\left[\sum_{k=0}^{T-1}
+\gamma^kG_k\nabla_\theta\log\pi_\theta(u_k\mid x_k)\right].
+$$
+
+这里 $G_k$ 以第 $k$ 步为折扣起点，外层 $\gamma^k$ 将它换回整条轨迹从第 0 步计起的权重。有些资料按折扣占用分布采样，把同一权重包含在期望记号中；两种写法的区别在于采样分布如何定义。
+
+<span id="一次手算更新以及基线为何有效" />
+
+## 3.6.5 REINFORCE 数值例与基线
+
+用无量纲单步问题计算一次策略梯度：动作 $a\in\{0,1\}$，代价为 $c(0)=1,c(1)=0$，$p=\pi_\theta(1)=\sigma(\theta)$。于是 $J(\theta)=1-p$，精确导数为 $J'=-p(1-p)$。对 Bernoulli 策略，$\partial_\theta\log\pi_\theta(a)=a-p$。当 $\theta=0$、$p=0.5$ 时，精确导数为 $-0.25$；若本次抽中 $a=1$，代价为零，样本梯度 $c(a)(a-p)$ 也为零。这显示了单个样本围绕期望梯度的波动。
+
+取与当前动作无关的基线 $b=0.5$，同一样本给出梯度估计 $(0-0.5)(1-0.5)=-0.25$。学习率 $\eta=0.05$ 时，下降更新为 $\theta^+=0-0.05(-0.25)=0.0125$，新概率约为 $0.503125$。若抽中 $a=0$，则 $(1-0.5)(0-0.5)$ 也等于 $-0.25$。这个对称例在初始点对两种动作都给出相同估计，因此基线将该点的样本方差降为零。更一般的基线选择则以减小梯度波动为目标。
+
+基线不改期望梯度，因为在给定状态 $x$ 下，
+
+$$
+\mathbb E_{u\sim\pi_\theta(\cdot\mid x)}
+[b(x)\nabla_\theta\log\pi_\theta(u\mid x)]
+=b(x)\nabla_\theta\sum_u\pi_\theta(u\mid x)=0.
+$$
+
+等式中 $b(x)$ 依赖动作发生前的信息，因此可以移到动作期望之外；连续动作将求和换为积分。有限时域可取 $b_k(x)=V_w(x,k)$，得到代价优势 $A_k=G_k-V_w(x_k,k)$。正优势表示这次后续代价高于基线，下降更新倾向于降低相关动作概率；负优势表示代价较低，更新倾向于提高其概率。实现 actor 更新时，将优势数值固定，用它加权策略的对数梯度；critic 则通过单独的拟合目标更新。共享网络时也按这两个目标分别计算梯度。
+
+<TeachingFigure
+  id="fig-policy-search-and-sampling"
+  src="/Aerodrome/figures/reinforcement-learning/policy-search-and-sampling.svg"
+  number="3.6-1"
+  title="两种参数优化，各自改变什么"
+  alt="增益搜索的代价曲线与单步REINFORCE的动作概率变化。"
+  caption="左图为速度任务的增益搜索，训练初值1、2、3 m/s，增益2 s⁻¹由验证集选择。右图为单步两动作任务的策略概率更新，种子7、学习率0.05；折线连接记录点。"
+  source="/Aerodrome/figures/sources/reinforcement-learning.json"
+  size="wide"
+/>
+
+<span id="从-reinforce-到简单的-actorcritic" />
+
+## 3.6.6 actor–critic：策略与价值联合学习
+
+REINFORCE 等一条轨迹结束才知道 $G_k$，长轨迹的随机代价方差可能很大。actor–critic 让 actor 使用 $\pi_\theta$ 选动作，让 critic 用 $V_w(x,k)$ 估计继续执行当前策略的未来代价。若 $V_w$ 接近真实值，可以用一步目标
+
+$$
+y_k=c_k+\gamma V_w(x_{k+1},k+1),\qquad
+\delta_k=y_k-V_w(x_k,k)
+$$
+
+代替完整的 $G_k-V_w(x_k,k)$。critic 固定本次 $y_k$，对 $(y_k-V_w(x_k,k))^2$ 做半梯度回归；actor 用 $\gamma^k\delta_k\nabla_\theta\log\pi_\theta(u_k\mid x_k)$ 估计有限时域目标的梯度，并做下降更新。价值函数以时刻 $k$ 为输入，表达同一状态在不同剩余时间下的代价；共同速度任务取 $\gamma=1$。边界处理与 TD 相同：终端代价已计入末次阶段代价时，终止后的值取零；单列终端代价时，使用 $V_T=c_T$；采样窗口截断而过程继续时，保留后继自举值。
+
+一步目标缩短了等待时间，也引入 critic 的估计误差。策略变化较快时，critic 的预测可能滞后，$\delta_k$ 随之产生偏差；多步目标通过加入更多实际代价减轻对近期预测的依赖。评价时，critic 的拟合误差显示价值预测进度，留出工况的完整轨迹显示策略表现。本节可运行程序采用前面的单步 REINFORCE 例，便于先核对策略梯度和基线的计算。
+
+<span id="选读ppo-怎样限制单次策略变化" />
+
+## 3.6.7 PPO 的裁剪目标与局限（选读）
+
+近端策略优化（proximal policy optimization，PPO）的裁剪目标在奖励最大化文献中常写成最大化目标。为保持本章的代价最小化约定，令旧策略采样的代价优势 $A^{c}_k$ 为“该动作比状态基线多出的未来代价”，概率比 $r_k(\theta)=\pi_\theta(u_k\mid x_k)/\pi_{\theta_{\rm old}}(u_k\mid x_k)$。相应的裁剪代理代价写为
+
+$$
+L^{c}_{\rm clip}(\theta)=\mathbb E_{\tau\sim\pi_{\rm old}}\!\left[
+\sum_{k=0}^{T-1}\gamma^k\max\left(r_k(\theta)A^c_k,
+\operatorname{clip}(r_k(\theta),1-\epsilon,1+\epsilon)A^c_k\right)\right],
+$$
+
+然后最小化它。$0<\epsilon<1$ 是裁剪幅度，旧动作概率与估计优势在这轮优化中固定。显式的 $\gamma^k$ 对应本节有限时域折扣目标；按折扣占用分布采样时，同一权重可以包含在期望记号中。式中的 `max` 来自把奖励优势 $A^{r}=-A^{c}$ 代入文献中的奖励 `min` 目标，再整体取负。
+
+以 $A^c_k>0$ 为例，该动作的未来代价高于基线，降低它的概率可减小代理目标；当 $r_k<1-\epsilon$ 后，这一项进入平坦区，继续降低概率得到的收益被截住。裁剪由此调节旧样本对参数更新的推动作用。控制输入的幅度由动作参数化或执行限幅处理。训练时保存旧概率和优势，在同一批样本上做多轮更新，再采集新轨迹评价实际累计代价；代理目标和实际代价分别反映固定样本上的更新过程与新策略的执行表现。
+
+原始算法与经验结果见 [Schulman 等《Proximal Policy Optimization Algorithms》](https://arxiv.org/abs/1707.06347)；本章的方法主线也可参看 [Bertsekas《A Course in Reinforcement Learning》第二版，第 3.5 节](https://www.mit.edu/~dimitrib/books.htm)。
+
+<span id="运行与练习" />
+
+## 3.6.8 运行与练习
+
+在 `ngc/` 运行 `python examples/policy_learning.py`，使用项目虚拟环境时可执行 `.venv/bin/python examples/policy_learning.py`。脚本输出 JSON：`gain_search` 给出候选增益、三份初值、训练与验证代价、选定增益、测试代价和 $x_0=5\,\mathrm{m/s}$ 的逐步轨迹；`reinforce` 给出固定随机种子下各检查点的动作概率、精确期望代价和精确梯度。前者用于观察参数选择与速度响应，后者用于核对随机梯度的符号和变化。完整字段及参考结果见[策略学习可运行说明](/Aerodrome/reference/rl-policy-learning/#policy-learning)。
+
+练习一：把网格中的 $K=2$ 改为 $K=2.2\,\mathrm{s^{-1}}$，保持训练、验证、测试初值不变。比较验证代价和测试代价，统计 $x_0=5$ 时达到加速度限幅的步数，再从误差平方项和控制平方项解释总代价的变化。练习二：将单步 REINFORCE 的基线改为零，用同一组预先指定的多个种子运行两种基线，比较更新方向的波动及精确期望代价的变化。用解析式 $J'= -p(1-p)$ 核对平均梯度，并观察基线对估计方差的影响。

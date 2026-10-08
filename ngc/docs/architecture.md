@@ -94,7 +94,7 @@ models.advance(truth, actuator, physical_parameters, dt) -> next_truth
 
 正式教学 baseline 已确定为 **F-16 六自由度非线性模型**。当前二状态模型仅用于架构验证，不作为最终飞机模型。
 
-来源推荐已进一步确定为 [ISRL F16-Model-Matlab 的机体/气动实现](f16-selection.md)，发动机与执行器单独选择。可扩展的组合机制见 [模块化管线设计](modular-pipeline.md)；World 装配接口已实现，F16 本身尚未实现。
+来源确定为 [ISRL F16-Model-Matlab 的机体/气动实现](f16-selection.md)，发动机与执行器单独选择。可扩展的组合机制见 [模块化管线设计](modular-pipeline.md)；World 已接入[完整气动六自由度 F16 机体](f16-six-dof.md)。
 
 实施前需选定并记录具体 F-16 模型版本、方程/气动表来源、许可、参数集与适用包线。已有 Aerodrome、NeuralPlane、AeroPlanax 的 F-16 实现可供对照，但不默认等价，也不混合不同版本的气动表与参数。
 
@@ -102,7 +102,7 @@ models.advance(truth, actuator, physical_parameters, dt) -> next_truth
 
 课程模型形成同源层次：完整非线性 F-16 → 指定工况配平 → 局部线性化 → 经假设说明与误差验证的纵向/横侧向子模型。线性化模型保留配平状态、配平输入、扰动变量定义、坐标/单位、版本与生成方法，不能将某个工况模型称为全包线近似。
 
-建议新增 `models/f16/`，包含 `parameters`、`aerodynamics`、`propulsion`、`actuators`、`dynamics`；另设 `analysis/trim`、`analysis/linearize`。不将这些内容加入现有 `PitchState`：六自由度模型使用新的命名状态类型与 `systems/f16_loop.py` 组合。
+当前实现使用 `models/f16.py` 保存参数、气动与载荷，复用 `RigidBodyState` 和通用刚体积分；`pipelines/f16_six_dof_trim.py` 完成配平，`composition/f16.py` 接入 World。发动机、执行器和闭环控制待实际实现时再加入，不预建空模块。
 
 1. 审定 F-16 模型来源、符号、执行器与有效范围，建立模型卡和参考工况。
 2. 增加面向用户的配置校验、模型卡和数据记录格式。

@@ -1,0 +1,152 @@
+---
+title: "4.6 固定翼飞行器建模"
+description: 从升力和阻力计算体轴载荷，建立系数、舵偏、角速度与固定翼六自由度模型的联系。
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
+---
+
+import TeachingFigure from '../../../../components/TeachingFigure.astro';
+
+给飞机一个短暂的升降舵偏转，机头会怎样动，速度和高度又会怎样变化？刚体方程已经提供了运动规律，现在要把舵面、迎角和空速变成力与力矩。固定翼模型的主要工作就集中在这一步：用气动系数描述飞机在当前来流中的受力，再与推力一起交给刚体。
+
+## 4.6.1 升力、阻力与体轴载荷
+
+风轴 $x_w$ 沿飞机相对空气的速度，$z_w$ 指向风轴下方。记升力为 $L$、阻力为 $D$、沿风轴右方的侧力为 $Y_w$，单位为牛顿，则气动力的风轴分量为
+
+$$
+\mathbf F_{a,w}=[-D,Y_w,-L]^{\mathsf T},\qquad
+\mathbf F_{a,b}=R_{bw}\mathbf F_{a,w}.
+$$
+
+风轴到 FRD 机体系的变换沿用[4.2 的定义](/Aerodrome/chapters/04-aircraft-control-models/02-frames-and-attitude/)：$R_{bw}=R_y(-\alpha)R_z(\beta)$。它把 $[V_a,0,0]^{\mathsf T}$ 变成 $[V_a\cos\alpha\cos\beta,V_a\sin\beta,V_a\sin\alpha\cos\beta]^{\mathsf T}$。在零侧滑时，投影关系简化为
+
+$$
+X_a=-D\cos\alpha+L\sin\alpha,\qquad
+Z_a=-D\sin\alpha-L\cos\alpha.
+$$
+
+图中先沿空速方向辨认阻力，再沿垂直方向辨认升力。正迎角使升力具有正的体轴 $x_b$ 分量，因此 $X_a$ 可能为正；沿空速方向的气动力仍为 $-D$。
+
+<TeachingFigure
+  id="fig-fixed-wing-forces"
+  src="/Aerodrome/figures/flight-models/aircraft-fixed-wing-forces.svg"
+  alt="零侧滑侧视图中，空速位于机体前轴下方，升力垂直空速指向右上方，阻力沿空速反方向指向左上方。"
+  number="4.6-1"
+  title="同一气动力在风轴与体轴中的分量"
+  caption="原创方向示意；零侧滑，图示迎角为 20°，用较大夹角辨认投影关系。箭头长度不表示力或速度大小，正文数值算例使用 5° 迎角。"
+  source="/Aerodrome/figures/sources/generate-flight-aircraft-figures.py"
+/>
+
+令参考面积为 $S\,(\mathrm{m^2})$，翼展为 $b\,(\mathrm m)$，平均气动弦长为 $\bar c\,(\mathrm m)$，动压为 $\bar q=\rho V_a^2/2\,(\mathrm{Pa})$。力和力矩的系数化写法为
+
+$$
+\begin{aligned}
+L&=\bar qSC_L, &D&=\bar qSC_D, &Y_w&=\bar qSC_{Y_w},\\
+\mathbf F_{a,b}&=\bar qS[C_X,C_Y,C_Z]^{\mathsf T},\\
+\mathbf M_{a,b}&=\bar qS[bC_\ell,\bar c C_m,bC_n]^{\mathsf T}.
+\end{aligned}
+$$
+
+$\mathbf M_{a,b}$ 是关于质心的滚转、俯仰、偏航力矩，单位为 $\mathrm{N\,m}$；三个力矩都按体轴右手方向取正。$C_L$ 表示升力系数，小写下标的 $C_\ell$ 表示滚转力矩系数。$\bar qS$ 的单位为牛顿，力矩再乘参考长度，六个系数因而无量纲。采用体轴系数的数据表时，可直接算体轴载荷。
+
+## 4.6.2 气动系数为什么随运动变化
+
+迎角改变机翼与来流的关系，侧滑改变左右受力，舵偏改变局部形状。气动系数可以写成这些量的函数；较宽飞行范围还会包含马赫数、雷诺数、襟翼位置与构型。低速、失速前的一小段范围常用
+
+$$
+\begin{aligned}
+C_L&=C_{L0}+C_{L\alpha}\alpha+C_{L\delta_e}\delta_e,\\
+C_D&=C_{D0}+k_D C_L^2,\\
+C_m&=C_{m0}+C_{m\alpha}\alpha+C_{m\delta_e}\delta_e
++C_{mq}\frac{q\bar c}{2V_a}.
+\end{aligned}
+$$
+
+其中 $\delta_e$ 为实际升降舵偏角，$q$ 是俯仰角速度，单位为 $\mathrm{rad/s}$。$C_{L\alpha}$ 等角度导数按每弧度给出；例如 $C_{L\alpha}=4.5\,\mathrm{rad^{-1}}$ 表示迎角增加一弧度时，线性模型的升力系数增加 4.5。$q\bar c/(2V_a)$ 是无量纲俯仰角速度，因此 $C_{mq}$ 的定义包含这一归一化。按“每度”给出的表格导数换成“每弧度”时，要乘 $180/\pi$。
+
+角速度项有直接的几何来源：飞机抬头时，后方尾翼相对质心向下运动，改变了尾翼局部来流和升力。典型常规构型的 $C_{mq}<0$，使正俯仰角速度产生负的俯仰阻尼力矩。同理，滚转和偏航项分别用 $pb/(2V_a)$、$rb/(2V_a)$ 归一化。一个侧向例子是
+
+$$
+C_\ell=C_{\ell\beta}\beta+C_{\ell\delta_a}\delta_a
++C_{\ell\delta_r}\delta_r
++C_{\ell p}\frac{pb}{2V_a}
++C_{\ell r}\frac{rb}{2V_a},
+$$
+
+其中 $\delta_a,\delta_r$ 为副翼和方向舵实际偏角。每个舵面的正方向要随数据源一起确定；气动力矩的符号由相应导数给出。
+
+在大迎角等范围，升力曲线可能弯曲甚至下降。此时用数据表存储静态系数，再叠加角速度和舵面增量更合适。例如，给定相邻节点 $\alpha_0,\alpha_1$，线性插值为
+
+$$
+C(\alpha)=(1-\lambda)C(\alpha_0)+\lambda C(\alpha_1),
+\qquad \lambda=\frac{\alpha-\alpha_0}{\alpha_1-\alpha_0}.
+$$
+
+多维表沿各坐标加权。表格节点、参考面积、力矩参考点和角度单位共同定义数据含义；局部导数是所在工况附近的斜率。配平点附近的整体线性化见[4.8 配平与线性化](/Aerodrome/chapters/04-aircraft-control-models/08-trim-and-linearization/)。
+
+## 4.6.3 算一次载荷
+
+取一组教学参数：$\rho=1.225\,\mathrm{kg/m^3}$、$V_a=25\,\mathrm{m/s}$、$S=0.8\,\mathrm{m^2}$、$\bar c=0.3\,\mathrm m$，侧滑为零。设
+
+$$
+\begin{aligned}
+C_L&=0.2+4.5\alpha,\\
+C_D&=0.025+0.045C_L^2,\\
+C_m&=0.02-0.5\alpha-1.1\delta_e
+-8\frac{q\bar c}{2V_a}.
+\end{aligned}
+$$
+
+角度代入弧度。这组系数用于练习量纲和载荷组装。令 $\alpha=5^\circ$、$\delta_e=-2^\circ$、$q=0.2\,\mathrm{rad/s}$，逐项得到
+
+$$
+\begin{aligned}
+\bar q&=382.8125\,\mathrm{Pa},\\
+C_L&\approx0.592699,\quad C_D\approx0.040808,
+\quad C_m\approx0.005164,\\
+L&\approx181.514\,\mathrm N,\qquad D\approx12.4975\,\mathrm N,\\
+M_y&=\bar qS\bar c C_m\approx0.47444\,\mathrm{N\,m}.
+\end{aligned}
+$$
+
+投影到机体系为 $X_a\approx3.3701\,\mathrm N$、$Z_a\approx-181.9126\,\mathrm N$。把它们投回风轴，$X_a\cos\alpha+Z_a\sin\alpha=-D$，可独立核对方向和符号。再给定质量、姿态和推力，就能通过刚体方程算加速度；上面这组载荷本身没有指定平飞条件。
+
+## 4.6.4 从纵向模型到六自由度
+
+若飞机构型与载荷左右对称、无侧滑，且滚转角和滚转/偏航角速度为零，运动可限制在竖直平面内。无风时取状态 $[V_a,\alpha,q,\theta,h]$，$\theta$ 为俯仰角，$h$ 为向上为正的高度，$\gamma=\theta-\alpha$ 为爬升角。记质量为 $m$，俯仰惯量为 $I_{yy}$，单位分别为 kg 和 $\mathrm{kg\,m^2}$。推力 $T$ 沿机体 $+x_b$ 并通过质心时，纵向方程为
+
+$$
+\begin{aligned}
+\dot V_a&=\frac{T\cos\alpha-D}{m}-g\sin\gamma,\\
+\dot\alpha&=q+\frac{-T\sin\alpha-L+mg\cos\gamma}{mV_a},\\
+\dot q&=\frac{M_y}{I_{yy}},\qquad
+\dot\theta=q,\qquad \dot h=V_a\sin\gamma.
+\end{aligned}
+$$
+
+第一式沿空速投影，第二式描述速度方向相对机头的变化。它们说明：升降舵先改变力矩和俯仰运动，随后迎角、升力、速度与高度共同变化。
+
+六自由度模型保留侧滑与横侧向运动，将当前六个体轴载荷接入[4.3 的统一刚体方程](/Aerodrome/chapters/04-aircraft-control-models/03-rigid-body-dynamics/)。推进部件若装在 $\mathbf r_{T,b}$，推力为 $\mathbf F_{T,b}$，还会贡献 $\mathbf r_{T,b}\times\mathbf F_{T,b}$。若气动数据的力矩关于参考点 $A$，先用 $\mathbf M_{CM}=\mathbf M_A+\mathbf r_{A/CM}\times\mathbf F_a$ 换到质心。重力由刚体模型单独加入。
+
+## 4.6.5 运行现有 F-16 机体
+
+[零号固定翼入口](/Aerodrome/reference/project-zero/#fixed-wing)连接完整的[F-16 六自由度开环示例](/Aerodrome/reference/f16-six-dof/)与[纵向配平示例](/Aerodrome/reference/f16-level-flight/)。当前六自由度实现位于 `ngc/src/aerodrome/models/f16.py`：`coefficients` 计算六个气动系数，`loads` 乘动压和几何尺度并加入推力，`step` 在每个 RK4 子阶段重算载荷。
+
+它使用 SI 和弧度，查表入口将角度转换成度；姿态采用 Hamilton、标量在前的 body→NED 四元数。载荷包括三舵面、前缘襟翼、角速度阻尼和重心修正。`Controls` 中给出实际舵偏和推力 N，推力沿机体前轴并通过质心；舵机与发动机动态可按[4.5](/Aerodrome/chapters/04-aircraft-control-models/05-environment-and-components/)另行接入。当前共同查表范围为迎角 $-20^\circ$—$45^\circ$、侧滑 $\pm30^\circ$、升降舵 $\pm25^\circ$，域外返回 NaN。
+
+从 `ngc/` 执行：
+
+```sh
+uv run --locked --extra control python examples/f16_six_dof.py
+```
+
+默认例子先在 $150\,\mathrm{m/s}$、$3000\,\mathrm m$、无风条件下配平，再以 $0.01\,\mathrm s$ 步长运行四秒。两条轨迹分别保持配平输入，或在 $0.5$—$1.5\,\mathrm s$ 叠加升降舵 $-0.25^\circ$、副翼 $2^\circ$、方向舵 $0.5^\circ$ 的脉冲。输出为 `artifacts/f16_six_dof/` 中的 `summary.json`、`trajectory.npz` 和 `flight.png`。
+
+本次 float64 CPU 运行得到配平推力 $8398.068\,\mathrm N$，配平对照的高度漂移为零；脉冲轨迹四秒末滚转角约 $-21.05^\circ$。舵面回到配平值后，飞机继续按当时的姿态和速度运动，开环模型因此没有主动回到初态的动作。原书 §3.5 的缩减 F-16 数据与本站所用 ISRL 数据属于不同实现版本；本站来源与公式修订记录在上述机体说明中。
+
+练习：先把手算例中的 $q$ 从 $0.2$ 改成 $0.4\,\mathrm{rad/s}$，保持其他条件不变。算出俯仰力矩的增量并解释其符号，预期为 $-0.882\,\mathrm{N\,m}$。再将开环程序的副翼脉冲减半，比较滚转角速度峰值；用系数随状态变化的事实解释完整响应为何只在小扰动时近似按比例缩放。
+
+## 参考阅读
+
+[Stevens、Lewis、Johnson，*Aircraft Control and Simulation*，第三版，2016](https://onlinelibrary.wiley.com/doi/book/10.1002/9781119174882)：§2.2—§2.5，页 64—116 给出气动系数、力矩参考点和非线性模型；§2.6，页 129—137 解释导数的归一化与物理作用；§3.5，页 179—185 和附录 A，页 714—722 展示 F-16 的模型组织与数据。选读 §8.5，页 648—654，可看到小型特技飞机如何按左右机翼、尾翼与螺旋桨局部来流分别组装载荷。

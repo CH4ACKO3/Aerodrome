@@ -1,6 +1,6 @@
 # 通用六自由度刚体动力学
 
-`models/rigid_body.py` 实现固定质量、固定惯量刚体；`composition/rigid_body.py` 将其接入现有 World、BatchedWorld、scan rollout。它不依赖某一架飞机的气动表。当前 F-16 平飞示例仍使用纵向简化模型；测试验证其方程是通用模型在对称运动假设下的退化形式，尚未补齐 F-16 横侧向气动与发动机。
+`models/rigid_body.py` 实现固定质量、固定惯量刚体；`composition/rigid_body.py` 将其接入现有 World、BatchedWorld、scan rollout。`models/f16.py` 已将三轴查表气动力与力矩接入这套四元数刚体，并在 RK4 各子阶段重新计算载荷，详见 [F-16 六自由度机体](f16-six-dof.md)。原有纵向模型与平飞 LQR 示例继续作为简化分析入口；六自由度机体的输入为实际舵偏与给定推力，发动机和舵机动态由后续部件模型扩展。
 
 ## 坐标与状态
 

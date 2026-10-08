@@ -413,7 +413,7 @@ double cz(double alpha, double beta, double el) {
   k += 3;
   s = cz_a[k - 1] + abs(da) * (cz_a[l - 1] - cz_a[k - 1]);
 
-  return s * (1 - pow(beta / 57.3f, 2.0f) - 0.19f * (el / 25.0f));
+  return s * (1 - pow(beta / 57.3f, 2.0f)) - 0.19f * (el / 25.0f);
 }
 
 /*

@@ -49,7 +49,7 @@ class EntityBuild:
 
 
 def builtin_registry():
-    from .schema import RigidBodyOptions,F16Options,GravityOptions,EmptyOptions,HeadlessOptions
+    from .schema import RigidBodyOptions,F16Options,F16SixDoFOptions,GravityOptions,EmptyOptions,HeadlessOptions
     registry = ComponentRegistry()
     def gravity(options,context):
         return context["vector"](options.gravity_ned_m_s2,3,"gravity_ned_m_s2")
@@ -86,9 +86,31 @@ def builtin_registry():
         perturbation = context["vector"](options.perturbation,5,"perturbation")
         return EntityBuild(F16LongitudinalAssembly(),FlightState(x+perturbation,u),
                            FlightParameters(x,u,K,airframe),x,tables)
+    def f16_six_dof(options,context):
+        from pathlib import Path
+        from aerodrome.models import f16
+        from aerodrome.pipelines.f16_six_dof_trim import trim
+        from aerodrome.composition.f16 import F16Assembly
+        from aerodrome.rendering import rigid_body_pose
+        if context["config"].runtime.dtype!="float64":
+            raise ValueError("F16 trim requires float64")
+        parameters = f16.default_parameters(gravity_ned_m_s2=context["gravity"],
+                       wind_ned_m_s=context["vector"](options.wind_ned_m_s,3,"wind_ned_m_s"))
+        tables = f16.load_tables()
+        state,controls = trim(tables,parameters,speed_m_s=options.speed_m_s,height_m=options.height_m,
+                              heading_rad=options.heading_rad,lef_rad=options.lef_rad)
+        state = state._replace(omega_body_rad_s=context["vector"](options.omega_body_rad_s,3,"omega_body_rad_s"))
+        offset = context["vector"](options.surface_offset_rad,3,"surface_offset_rad")
+        controls = controls._replace(elevator_rad=controls.elevator_rad+offset[0],
+                                    aileron_rad=controls.aileron_rad+offset[1],
+                                    rudder_rad=controls.rudder_rad+offset[2])
+        context["asset_manifest"]["builtin/f16_6dof"] = json.loads(
+            (Path(f16.__file__).parent/"data/f16/aerodynamics.json").read_text())
+        return EntityBuild(F16Assembly(),state,parameters,controls,tables,pose=rigid_body_pose)
     registry.register("environment","constant_gravity","1",GravityOptions,gravity)
     registry.register("entity","rigid_body","1",RigidBodyOptions,rigid)
     registry.register("entity","f16_longitudinal","1",F16Options,f16)
+    registry.register("entity","f16_6dof","1",F16SixDoFOptions,f16_six_dof)
     registry.register("renderer","none","1",EmptyOptions,lambda options,context:None)
     def headless(options,context):
         from aerodrome.rendering import HeadlessBackend,RenderConfig

@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/components/ImageViewer.astro"
+        ],
+        "createdAt": "2026-10-08T04:40:14.900Z",
+        "reason": "Agent reviewed: hidden dialog preview receives the clicked image URL before display; it is not a content placeholder."
+      }
+    ]
+  }
+}

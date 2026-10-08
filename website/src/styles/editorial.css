@@ -59,7 +59,7 @@ input,textarea { caret-color: var(--sl-color-text-accent); }
 .content-panel { border: none; padding-top: 2rem; }
 .content-panel + .content-panel { padding-top: 1.25rem; }
 h1#_top { font-size: clamp(1.85rem, 3.1vw, 2.65rem); line-height: 1.3; letter-spacing: -.035em; font-weight: 650; text-wrap: balance; }
-.sl-markdown-content { line-height: 1.8; }
+.sl-markdown-content { line-height: 1.8; overflow-wrap: break-word; }
 .sl-markdown-content > p { color: var(--sl-color-gray-1); margin-block: 1.15rem; }
 .sl-markdown-content h2 { font-size: 1.4rem; font-weight: 650; letter-spacing: -.025em; margin-top: 3rem; padding-bottom: .8rem; border-bottom: 1px solid var(--pa-border); }
 .sl-markdown-content h3 { font-size: 1.12rem; font-weight: 650; margin-top: 2rem; }
@@ -75,7 +75,48 @@ h1#_top { font-size: clamp(1.85rem, 3.1vw, 2.65rem); line-height: 1.3; letter-sp
 .pagination-links a:hover { border-color: var(--sl-color-accent); background: var(--pa-surface); }
 .pagination-links .link-title { font-size: .95rem; }
 .expressive-code { margin-block: 1.5rem; }
+/* One quiet title bar for examples, shell commands, and output. The language is
+   separate from the name, and copying remains the engine's built-in behavior. */
+.expressive-code .frame .header {
+  display: flex; align-items: center; gap: .75rem;
+  min-height: 3.25rem; padding: .65rem 3.5rem .65rem 1rem;
+  background: var(--pa-surface); border: 1px solid var(--pa-border);
+}
+.expressive-code .frame .header::before,
+.expressive-code .frame .title::after { display: none; }
+.expressive-code .frame .header .title {
+  flex: 1; min-width: 0; margin: 0; padding: 0; border: 0;
+  background: transparent; color: var(--sl-color-white);
+  font-family: var(--sl-font); font-size: .8125rem; font-weight: 600;
+  line-height: 1.6; white-space: normal; overflow-wrap: anywhere;
+}
+.expressive-code .code-language {
+  flex: none; color: var(--pa-muted); font-size: .75rem; line-height: 1.6;
+}
+.expressive-code .frame .copy { inset-block-start: .375rem; inset-inline-end: .375rem; }
+.expressive-code .frame .copy button { opacity: 1; background: var(--pa-surface); }
+.expressive-code .frame .copy button:hover { background: var(--sl-color-accent-low); }
+.expressive-code .frame .copy button:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
+.expressive-code .frame pre { border-color: var(--pa-border); }
 .katex-display { padding: 1.1rem; background: var(--pa-surface); border-radius: 6px; overflow-x: auto; }
+
+/* A figure is part of the argument, with its caption outside the plot canvas.
+   Dense multi-panel plots scroll locally instead of reducing labels to tiny text. */
+:root {
+  --pa-plot-paper: #ffffff;
+}
+.sl-markdown-content .teaching-figure { margin: 2rem 0; scroll-margin-top: 6rem; }
+.sl-markdown-content .figure-scroll { margin: 0; overflow-x: auto; background: var(--pa-plot-paper); border: 1px solid var(--pa-border); border-radius: 6px; }
+.sl-markdown-content .teaching-figure img { display: block; width: 100%; height: auto; margin: 0; }
+.sl-markdown-content .teaching-figure .figure-wide { min-width: 48rem; max-width: none; }
+.sl-markdown-content .teaching-figure .figure-standard { min-width: 40rem; max-width: none; }
+.sl-markdown-content .teaching-figure figcaption { margin-top: .75rem; color: var(--pa-muted); font-size: .875rem; line-height: 1.75; }
+.sl-markdown-content .teaching-figure figcaption strong { color: var(--sl-color-white); font-weight: 600; }
+.sl-markdown-content .teaching-figure figcaption a { white-space: nowrap; }
+.sl-markdown-content table { display: block; max-width: 100%; overflow-x: auto; font-variant-numeric: tabular-nums; }
+.sl-markdown-content pre { tab-size: 4; }
+/* Preserve the mathematical layout; wrap derivations in the source, never shrink them. */
+.katex-display > .katex { white-space: nowrap; }
 
 /* The same control vocabulary for numerical and graphical experiments. */
 .experiment,.scene-viewer { margin-block: 2rem; border: 1px solid var(--pa-border); border-radius: 12px; padding: 1.5rem; background: var(--pa-surface); box-shadow: var(--pa-shadow); }

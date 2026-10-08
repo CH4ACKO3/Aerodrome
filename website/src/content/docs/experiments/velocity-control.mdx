@@ -4,8 +4,7 @@ description: 用通用刚体 World 理解比例反馈、推力限幅与离散采
 ---
 import Experiment from '../../../components/Experiment.astro';
 
-本实验把六自由度刚体限制在一个平移方向，观察比例反馈怎样改变速度。
-它是控制入门实验，并非 F-16 飞行性能模型。
+本实验把六自由度刚体限制在一个平移方向，用一个可以手算的模型观察比例反馈、推力限幅与速度响应之间的关系。
 
 ## 公式与假设
 
@@ -16,11 +15,11 @@ $$m\dot v=F,\qquad F_k=\operatorname{clip}\bigl(mK(v_\mathrm{ref}-v_k),-F_{\max}
 
 控制器每 0.02 秒更新一次，其间保持推力。每次 World step 包含两个 0.01 秒 tick，
 刚体使用 RK4 积分。实验共运行 250 step（5 秒），整段通过 JAX `jit` 和 `lax.scan` 计算。
-初次运行包含编译成本；当前教学适配器每次构造实验，尚未缓存不同任务之间的编译结果。
+当前教学适配器在每次任务中构造实验，运行耗时包含相应的编译过程。
 
 ## 修改参数，观察响应
 
-在线图线来自默认参数的预计算结果。修改输入不会改变参考图线；连接本地服务后才能计算新轨迹。
+在线图线来自默认参数的预计算结果，作为参数对照保留在页面中。连接本地服务后，可以提交修改后的输入并计算新轨迹。
 实线表示速度，虚线表示本次结果对应的目标速度。
 
 <Experiment />
@@ -32,9 +31,11 @@ $$m\dot v=F,\qquad F_k=\operatorname{clip}\bigl(mK(v_\mathrm{ref}-v_k),-F_{\max}
 3. 设定负目标速度，验证推力限幅和反馈符号。
 
 无饱和时，连续模型误差满足 $e(t)=e(0)e^{-Kt}$；此处采样保持控制的离散误差满足
-$e_{k+1}=(1-K\Delta t)e_k$。比较时需区分连续控制和离散控制。
+$e_{k+1}=(1-K\Delta t)e_k$。前者描述连续更新反馈，后者描述本实验的采样保持过程，可用来核对非饱和阶段的误差衰减。
+
+对应零号工程：[控制算法](/Aerodrome/reference/project-zero/#control)、[时间与输入保持](/Aerodrome/reference/project-zero/#world)、[三种代码写法](/Aerodrome/reference/project-zero/#coding-styles)。
 
 ## 下一步
 
 阅读[通用刚体模型](/Aerodrome/reference/rigid-body/)和[World](/Aerodrome/reference/world/)，
-再进入 [F-16 纵向平飞](/Aerodrome/reference/f16-level-flight/)。本地接口目前只开放本实验，后续章节通过注册实验扩展。
+再进入 [F-16 纵向平飞](/Aerodrome/reference/f16-level-flight/)。本地页面目前提供上述速度控制实验，后续章节将通过注册实验扩展计算入口。

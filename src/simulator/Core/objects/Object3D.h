@@ -180,6 +180,11 @@ public:
             new_state = c_state + (k1 + 2 * k2 + 2 * k3 + k4) * (dt / 6);
         }
 
+        set_kinematic_state(new_state);
+    }
+
+    void set_kinematic_state(const state_vec& new_state)
+    {
         pos(0) = new_state(0);
         pos(1) = new_state(1);
         pos(2) = new_state(2);

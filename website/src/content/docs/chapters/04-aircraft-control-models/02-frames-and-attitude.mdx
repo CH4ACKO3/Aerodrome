@@ -1,0 +1,236 @@
+---
+title: "4.2 坐标系与姿态表示"
+description: 用坐标变换、旋转顺序和90度偏航算例，建立NED、FRD、欧拉角与Hamilton四元数的统一约定。
+---
+
+import TeachingFigure from '../../../../components/TeachingFigure.astro';
+
+飞机朝东飞时，“向前 10 米每秒”和“向东 10 米每秒”可能描述同一个速度。机头转过去后，这两个说法就各有含义了。仿真要同时计算地面上的位置和机身受到的载荷，因此需要在地面系、机体系之间变换分量；姿态正是连接这两套坐标的几何关系。
+
+## 4.2.1 点的位置与向量的分量
+
+本章采用右手坐标系。地面系记为 $n$，轴向为北、东、下（NED），原点固定在所研究区域；机体系记为 $b$，原点在质心，轴向为前、右、下（FRD）。正转角遵循右手定则：正滚转使右翼下沉，正俯仰使机头抬起，正偏航使机头从北转向东。
+
+位置描述一个点相对原点在哪里。若 $\boldsymbol r_n$ 是质心在地面系的位置，$\boldsymbol\rho_b$ 是某安装点相对质心的位置，则安装点的地面坐标为
+
+$$
+\boldsymbol r_{P,n}=\boldsymbol r_n+R_{nb}\boldsymbol\rho_b.
+$$
+
+三个位置向量均以 m 为单位。$R_{nb}\in\mathbb R^{3\times3}$ 将机体系分量变到地面系；下标先写目标系、后写来源系。速度、力等向量的分量变换只用旋转，例如 $\boldsymbol F_n=R_{nb}\boldsymbol F_b$。变换一股力的分量后，力的作用点依然影响其对质心的力矩，见 [4.3](/Aerodrome/chapters/04-aircraft-control-models/03-rigid-body-dynamics/)。
+
+旋转矩阵的三列就是机体三根单位轴在地面系中的分量。因此
+
+$$
+R_{nb}^{\mathsf T}R_{nb}=I_3,\qquad
+\det R_{nb}=1,\qquad
+R_{bn}=R_{nb}^{\mathsf T}.
+$$
+
+$I_3$ 是三阶单位矩阵。正交关系保证向量长度和夹角不变，取转置即可反向变换。这里的矩阵乘法对应[第一章的基与线性组合](/Aerodrome/chapters/01-mathematical-tools/01-linear-algebra/#112-线性组合基与矩阵乘法)。
+
+风轴系记为 $w$，其 $x_w$ 轴沿飞行器相对空气的速度。设空速在机体系中的分量为 $\boldsymbol v_{a,b}=[u_a,v_a,w_a]^{\mathsf T}$，单位 m/s，则在非零空速下
+
+$$
+V_a=\|\boldsymbol v_{a,b}\|,\qquad
+\alpha=\operatorname{atan2}(w_a,u_a),\qquad
+\beta=\arcsin(v_a/V_a).
+$$
+
+迎角 $\alpha$、侧滑角 $\beta$ 以 rad 为单位。本章用 $R_{bw}=R_y(-\alpha)R_z(\beta)$ 定义其余风轴，因此 $R_{bw}[V_a,0,0]^{\mathsf T}=\boldsymbol v_{a,b}$。空气数据与风的计算在 [4.5](/Aerodrome/chapters/04-aircraft-control-models/05-environment-and-components/)，风轴载荷在 [4.6](/Aerodrome/chapters/04-aircraft-control-models/06-fixed-wing-models/)接入刚体。
+
+## 4.2.2 三个欧拉角与旋转顺序
+
+欧拉角写为 $[\phi,\theta,\psi]^{\mathsf T}$，依次是滚转、俯仰、偏航角，单位 rad。采用航空常用的 3–2–1 顺序：从与 NED 对齐的机体开始，先绕下轴偏航，再绕转动后的右轴俯仰，最后绕再次转动后的前轴滚转。对应的机体到地面矩阵是
+
+$$
+R_{nb}=R_z(\psi)R_y(\theta)R_x(\phi),
+$$
+
+其中基本右手旋转矩阵为
+
+$$
+\begin{aligned}
+R_x(\phi)&=\begin{bmatrix}1&0&0\\0&\cos\phi&-\sin\phi\\0&\sin\phi&\cos\phi\end{bmatrix},\\
+R_y(\theta)&=\begin{bmatrix}\cos\theta&0&\sin\theta\\0&1&0\\-\sin\theta&0&\cos\theta\end{bmatrix},\\
+R_z(\psi)&=\begin{bmatrix}\cos\psi&-\sin\psi&0\\\sin\psi&\cos\psi&0\\0&0&1\end{bmatrix}.
+\end{aligned}
+$$
+
+把该乘积作用到列向量时，最右侧矩阵先参与计算。也可以把同一乘积理解为绕固定参考轴依次做滚转、俯仰、偏航的主动旋转。前一种解释使用随动轴，后一种使用固定轴，两者给出同一个最终姿态。
+
+旋转顺序决定结果。图中从三轴重合开始，每次都绕标明的固定参考轴正转 $90^\circ$。观察机头轴就能辨认两种顺序的区别。
+
+<TeachingFigure
+  id="fig-rotation-order"
+  src="/Aerodrome/figures/flight-models/foundations-rotation-order.svg"
+  alt="先绕固定x轴再绕固定z轴转90度，机头最终沿正y；交换顺序后机头最终沿正z。"
+  number="4.2-1"
+  title="交换旋转顺序会改变最终姿态"
+  caption="原创几何示意；灰色点线是固定参考轴，实线是最终机体轴，橙色标出机头。每次旋转均为右手正90°；坐标轴长度为示意。"
+  source="/Aerodrome/figures/sources/generate-flight-foundations-figures.py"
+  size="wide"
+/>
+
+现在只做 $\psi=90^\circ$ 偏航，保持 $\phi=\theta=0$。机头指东，右翼指南，因此
+
+$$
+R_{nb}=\begin{bmatrix}0&-1&0\\1&0&0\\0&0&1\end{bmatrix},\qquad
+R_{nb}\begin{bmatrix}10\\0\\0\end{bmatrix}
+=\begin{bmatrix}0\\10\\0\end{bmatrix}\ \mathrm{m/s}.
+$$
+
+<TeachingFigure
+  id="fig-yaw-transform"
+  src="/Aerodrome/figures/flight-models/foundations-yaw.svg"
+  alt="俯视下正90度偏航使机头向东、右翼向南，沿机头的10米每秒变成NED中的东向10米每秒。"
+  number="4.2-2"
+  title="同一速度在两套坐标中的分量"
+  caption="机体保持水平，偏航角为90°；下轴指入纸面。速度数值由矩阵乘法直接计算。"
+  source="/Aerodrome/figures/sources/generate-flight-foundations-figures.py"
+  size="standard"
+/>
+
+## 4.2.3 用四元数存储姿态
+
+单位四元数用四个数表示一个三维旋转。本章采用 Hamilton 乘法和标量在前的顺序，记姿态为 $\boldsymbol q_{\mathrm{att}}=[w,x,y,z]^{\mathsf T}=[w,\boldsymbol\eta^{\mathsf T}]^{\mathsf T}$。它满足 $w^2+\boldsymbol\eta^{\mathsf T}\boldsymbol\eta=1$，各分量无量纲，对应 body→NED 旋转。若将与 NED 对齐的机体绕单位轴 $\boldsymbol a$ 正转 $\gamma$，其中轴向在 NED 中表达，则四元数为
+
+$$
+\boldsymbol q_{\mathrm{att}}=
+\begin{bmatrix}\cos(\gamma/2)\\\boldsymbol a\sin(\gamma/2)\end{bmatrix}.
+$$
+
+四个分量与这个约束共同表示三个独立转动自由度。$\boldsymbol q_{\mathrm{att}}$ 和 $-\boldsymbol q_{\mathrm{att}}$ 产生同一旋转矩阵。实际计算中用 $\boldsymbol q_{\mathrm{att}}$ 区分姿态四元数与稍后出现的俯仰角速度 $q$。
+
+对两组标量与向量部分，Hamilton 乘法定义为
+
+$$
+[a_0,\boldsymbol a]\otimes[b_0,\boldsymbol b]
+=\left[a_0b_0-\boldsymbol a^{\mathsf T}\boldsymbol b,\;
+ a_0\boldsymbol b+b_0\boldsymbol a+\boldsymbol a\times\boldsymbol b\right].
+$$
+
+若 $\boldsymbol q_{ab}$ 把 $b$ 系变到 $a$ 系，$\boldsymbol q_{bc}$ 把 $c$ 系变到 $b$ 系，则 $\boldsymbol q_{ac}=\boldsymbol q_{ab}\otimes\boldsymbol q_{bc}$，与 $R_{ac}=R_{ab}R_{bc}$ 顺序一致。单位四元数的逆为共轭 $[w,-x,-y,-z]$；将向量写成纯四元数，可得到
+
+$$
+[0,\boldsymbol v_n]=\boldsymbol q_{\mathrm{att}}
+\otimes[0,\boldsymbol v_b]\otimes\boldsymbol q_{\mathrm{att}}^*.
+$$
+
+由乘法展开，等价的矩阵为
+
+$$
+R_{nb}=(w^2-\boldsymbol\eta^{\mathsf T}\boldsymbol\eta)I_3
++2\boldsymbol\eta\boldsymbol\eta^{\mathsf T}+2w[\boldsymbol\eta]_\times,
+\qquad [\boldsymbol\eta]_\times\boldsymbol v=\boldsymbol\eta\times\boldsymbol v.
+$$
+
+$90^\circ$ 偏航对应 $[\sqrt2/2,0,0,\sqrt2/2]$，代入即得到上一小节的矩阵。现有 `euler321_to_quaternion`、`quaternion_multiply` 与 `quaternion_to_matrix` 沿用这组约定，入口见[零号工程：坐标、姿态与单位](/Aerodrome/reference/project-zero/#coordinates)。
+
+## 4.2.4 角速度怎样改变姿态
+
+陀螺仪常给出机体系角速度 $\boldsymbol\omega_b=[p,q,r]^{\mathsf T}$，单位 rad/s。欧拉角分别绕三个不同方向的轴变化，把这三股转动投影到机体系并相加，再解出角度变化率，得到
+
+$$
+\begin{bmatrix}\dot\phi\\\dot\theta\\\dot\psi\end{bmatrix}
+=\begin{bmatrix}
+1&\sin\phi\tan\theta&\cos\phi\tan\theta\\
+0&\cos\phi&-\sin\phi\\
+0&\sin\phi/\cos\theta&\cos\phi/\cos\theta
+\end{bmatrix}
+\begin{bmatrix}p\\q\\r\end{bmatrix}.
+$$
+
+例如，$\phi=0,\theta=30^\circ$ 且 $\boldsymbol\omega_b=[0,0,1]^{\mathsf T}\,\mathrm{rad/s}$ 时，$\dot\phi=0.57735$、$\dot\theta=0$、$\dot\psi=1.15470\,\mathrm{rad/s}$。同一次体轴偏航运动会改变两个欧拉角。
+
+当 $\cos\theta=0$ 时，欧拉角速率映射出现奇异，滚转与偏航的参数方向重合。四元数运动学在整个姿态范围内保持连续：短时间 $\mathrm dt$ 内的体轴转动近似为 $[1,\boldsymbol\omega_b\mathrm dt/2]$，把它右乘到当前姿态并取极限，就得到
+
+$$
+\dot{\boldsymbol q}_{\mathrm{att}}
+=\tfrac12\boldsymbol q_{\mathrm{att}}\otimes[0,\boldsymbol\omega_b].
+$$
+
+这也是通用刚体代码的姿态导数。数值推进与单位长度的维护见 [4.4](/Aerodrome/chapters/04-aircraft-control-models/04-numerical-simulation/)。
+
+## 4.2.5 练习与地理坐标入口
+
+把偏航算例的体轴速度改为 $[10,2,0]^{\mathsf T}\,\mathrm{m/s}$。先根据机头和右翼的方向判断北、东分量，再用矩阵计算；结果应为 $[-2,10,0]^{\mathsf T}\,\mathrm{m/s}$。随后把偏航改成 $-90^\circ$，用四元数计算并检查旋转前后的速度长度是否相同。
+
+本章的 NED 原点和方向在一次局部实验中固定。跨区域航迹通常使用地心地固系 ECEF 与经纬高：ECEF 便于统一记录全球位置，经纬高便于地图显示，局部 NED 便于解释飞行方向。它们的换算和地理环境入口见[零号工程的坐标工具](/Aerodrome/reference/project-zero/#coordinates)。
+
+<span id="faq-frame-transforms" />
+
+## 4.2.6 常见问题：怎样把向量换到另一个坐标系？
+
+机载传感器给出“前、右、下”三个分量，地图却按“北、东、下”显示。把这三个数送到地图前，先写出一条带下标的等式：$\boldsymbol v_a=R_{ab}\boldsymbol v_b$。它表示同一个几何向量，右端输入 $b$ 系分量，左端得到 $a$ 系分量；本章始终把分量写成列向量。按这个方向读矩阵，就能确定正向、反向和连续变换的乘法顺序。
+
+### 从输入坐标读到输出坐标
+
+$R_{ab}$ 的第 $j$ 列是 $b$ 系第 $j$ 根单位轴在 $a$ 系中的分量。因此，$\boldsymbol v_b$ 的三个数分别乘这三列再相加。反向变换和经过中间坐标系的变换为
+
+$$
+\boldsymbol v_b=R_{ab}^{\mathsf T}\boldsymbol v_a,
+\qquad
+\boldsymbol v_a=R_{ab}R_{bc}\boldsymbol v_c,
+\qquad R_{ac}=R_{ab}R_{bc}.
+$$
+
+第二式先由 $R_{bc}$ 把 $c$ 系分量换成 $b$ 系分量，再由 $R_{ab}$ 换成 $a$ 系分量。其依据是正交性 $R_{ab}^{-1}=R_{ab}^{\mathsf T}$，以及矩阵对列向量从右向左作用的规则。
+
+在前面的 $90^\circ$ 偏航工况中，$\boldsymbol v_b=[10,2,0]^{\mathsf T}\,\mathrm{m/s}$ 变成 $\boldsymbol v_n=[-2,10,0]^{\mathsf T}\,\mathrm{m/s}$：前向分量指东，右向分量指南。再乘 $R_{nb}^{\mathsf T}$ 就回到原来的三个数。若求的是一个安装点的位置，设机体原点在 NED 中为 $\boldsymbol t_n=[100,200,-50]^{\mathsf T}\,\mathrm m$，安装点的机体坐标为 $\boldsymbol r_b=[1,0,0]^{\mathsf T}\,\mathrm m$，则
+
+$$
+\boldsymbol r_n=\boldsymbol t_n+R_{nb}\boldsymbol r_b
+=[100,201,-50]^{\mathsf T}\,\mathrm m.
+$$
+
+平移项给出两个原点的间隔；方向、力和同一速度向量的分量变换只含旋转。若改变速度所参照的运动物体，还会出现相对速度项，见下一节的转动系求导。
+
+### 旋转矩阵与欧拉角的奇异性各发生在哪里？
+
+对任意旋转矩阵 $R$，$R^{\mathsf T}R=I$。奇异值是 $R^{\mathsf T}R$ 特征值的平方根，故三个奇异值均为 $1$，二范数条件数也为 $1$。任意姿态下的旋转矩阵都可逆，并且保持向量长度。
+
+欧拉角在 $\theta=\pm90^\circ$ 的奇异性发生在“体轴角速度 → 欧拉角变化率”这一步：4.2.4 的矩阵出现 $1/\cos\theta$，同一姿态的滚转与偏航也失去独立性。例如，在 $\theta=90^\circ$ 时，$R_y(\theta)$ 仍是正交矩阵。程序可用单位四元数积分姿态，每次需要力或速度分量时生成旋转矩阵，需要显示姿态时再转换成欧拉角；经过竖直姿态附近，显示出的滚转、偏航角可能跳变，而四元数和旋转矩阵保持连续。现有坐标工具与刚体积分器采用的接口见[零号工程的坐标与姿态组件](/Aerodrome/reference/project-zero/#coordinates)。
+
+### 测量得到的矩阵怎样恢复正交性？
+
+若三根轴由带噪测量估计，或矩阵经过数值积分，得到的 $A$ 可能只有小幅正交误差。作[奇异值分解](/Aerodrome/chapters/01-mathematical-tools/01-linear-algebra/#1142-奇异值分解svd与秩) $A=U\Sigma V^{\mathsf T}$，按奇异值降序排列，可构造
+
+$$
+\widehat R=U\operatorname{diag}\bigl(1,1,\det(UV^{\mathsf T})\bigr)V^{\mathsf T}.
+$$
+
+这个结果在所有 $R^{\mathsf T}R=I$、$\det R=1$ 的矩阵中，使 $\|A-R\|_F$ 最小。它把奇异值对应的伸缩恢复为单位长度；最后一个对角元素使行列式为 $+1$，必要时在最小奇异值对应方向修正反射。它适合将带有小误差的旋转估计投影回旋转矩阵集合。
+
+下面在精确偏航矩阵上加入 $+2\%$、$-2\%$、$+1\%$ 的轴长误差。将代码保存为 `ngc/frames_faq.py`，在 `ngc/` 目录执行 `uv run --locked python frames_faq.py`：
+
+```python title="核对偏航变换与 SVD 正交化"
+import numpy as np
+
+R = np.array([[0., -1., 0.], [1., 0., 0.], [0., 0., 1.]])
+v_body = np.array([10., 2., 0.])  # m/s，一维数组按列向量参与 @ 运算
+v_ned = R @ v_body
+print("NED 速度:", v_ned)
+print("反向变换:", R.T @ v_ned)
+
+A = R @ np.diag([1.02, .98, 1.01])
+U, singular_values, Vt = np.linalg.svd(A)
+R_fit = U @ np.diag([1., 1., np.linalg.det(U @ Vt)]) @ Vt
+print("原矩阵奇异值:", singular_values)
+print("原正交误差:", np.linalg.norm(A.T @ A - np.eye(3)))
+print("恢复后与 R 的距离:", np.linalg.norm(R_fit - R))
+```
+
+依次得到速度 `[-2, 10, 0]`、恢复速度 `[10, 2, 0]`、奇异值 `[1.02, 1.01, 0.98]`，原正交误差约为 $0.0600361$，恢复后的矩阵与 $R$ 的距离为 $0$。这组轴长误差特意选得简单，便于手算；一般测量噪声还会改变估计的方向。
+
+轴顺序、正方向或矩阵映射方向写错时，修正来自核对坐标定义和上述偏航算例。一个方向写反的矩阵也可能完全正交，SVD 处理的目标是正交误差。
+
+### 如果基向量本来就不正交呢？
+
+设 $B_a,B_b$ 的列分别是两组基向量在同一参考系中的分量。同一向量满足 $B_a\boldsymbol v_a=B_b\boldsymbol v_b$，当 $B_a$ 可逆时，程序用 `solve(B_a, B_b @ v_b)` 求 $\boldsymbol v_a$。这时换基矩阵一般会改变坐标数组的欧氏长度，反向变换由线性方程求解；转置作为逆的简化来自正交基这一条件。
+
+若矩阵欠秩，它的列向量无法构成完整的三维基。此时 [SVD 与伪逆](/Aerodrome/chapters/01-mathematical-tools/01-linear-algebra/#1144-线性方程最小二乘与伪逆)给出最小二乘意义下的最小范数解，零空间描述由当前数据无法确定的分量。例如，只测北、东速度就留出了向下速度的自由度；伪逆会为该分量选择零，补充高度变化测量才能确定它的实际值。
+
+## 参考阅读
+
+点、向量、旋转矩阵与运动学参考 [*Aircraft Control and Simulation*，第三版](https://onlinelibrary.wiley.com/doi/book/10.1002/9781119174882)，§1.2–1.5（pp.3–23）；地理坐标见 §1.6（pp.23–34）；四元数见 §1.8（pp.45–54）。原书常用的 $C_{b/n}$ 将 NED 分量变到机体系，与本章 $R_{nb}$ 互为转置；对照原书时按变换等式识别方向。

@@ -1,0 +1,1125 @@
+---
+title: "1.1 线性代数与矩阵计算"
+description: 从空间、向量与矩阵出发，逐步理解线性代数和矩阵求导，并配套程序与工程例子。
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 3
+---
+
+import TeachingFigure from '../../../../components/TeachingFigure.astro';
+
+写一个运动仿真，往往先从两条计算开始：求出下一时刻的位置和速度。状态量一多，逐条写公式就容易看漏它们之间的联系。向量把这些量按顺序放在一起，矩阵把更新规则写在一起，测量和误差也能用同一套运算处理。研究向量、矩阵和线性映射的数学工具，就是**线性代数**。
+
+下面从状态与观测的几何关系进入矩阵计算，再推导估计与控制中常用的导数。主要参考为 Murphy 的 *Probabilistic Machine Learning: An Introduction* 第 7 章。阅读的前置知识是一元函数求导、求和符号及基础三角函数；NumPy 与 PyTorch 例子说明数组形状，工程算例采用项目的 Python/JAX 实现。
+
+<span id="初读把一个运动状态一起算完" />
+
+## 导读：状态向量与线性变换
+
+一辆沿直线运动的小车，此刻位置为 $p=1\,\mathrm m$，速度为 $v=2\,\mathrm{m/s}$。先假设没有加速度，过 $\Delta t=0.5\,\mathrm s$ 后，
+
+$$
+p'=p+v\Delta t=1+2\times0.5=2\,\mathrm m,
+\qquad v'=v=2\,\mathrm{m/s}.
+$$
+
+位置和速度共同描述运动，需要一起保存、一起更新。将它们按固定顺序装进一个列向量，称为状态 $\boldsymbol x=[p\ v]^{\mathsf T}$，两条更新就可以合写成
+
+$$
+\begin{bmatrix}p'\\v'\end{bmatrix}
+=
+\underbrace{\begin{bmatrix}1&\Delta t\\0&1\end{bmatrix}}_{\boldsymbol A}
+\begin{bmatrix}p\\v\end{bmatrix}.
+$$
+
+矩阵第一行说“新位置取一份旧位置，再加上 $\Delta t$ 份旧速度”，第二行说“新速度只取旧速度”。按米、秒记录数值，代入后就是
+
+$$
+\begin{bmatrix}1&0.5\\0&1\end{bmatrix}
+\begin{bmatrix}1\\2\end{bmatrix}
+=
+\begin{bmatrix}1\times1+0.5\times2\\0\times1+1\times2\end{bmatrix}
+=
+\begin{bmatrix}2\\2\end{bmatrix}.
+$$
+
+输出的第一个 $2$ 用米计，第二个 $2$ 用米每秒计。矩阵紧凑地表达了两条更新规则，各分量继续沿用原来的物理单位；其中 $\Delta t$ 带有秒的单位。
+
+若在这半秒内保持加速度 $a=1\,\mathrm{m/s^2}$，则需要再加上输入造成的变化：
+
+$$
+\boldsymbol x'
+=\boldsymbol A\boldsymbol x+
+\begin{bmatrix}\tfrac12\Delta t^2\\\Delta t\end{bmatrix}a
+=\begin{bmatrix}2.125\,\mathrm m\\2.5\,\mathrm{m/s}\end{bmatrix}.
+$$
+
+这就是[零号工程：运动积分与载荷](/Aerodrome/reference/project-zero/#dynamics)中 `PointMassState` 和 `step` 使用的恒加速度更新。式子在步内加速度恒定时精确成立，位置更新中的速度取本步开始值。对于持续变化的加速度，可以缩短时间步，并用数值积分累计每一步的运动。
+
+<span id="从箭头到状态不要混淆两种长度" />
+
+### 几何向量、状态向量与单位
+
+若平面位移是向右 $3\,\mathrm m$、向上 $4\,\mathrm m$，可以写成两个方向的叠加：$3\boldsymbol e_1+4\boldsymbol e_2$，其中 $\boldsymbol e_1,\boldsymbol e_2$ 是坐标轴单位方向，系数以米计。位移长度为 $\sqrt{3^2+4^2}=5\,\mathrm m$。这种按系数相加的表达称为线性组合，矩阵乘法也在做列向量的线性组合。
+
+状态向量 $[p,v]^{\mathsf T}$ 的两个分量分别表示位置和速度，$\sqrt{p^2+v^2}$ 混合了不同的物理单位。评价这类状态误差的大小时，先按各分量的物理单位选取尺度。若位置误差为 $0.2\,\mathrm m$、速度误差为 $0.5\,\mathrm{m/s}$，可以先分别除以选定尺度 $1\,\mathrm m$ 和 $1\,\mathrm{m/s}$，再计算无量纲大小 $\sqrt{0.2^2+0.5^2}\approx0.539$。尺度越小，同样的物理误差在评价中占的比重越大。
+
+<span id="观测数量多不一定信息就完整" />
+
+### 观测矩阵、秩与状态可辨识性
+
+如果同时读取两次位置、都没有速度信息，观测可写成
+
+$$
+\boldsymbol y=
+\begin{bmatrix}1&0\\1&0\end{bmatrix}
+\begin{bmatrix}p\\v\end{bmatrix}.
+$$
+
+无论速度是多少，输出都是 $[p,p]^{\mathsf T}$。两行表达同一条独立关系，因此矩阵的秩为 $1$。有噪声时，可以通过重复测量改善位置估计；要辨认速度，则需要包含运动信息的观测。
+
+如果第二次观测在 $\Delta t$ 之后进行，并假定期间匀速，那么
+
+$$
+\begin{bmatrix}y_0\\y_1\end{bmatrix}
+=\begin{bmatrix}1&0\\1&\Delta t\end{bmatrix}
+\begin{bmatrix}p_0\\v\end{bmatrix}.
+$$
+
+当 $\Delta t\ne0$ 时，可以先由 $p_0=y_0$ 求位置，再由 $v=(y_1-y_0)/\Delta t$ 求速度。取 $y_0=1\,\mathrm m$、$y_1=2\,\mathrm m$、$\Delta t=0.5\,\mathrm s$，得到 $v=2\,\mathrm{m/s}$。若第二次读数多了 $0.1\,\mathrm m$，速度估计就多了 $0.2\,\mathrm{m/s}$。这说明除了能否求出解，还要关心误差被放大多少。
+
+测量有噪声时，多条关系可能无法同时精确满足。**残差**就是预测与观测之间的差，最小二乘选择让残差平方和最小的状态或参数。例如静止位置的两次读数为 $0.9$ 和 $1.1\,\mathrm m$，选位置 $p=1.0\,\mathrm m$ 时，两项残差为 $0.1$ 和 $-0.1\,\mathrm m$，平方和为 $0.02\,\mathrm m^2$；选 $p=0.9\,\mathrm m$ 时平方和为 $0.04\,\mathrm m^2$。后文会推导为何这里的平均值就是最优解。
+
+下图显示了这种测量对速度的响应：沿左图的竖直方向改变状态，右图的读数保持相同。左图中整条竖线上的状态都对应同一组位置读数。
+
+<TeachingFigure
+  id="fig-measurement-nullspace"
+  src="/Aerodrome/figures/math-tools/measurement-nullspace.svg"
+  alt="位置相同、速度不同的三个状态，经测量矩阵 H 都映射到读数平面中的同一个点 (1,1)。"
+  number={"1.1-1"}
+  title="两次读数也可能只包含一种信息"
+  caption="解析示意，忽略测量噪声。左图三个状态的位置均为 1 m、速度分别为 0、1、2 m/s；右图是同时测量位置的两台传感器输出。左图横轴记录位置，纵轴记录速度，各自沿用相应单位。"
+  source="/Aerodrome/figures/sources/math-foundations.json"
+  size="wide"
+/>
+
+### 初次阅读的路线
+
+先读完上面的状态、误差与观测例子，再阅读 1.1.1 中向量、矩阵和程序形状的部分，以及 1.1.2–1.1.3 的线性组合与误差尺度。空间定义中的零维、无穷维和张量细节放在选读部分，便于回查术语。
+
+需要理解最小二乘时，读 1.1.4 中线性方程的部分，再看 1.1.9 的完整算例。梯度可以先理解为“每个输入分量变化一点，目标在局部变化多少”；1.1.5–1.1.8 再解释形状与推导，[1.5 优化](/Aerodrome/chapters/01-mathematical-tools/05-optimization/)会用一条曲线说明如何沿梯度选更新方向。1.1.10–1.1.13 的矩阵变量求导、公式表、海森矩阵和自动微分已折叠为进阶阅读。第一次阅读到 1.1.4 后，可以先进入概率章节；遇到模型拟合和控制优化代码时，再回来读 1.1.5–1.1.9 并回查进阶材料。
+
+先手算，再把同一状态更新与[零号工程：三种代码写法](/Aerodrome/reference/project-zero/#coding-styles)对应起来。能逐项解释矩阵如何更新位置和速度，比一次记住全部分解与求导规则更有助于阅读后面的工程。
+
+<span id="111-符号约定" />
+
+## 1.1.1 空间、向量、矩阵与张量
+
+把位置和速度存进程序时，要先约定每个数代表什么、放在哪个位置。只有一条状态记录时，可以用向量；记录多个时刻后，就会用到矩阵。先从坐标与空间的关系出发，便能说明这些数学对象怎样对应到数组的形状和运算。
+
+<span id="1111-空间与维度" />
+
+### 空间与维度
+
+空间的维数描述独立坐标的个数。数轴和平面提供了最直观的例子：数轴上的一个点可以用一个实数 $x$ 确定；平面上选定原点和两条坐标轴后，一个点可以用两个实数 $(x_1,x_2)$ 确定。这里的“两个”指的是：描述平面上的任意位置，需要两个可以独立变化的坐标。三维空间类似，需要三个坐标。
+
+把这种写法推广，就得到
+
+$$
+\mathbb R^n=\{(x_1,\ldots,x_n):x_i\in\mathbb R\}.
+$$
+
+反过来，我们可以写 $(x_1,\ldots,x_n) \in \mathbb R^n$。其中 $\mathbb R$ 表示实数集合，$\mathbb R^n$ 表示所有实数 $n$ 元组构成的集合。
+
+在线性代数中，还为集合规定两种运算：元素之间**相加**，以及元素**乘以一个实数**；这里用来相乘的实数称为**标量**。例如，在 $\mathbb R^2$ 中，
+
+$$
+(x_1,x_2)+(y_1,y_2)=(x_1+y_1,x_2+y_2),\qquad
+a(x_1,x_2)=(ax_1,ax_2).
+$$
+
+这些运算的结果仍在原集合中，并满足分配律等规则。具备这类运算、满足向量空间公理的集合称为**向量空间**。本节谈到“空间的维数”时，指的是实向量空间的维数。
+
+要准确计算独立坐标的个数，可以寻找一组向量，使空间中的每个元素都能唯一地写成
+
+$$
+x_1\boldsymbol{e}_1+\cdots+x_n\boldsymbol{e}_n,
+$$
+
+这时，$\boldsymbol{e}_1,\ldots,\boldsymbol{e}_n$ 就构成这个空间的一组**基**，基中元素的个数 $n$ 称为这个空间的**维数**，记作 $\dim V=n$。例如 $(1,0)$ 和 $(0,1)$ 是 $\mathbb R^2$ 的一组基，但 $(1,0)$ 和 $(-1,0)$ 则不是。
+
+维数由整个空间的基决定。$(0,0,0)$ 虽然所有分量都是零，仍是 $\mathbb R^3$ 的一个元素；而 $\{(t,0,0):t\in\mathbb R\}$ 虽然用三个坐标书写，却只有一个可以独立变化的坐标，是 $\mathbb R^3$ 中的一维子空间。
+
+<details>
+<summary>选读：零维和无穷维为什么仍然是空间</summary>
+
+**零维空间。** 如果一个向量空间只有**零元素**，那么不需要任何基向量就能表示它的全部元素，所以它的维数是 $0$。通常把 $\mathbb R^0$ 定义为只包含一个空元组 $()$ 的空间；这个唯一的元素就是它的零向量。因此，零维空间恰有一个元素；作为对照，空集含零个元素，实数空间 $\mathbb R$ 则允许一个坐标独立取值，维数是 $1$。零维空间让一些退化情形仍能统一表达，例如一个只有零解的齐次线性方程组，其解空间就是零维的。
+
+集合 $\{0\}$ 配备通常的实数加法与数乘，也是零维向量空间：它只有零元素，不需要任何基向量。它与用空元组表示的 $\mathbb R^0$ 在向量空间结构上等价，只是零元素的写法不同。程序中形状为 `()` 的零维数组则以轴数命名，可以保存一个实数；这个数属于一维实数空间。
+
+**无穷维空间。** 考虑所有实系数多项式构成的空间。任意一个多项式都能写成
+
+$$
+p(t)=a_0+a_1t+\cdots+a_kt^k.
+$$
+
+次数不超过 $k$ 的多项式构成一个 $k+1$ 维空间，一组基是 $1,t,\ldots,t^k$。但如果不限制次数，无论选多少个多项式作为候选基，它们的有限线性组合都不能产生次数超过其中最高次数的多项式。因此，不存在一组有限的基；$1,t,t^2,\ldots$ 构成一组无穷的基。**每个多项式只有有限项，整个多项式空间仍然是无穷维的。**
+
+无穷维空间也出现在连续物理量的描述中。连续的温度分布、梁的挠度曲线等，可以被看成函数空间中的元素；计算时再通过网格或有限个基函数进行近似。函数空间的具体定义需要说明允许哪些函数，这里先用多项式理解“不能由有限组基表示整个空间”的含义。
+
+</details>
+
+<span id="1112-向量" />
+
+### 向量
+
+一个含有 $n$ 个分量的**向量**，记作 $\boldsymbol{x}\in\mathbb R^n$，是 $n$ 个实数的有序列表，或者用上一小节里的概念说，是 $n$ 维实数空间里的一个元素。本手册默认把它写成**列向量**：
+
+$$
+\boldsymbol{x}=\begin{bmatrix}x_1\\x_2\\\vdots\\x_n\end{bmatrix}.
+$$
+
+$x_i$ 是第 $i$ 个分量；顺序属于定义的一部分，$[1,2]^{\mathsf T}$ 与 $[2,1]^{\mathsf T}$ 是不同向量。上标 $\mathsf T$ 表示**转置**，把列写成行：
+
+$$
+\boldsymbol{x}^{\mathsf T}=[x_1\ x_2\ \cdots\ x_n].
+$$
+
+两个同属 $\mathbb R^n$ 的向量按分量相加，标量乘法也按分量进行：
+
+$$
+\boldsymbol{x}+\boldsymbol{y}
+=\begin{bmatrix}x_1+y_1\\\vdots\\x_n+y_n\end{bmatrix},\qquad
+a\boldsymbol{x}=\begin{bmatrix}ax_1\\\vdots\\ax_n\end{bmatrix}.
+$$
+
+在几何图像中，这对应箭头的合成、伸缩与反向。向量空间中的其他对象也具有相应运算，例如多项式可以相加，也可以乘以标量。在有限维空间中，选定一组基，就能用对应的坐标列表表示抽象向量；更换基时，坐标可能改变，而所表示的对象不变。
+
+口语中的“向量长度”有时指分量个数，有时指几何长度。为避免混淆，本手册用“分量个数”表示 $n$，用**范数** $\|\boldsymbol{x}\|$ 表示向量的大小。范数将在后文定义。零向量 $\boldsymbol{0}\in\mathbb R^n$ 有 $n$ 个零分量，它的范数为零，但所在空间的维数仍是 $n$。
+
+<span id="1113-矩阵" />
+
+### 矩阵
+
+把实数按行和列排列，就得到一个**矩阵**。一个 $m$ 行、$n$ 列的矩阵记作 $\boldsymbol{A}\in\mathbb R^{m\times n}$：
+
+$$
+\boldsymbol{A}=\begin{bmatrix}
+A_{11}&A_{12}&\cdots&A_{1n}\\
+A_{21}&A_{22}&\cdots&A_{2n}\\
+\vdots&\vdots&\ddots&\vdots\\
+A_{m1}&A_{m2}&\cdots&A_{mn}
+\end{bmatrix}.
+$$
+
+$A_{ij}$ 表示第 $i$ 行、第 $j$ 列的元素，**先行后列**。例如
+
+$$
+\boldsymbol{A}=\begin{bmatrix}1&2&3\\4&5&6\end{bmatrix}
+\in\mathbb R^{2\times3},\qquad A_{23}=6.
+$$
+
+这个矩阵有两行、三列、六个元素。它的转置交换行列，满足 $(\boldsymbol{A}^{\mathsf T})_{ij}=A_{ji}$，因此 $\boldsymbol{A}^{\mathsf T}\in\mathbb R^{3\times2}$。列向量也可以写成 $n\times1$ 矩阵，行向量则写成 $1\times n$ 矩阵；运算时必须分清行列方向。
+
+同形状矩阵的加法、矩阵与标量的乘法都按元素进行。因此，所有 $m\times n$ 实矩阵也构成一个向量空间，记作 $\mathbb R^{m\times n}$。它的维数是 $mn$：每个位置都可以独立放置一个实数，以“仅一个位置为 $1$、其余位置为 $0$”的 $mn$ 个矩阵作为基即可。
+
+例如，$2\times3$ 矩阵用两个索引定位元素，六个元素值则是矩阵空间中的六个独立坐标。索引个数描述排列方式，空间维数描述独立取值的数量。
+
+矩阵还有另一个重要角色：表示**线性映射**。一个 $m\times n$ 矩阵可以通过 $\boldsymbol{y}=\boldsymbol{A}\boldsymbol{x}$，把 $\mathbb R^n$ 中的输入变成 $\mathbb R^m$ 中的输出。矩阵作为数据表、作为向量空间的元素、作为映射的表示，是不同的观察角度；矩阵乘法的规则留到下一小节。
+
+当 $m=n$ 时称为**方阵**。常用的方阵有单位矩阵 $\boldsymbol{I}_n$，其对角元素为 $1$、其他元素为 $0$；零矩阵记作 $\boldsymbol{0}$，具体形状由上下文说明。
+
+<span id="1114-张量" />
+
+### 张量
+
+<details>
+<summary>选读：数组阶数与物理张量的区别</summary>
+
+向量用一个索引 $x_i$ 标记分量，矩阵用两个索引 $A_{ij}$ 标记元素。机器学习中用更多索引组织的数据通常称为**张量**，例如
+
+$$
+\mathcal{T}\in\mathbb R^{n_1\times n_2\times\cdots\times n_k},\qquad
+\mathcal{T}_{i_1i_2\cdots i_k}.
+$$
+
+这里每个索引 $i_j$ 的取值范围是 $1,\ldots,n_j$。需要 $k$ 个索引的分量表示称为 $k$ **阶**；每个索引所对应的排列方向称为一个**轴**，各轴长度组成**形状** $(n_1,\ldots,n_k)$。
+
+按这种分量表示，标量没有索引，是零阶；向量是一阶；矩阵是二阶。三阶数组可以想象成一叠矩阵，更高阶数组则可以按每个索引的含义来理解。一个形状为 $(2,3,4)$ 的数组有三个轴、$24$ 个元素；允许这 $24$ 个元素独立取值时，所有这种数组构成一个 $24$ 维实向量空间。
+
+**数学、物理中的张量概念比“多维数组”更严格。** 张量是可以不依赖坐标描述的对象；选定各相关空间的基后，其分量排列成数组，更换基时这些分量必须遵循相应的变换规则。例如材料力学中的应力张量，在三维直角坐标系中可用 $3\times3$ 矩阵表示，换坐标系时矩阵元素也会变化。对称应力张量满足 $\sigma_{ij}=\sigma_{ji}$，虽有九个位置，却只有六个独立分量。
+
+程序中的一组彩色图像也称为“张量”，其轴分别表示样本、高度、宽度和颜色通道。这是数组计算中的常见用法，各轴通过数据含义定义。物理张量则通过坐标变换规则定义，其分量数组随基的变化而变化。
+
+</details>
+
+<span id="把这些概念放在一起" />
+
+<span id="1115-维度轴与数组形状" />
+
+### 维度、轴与数组形状
+
+标量、向量、矩阵和高阶数组，可以用“需要多少个索引来定位一个数”统一理解其排列方式；它们在合适的加法和标量乘法下，也都可以作为向量空间的元素。这些概念分别描述数学结构与数据排列，常见数量的含义如下：
+
+| 名称 | 回答的问题 | 例子 |
+|---|---|---|
+| 空间维数 $\dim V$ | 一组基有多少个元素？ | $\dim\mathbb R^{2\times3}=6$ |
+| 张量阶数 | 张量分量表示需要多少个索引？ | 矩阵形式的二阶张量有两个索引 |
+| 数组轴数 `ndim` | 程序用多少个轴组织数据？ | 形状 `(2, 3)` 有两个轴 |
+| 数组形状 `shape` | 每个轴的长度分别是多少？ | `(2, 3)` 表示两行三列 |
+| 元素总数 | 一共有多少个数值位置？ | `(2, 3)` 共六个位置 |
+
+对不加约束的实数数组，元素总数等于所有同形状数组构成的实向量空间的维数；如果加上对称等线性约束，就要重新计算独立分量的个数。**矩阵的秩**则是另一个概念，它描述列空间的维数，下一小节将通过矩阵映射解释它。
+
+本节统一用普通字母 $a$ 表示标量、粗体小写 $\boldsymbol{x}$ 表示向量、粗体大写 $\boldsymbol{A}$ 表示矩阵，必要时用 $\mathcal{T}$ 表示高阶张量。数学下标默认从 $1$ 开始，程序下标从 $0$ 开始。除特别说明，后续运算讨论实数、普通欧氏内积以及可微函数。
+
+<span id="numpypytorch-中怎样表示" />
+
+<span id="1116-numpy-与-pytorch-的数组表示" />
+
+### NumPy 与 PyTorch 的数组表示
+
+程序通常用同一种数组类保存多种数学对象。NumPy 通常用 `numpy.ndarray` 表示数值数组；PyTorch 用 `torch.Tensor` 表示张量。两者都能存放标量、向量、矩阵和更高阶数组，具体排列由形状决定。
+
+| 数学对象或表示 | 常用程序形状 | 数组轴数 | 元素总数 |
+|---|---|---|---|
+| 标量 $a\in\mathbb R$ | `()` | 0 | 1 |
+| 向量 $\boldsymbol{x}\in\mathbb R^n$ | `(n,)` | 1 | $n$ |
+| 显式列向量 | `(n, 1)` | 2 | $n$ |
+| 显式行向量 | `(1, n)` | 2 | $n$ |
+| 矩阵 $\boldsymbol{A}\in\mathbb R^{m\times n}$ | `(m, n)` | 2 | $mn$ |
+| 三阶数组 | `(p, m, n)` | 3 | $pmn$ |
+
+`(n,)` 是只有一个元素的 Python 元组，逗号不能省略。`()` 则是空元组，作为形状时表示“没有轴”。标量数组存放的一个实数属于一维空间 $\mathbb R$。形状 `(0,)` 的数组有一个长度为零的轴，没有数值元素，可以用于表示 $\mathbb R^0$ 中唯一的空坐标向量；而形状 `(3,)` 的全零数组表示 $\mathbb R^3$ 中的零向量。它们分别对应标量、空坐标向量和三分量零向量。
+
+对象的类与元素类型也不同：`type(x)` 回答“是不是 `ndarray` 或 `Tensor`”，`x.dtype` 回答“元素使用什么数值类型”。下面明确使用 `float64`，即双精度浮点数；它以有限精度近似表示实数。
+
+先看 NumPy：
+
+```python
+import numpy as np
+
+s = np.array(3.0, dtype=np.float64)
+x = np.array([1.0, 2.0, 3.0], dtype=np.float64)
+A = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=np.float64)
+T = np.zeros((2, 3, 4), dtype=np.float64)
+
+for a in (s, x, A, T):
+    print(a.shape, a.ndim, a.size)
+# ()        0  1
+# (3,)      1  3
+# (2, 3)    2  6
+# (2, 3, 4) 3 24
+
+print(x[:, None].shape)  # (3, 1)：显式列向量
+print(x[None, :].shape)  # (1, 3)：显式行向量
+print(A.sum(axis=0))     # [5. 7. 9.]：沿第 0 轴求和
+```
+
+再看 PyTorch，使用相同的数值和排列：
+
+```python
+import torch
+
+s = torch.tensor(3.0, dtype=torch.float64)
+x = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
+A = torch.tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype=torch.float64)
+T = torch.zeros((2, 3, 4), dtype=torch.float64)
+
+for a in (s, x, A, T):
+    print(tuple(a.shape), a.dim(), a.numel())
+# 与 NumPy 示例的形状、轴数、元素总数相同
+
+print(tuple(x.unsqueeze(1).shape))  # (3, 1)
+print(tuple(x.unsqueeze(0).shape))  # (1, 3)
+print(A.sum(dim=0))                # tensor([5., 7., 9.], dtype=torch.float64)
+```
+
+常用接口可以这样对照：
+
+| 要查询或操作的内容 | NumPy | PyTorch |
+|---|---|---|
+| 形状 | `a.shape` | `a.shape` 或 `a.size()` |
+| 轴数 | `a.ndim` | `a.ndim` 或 `a.dim()` |
+| 元素总数 | `a.size` | `a.numel()` |
+| 元素类型 | `a.dtype` | `a.dtype` |
+| 沿某个轴求和 | `a.sum(axis=0)` | `a.sum(dim=0)` |
+
+注意 PyTorch 的 `dim()` 方法返回轴数，而 `sum(dim=0)` 中的 `dim` 指定**轴的编号**。对于上面的 $2\times3$ 矩阵，沿第 $0$ 轴求和，就是固定列编号，把两行对应的元素相加，得到三个数；沿第 $1$ 轴求和则得到两个行和。NumPy 的 `size` 是元素总数属性，PyTorch 的 `size()` 返回形状，名字相似但含义不同。接口细节见 [NumPy 数组文档](https://numpy.org/doc/stable/reference/arrays.ndarray.html)、[PyTorch 张量文档](https://docs.pytorch.org/docs/stable/tensors.html)及 [torch.Size 文档](https://docs.pytorch.org/docs/stable/size.html)。
+
+形状 `(n,)` 的数组沿一个轴保存分量，转置 `x.T` 后形状仍为 `(n,)`。需要显式行、列方向的运算时，可以像上面的例子那样添加轴，分别得到 `(1, n)` 和 `(n, 1)`。因此，同一个数学向量可以根据计算需要采用不同的数组形状。
+
+<span id="1117-工程例子一个状态与一批记录" />
+
+### 工程例子：一个状态与一批记录
+
+现在再看一个简单的物理对象。把沿直线运动的位置 $p$ 和速度 $v$ 依次写成状态向量：
+
+$$
+\boldsymbol{x}=\begin{bmatrix}p\\v\end{bmatrix}\in\mathbb R^2.
+$$
+
+两个状态分量分别用米、米每秒计量。固定单位后，这两个实数便能记录一个状态；列的顺序和单位共同确定数据的物理意义。
+
+若记录 $N$ 个时刻，每个时刻都有这两个分量，可以把记录组成矩阵：
+
+$$
+\boldsymbol{X}=\begin{bmatrix}
+p_1&v_1\\\vdots&\vdots\\p_N&v_N
+\end{bmatrix}\in\mathbb R^{N\times2}.
+$$
+
+每行对应一个时刻，每列对应一个状态分量。增加记录时，行数随时刻数增长，每个状态始终由两列描述。若继续记录 $B$ 次实验，可以用形状 `(B, N, 2)` 的三轴数组保存，三个轴分别是实验编号、时刻编号、状态分量编号。读取这种数据时，按实验、时刻、分量的顺序索引，并使用记录时约定的单位和坐标系。
+
+本手册的数据矩阵默认每行一个样本，单个样本在数学公式中默认写成列向量，即第 $i$ 行是 $\boldsymbol{x}_i^{\mathsf T}$。后面写出单样本模型 $\boldsymbol{y}=\boldsymbol{A}\boldsymbol{x}$ 时，对应的整批计算便是 $\boldsymbol{Y}=\boldsymbol{X}\boldsymbol{A}^{\mathsf T}$；这里的转置来自排列约定。先明确对象和形状，再学习下一小节的矩阵运算，就更容易理解这些公式。
+
+## 1.1.2 线性组合、基与矩阵乘法
+
+设 $\boldsymbol{A}=[\boldsymbol{a}_1\ \cdots\ \boldsymbol{a}_n]$，则
+
+$$
+\boldsymbol{A}\boldsymbol{x}=\sum_{j=1}^n x_j\boldsymbol{a}_j.
+$$
+
+矩阵乘向量，就是按各分量对矩阵的列加权。所有可能结果组成矩阵的**列空间**，也就是这些列能够张成的空间。
+
+例如取两列 $\boldsymbol a_1=(1,0)^{\mathsf T}\,\mathrm m$、$\boldsymbol a_2=(1,1)^{\mathsf T}\,\mathrm m$。权重 $(2,1)$ 表示先取两份第一列，再取一份第二列，得到位移 $(3,1)^{\mathsf T}\,\mathrm m$。图中两条基方向不必垂直，仍能用它们表示平面内的任意位移。
+
+<TeachingFigure
+  id="fig-basis-combination"
+  src="/Aerodrome/figures/math-tools/basis-combination.svg"
+  alt="水平走两份 a1，再沿斜方向走一份 a2，得到位移 (3,1)，它在这组基下的坐标为 (2,1)。"
+  number={"1.1-2"}
+  title="沿矩阵的列方向，首尾相接地走"
+  caption="教学几何例：两列为 a₁=(1,0) m、a₂=(1,1) m，权重为 2 和 1。横纵轴都是位移，采用等比例坐标；虚线表示换一种相加顺序。"
+  source="/Aerodrome/figures/sources/math-foundations.json"
+  size="standard"
+/>
+
+若一组向量只有在所有系数为零时，线性组合才等于零，称它们线性无关。能张成一个空间的一组线性无关向量称为该空间的一组基。矩阵的秩 $\operatorname{rank}(\boldsymbol{A})$ 是列空间的维数，也等于行空间的维数。
+
+零空间包含所有被映射成零的输入：
+
+$$
+\ker\boldsymbol{A}=\{\boldsymbol{z}:\boldsymbol{A}\boldsymbol{z}=\boldsymbol{0}\},\qquad
+\dim\ker\boldsymbol{A}+\operatorname{rank}(\boldsymbol{A})=n.
+$$
+
+例如测量 $y=[1\ 0]\boldsymbol{x}=p$ 无法区分 $[p,v]^{\mathsf T}$ 与 $[p,v+\delta v]^{\mathsf T}$。速度方向属于这一次测量的零空间。结合多时刻位置测量和运动模型，可以像导读中的例子那样推断速度。动态系统的可观测性描述的正是一段观测序列所提供的状态信息。
+
+<span id="1121-三种不同的乘法" />
+
+### 三种不同的乘法
+
+| 运算 | 形状 | 含义 |
+|---|---|---|
+| 内积 $\boldsymbol{a}^{\mathsf T}\boldsymbol{b}$ | $(1\times n)(n\times1)\to1$ | 对应分量乘积求和 |
+| 外积 $\boldsymbol{a}\boldsymbol{b}^{\mathsf T}$ | $(m\times1)(1\times n)\to m\times n$ | 第 $(i,j)$ 项为 $a_i b_j$ |
+| 逐元素积 $\boldsymbol{A}\odot\boldsymbol{B}$ | 两者同形状 | 对应元素相乘 |
+
+矩阵乘法表示映射复合。若 $\boldsymbol{y}=\boldsymbol{B}\boldsymbol{x}$、$\boldsymbol{z}=\boldsymbol{A}\boldsymbol{y}$，则 $\boldsymbol{z}=\boldsymbol{A}\boldsymbol{B}\boldsymbol{x}$，右边的映射先作用。一般不能交换次序；转置时必须倒序：
+
+$$
+(\boldsymbol{A}\boldsymbol{B})^{\mathsf T}=\boldsymbol{B}^{\mathsf T}\boldsymbol{A}^{\mathsf T}.
+$$
+
+同一几何向量更换基后，坐标也会改变。若新基各列用旧坐标表示为可逆矩阵 $\boldsymbol{B}$，则 $\boldsymbol{x}_{\rm old}=\boldsymbol{B}\boldsymbol{x}_{\rm new}$。当基正交归一时，$\boldsymbol{B}^{-1}=\boldsymbol{B}^{\mathsf T}$。正交矩阵保持长度和夹角，但可能包含反射；三维纯旋转还要求行列式为 $+1$。
+
+<span id="113-误差的大小范数与二次型" />
+
+## 1.1.3 范数、二次型与正定矩阵
+
+位置和速度都存在误差时，需要一个数概括误差有多大。前面的例子已经按各分量的尺度做了无量纲化，接下来可以选择不同的汇总方式。三个常用向量范数为
+
+$$
+\|\boldsymbol{x}\|_1=\sum_i|x_i|,\qquad
+\|\boldsymbol{x}\|_2=\sqrt{\sum_i x_i^2},\qquad
+\|\boldsymbol{x}\|_\infty=\max_i|x_i|.
+$$
+
+它们分别强调总绝对偏差、欧氏长度和最大分量。矩阵的 Frobenius 范数把所有元素看成一个长向量：
+
+$$
+\|\boldsymbol{A}\|_F^2=\sum_{i,j}A_{ij}^2=\operatorname{tr}(\boldsymbol{A}^{\mathsf T}\boldsymbol{A}).
+$$
+
+$\operatorname{tr}$ 是方阵对角元素之和。另一个常用量是谱范数 $\|\boldsymbol{A}\|_2=\max_{\|\boldsymbol{x}\|_2=1}\|\boldsymbol{A}\boldsymbol{x}\|_2$，表示映射对长度的最大放大倍数，与 Frobenius 范数通常不同。
+
+工程中不同误差的容许范围不同。若位置、速度的误差尺度分别为 $s_p,s_v>0$，先无量纲化再评价：
+
+$$
+L=\frac12\left[\left(\frac{\delta p}{s_p}\right)^2+\left(\frac{\delta v}{s_v}\right)^2\right]
+=\frac12\boldsymbol{e}^{\mathsf T}\boldsymbol{W}\boldsymbol{e},\qquad
+\boldsymbol{W}=\operatorname{diag}(s_p^{-2},s_v^{-2}).
+$$
+
+直接相加位置误差平方与速度误差平方既混合单位，也隐含了随单位选择而变化的权重。因此，选取尺度也是确定误差权重的过程，会影响数值条件和梯度方向。
+
+把两个误差分别除以各自的尺度，再画出“范数不超过 $1$”的区域，就得到下面三种形状。$L_\infty$ 允许两个分量各自接近 $1$；$L_1$ 则要求它们共享一个绝对值总额。选用哪种范数，会直接改变哪些误差被认为可接受。
+
+<TeachingFigure
+  id="fig-norm-balls"
+  src="/Aerodrome/figures/math-tools/norm-balls.svg"
+  alt="无量纲误差平面上，L1 单位球是菱形，L2 是圆，L无穷是正方形。"
+  number={"1.1-3"}
+  title="同一个“误差不超过 1”，可以划出不同区域"
+  caption="解析单位球：横轴为 δp/sₚ，纵轴为 δv/sᵥ，均无量纲。边界上的相应范数等于 1，填色区域内不超过 1；三个面板坐标范围和比例相同。"
+  source="/Aerodrome/figures/sources/math-foundations.json"
+  size="wide"
+/>
+
+<span id="1131-正定半正定与马氏距离" />
+
+### 正定、半正定与马氏距离
+
+对称矩阵 $\boldsymbol{W}$ 若满足任意非零 $\boldsymbol{e}$ 都有 $\boldsymbol{e}^{\mathsf T}\boldsymbol{W}\boldsymbol{e}>0$，称为正定，记作 $\boldsymbol{W}\succ0$；若允许等于零，称为半正定，记作 $\boldsymbol{W}\succeq0$。正定权重惩罚所有非零误差；半正定权重可能忽略某些方向。
+
+协方差 $\boldsymbol{\Sigma}$ 是对称半正定矩阵。它正定时，$\boldsymbol{e}^{\mathsf T}\boldsymbol{\Sigma}^{-1}\boldsymbol{e}$ 是平方马氏距离，用各方向的不确定性度量误差。这里先认识二次型，概率解释留到后面。
+
+## 1.1.4 矩阵分解与稳定求解
+
+<span id="特征值奇异值与条件数" />
+
+<span id="1141-特征值分解evd" />
+
+### 特征值分解（EVD）
+
+先考虑平面中的一个线性变换。多数箭头经过变换后既改变方向，也改变长度；某些特殊方向上的箭头变换后仍在原来的直线上。这样的方向就是特征方向，缩放的倍数由特征值给出。负特征值还表示方向反转，零特征值表示该方向被压到零。这个解释要求输入和输出属于同一个空间，因此特征值针对方阵定义。
+
+若 $\boldsymbol{A}\boldsymbol{q}=\lambda\boldsymbol{q}$ 且 $\boldsymbol{q}\ne0$，称 $\lambda$ 为特征值、$\boldsymbol{q}$ 为特征向量。实对称矩阵可以写成
+
+$$
+\boldsymbol{A}=\boldsymbol{Q}\boldsymbol{\Lambda}\boldsymbol{Q}^{\mathsf T},\qquad
+\boldsymbol{Q}^{\mathsf T}\boldsymbol{Q}=\boldsymbol{I},\qquad
+\boldsymbol{\Lambda}=\operatorname{diag}(\lambda_1,\ldots,\lambda_n).
+$$
+
+在正交坐标 $\boldsymbol{z}=\boldsymbol{Q}^{\mathsf T}\boldsymbol{x}$ 中，二次型成为 $\sum_i\lambda_i z_i^2$。因此，对称矩阵正定当且仅当所有特征值为正。上述正交特征分解适用于实对称矩阵，下一小节的奇异值分解则适用于任意实矩阵。
+
+<span id="1142-奇异值分解svd与秩" />
+
+### 奇异值分解（SVD）与秩
+
+任意实矩阵 $\boldsymbol{A}\in\mathbb R^{m\times n}$ 都有奇异值分解（SVD）：
+
+$$
+\boldsymbol{A}=\boldsymbol{U}\boldsymbol{S}\boldsymbol{V}^{\mathsf T}.
+$$
+
+$\boldsymbol{U},\boldsymbol{V}$ 为正交方阵，$\boldsymbol{S}\in\mathbb R^{m\times n}$ 的矩形对角线上是非负奇异值。非零奇异值个数等于秩，最大奇异值等于谱范数。很小的奇异值意味着某个输入方向在输出中几乎不可见，反推输入时容易放大噪声。
+
+在二维情况下，可以把 SVD 看成三个连续动作：$\boldsymbol{V}^{\mathsf T}$ 先把输入换到一组正交方向，$\boldsymbol{S}$ 沿这些方向分别伸缩，$\boldsymbol{U}$ 再把结果换到输出方向。正交变换保持长度，因而非奇异映射把单位圆变为椭圆，半轴长就是奇异值；奇异值为零时，会退化为线段或点。对长方形矩阵还可能增加零坐标或丢掉某些方向，但仍能按“输入方向—伸缩倍数—输出方向”理解。
+
+以已经选好单位和尺度的两个无量纲量为例，令 $\boldsymbol{A}=\operatorname{diag}(1,0.01)$。输入的第二个分量变化 $1$，输出只变化 $0.01$；反推时，输出第二分量上 $0.01$ 的误差会造成输入第二分量 $1$ 的误差。同样大小的误差若在第一分量上，反推误差仍为 $0.01$。因此，改善测量精度要考虑误差落在哪个方向，也要考虑观测对该方向有多敏感。这个例子的奇异值为 $1$ 和 $0.01$。
+
+<span id="1143-条件数与误差放大" />
+
+### 条件数与误差放大
+
+对可逆方阵，二范数条件数为
+
+$$
+\kappa_2(\boldsymbol{A})=\|\boldsymbol{A}\|_2\|\boldsymbol{A}^{-1}\|_2
+=\frac{\sigma_{\max}}{\sigma_{\min}}.
+$$
+
+当矩阵固定、$\boldsymbol{b}\ne0$ 且只有右端项受扰动时，$\boldsymbol{A}\boldsymbol{x}=\boldsymbol{b}$ 的解满足
+
+$$
+\frac{\|\delta\boldsymbol{x}\|_2}{\|\boldsymbol{x}\|_2}
+\leq\kappa_2(\boldsymbol{A})\frac{\|\delta\boldsymbol{b}\|_2}{\|\boldsymbol{b}\|_2}.
+$$
+
+条件数给出了最坏方向上的相对误差上界，具体扰动的放大量由它的方向决定。比较不同矩阵时，先固定输入输出的尺度，再用奇异值之比评价这种敏感性。
+
+<span id="1144-线性方程最小二乘与伪逆" />
+
+### 线性方程、最小二乘与伪逆
+
+仍看静止位置测量，不过现在两次读数是 $1$ 和 $2\,\mathrm m$。将它们合成观测向量 $\boldsymbol{y}=(1,2)^{\mathsf T}\,\mathrm m$。模型认为位置只有一个未知数 $p$，因此预测只能是 $\hat{\boldsymbol{y}}=(p,p)^{\mathsf T}$，落在观测平面中的直线 $y_1=y_2$ 上。观测点不在直线上，任何 $p$ 都无法同时满足两次读数。
+
+最小二乘找直线上离观测点最近的预测。取 $\hat p=1.5\,\mathrm m$，本段用观测减预测定义残差（与相反定义具有相同平方范数）：
+
+$$
+\boldsymbol{r}=\boldsymbol{y}-\hat{\boldsymbol{y}}
+=\begin{bmatrix}-0.5\\0.5\end{bmatrix}\,\mathrm m,
+\qquad
+\begin{bmatrix}1&1\end{bmatrix}\boldsymbol{r}=0.
+$$
+
+残差垂直于可用的预测方向 $(1,1)^{\mathsf T}$。若把位置再改为 $1.5+\delta$，其中 $\delta$ 以米计，平方误差变为
+
+$$
+(-0.5-\delta)^2+(0.5-\delta)^2=0.5+2\delta^2.
+$$
+
+原来的两项交叉变化相互抵消，任何非零移动都会增加误差。这就是**正交投影**的直觉：在模型能表示的预测中，选离观测最近的一个。图中左上角画的是观测空间，两个轴代表两次读数，不是物体的两个空间坐标。
+
+<TeachingFigure
+  id={"fig-measurement-geometry"}
+  src={"/Aerodrome/figures/math-tools/measurement-geometry.svg"}
+  alt={"最小二乘投影、相关误差椭圆、标准化与白化、线性传播的几何示意"}
+  number={"1.1-4"}
+  title={"测量与线性变换的几何关系"}
+  caption={"教学设定；(a) 最小二乘投影，(b) 等密度椭圆，(c) 标准化与白化，(d) 协方差传播。椭圆对应平方马氏距离为 1 的边界。"}
+  source={"/Aerodrome/figures/sources/math-tools.json"}
+  size={"wide"}
+/>
+
+图中左上角使用上述两次读数；其余三图使用协方差 $\left[\begin{smallmatrix}4&1.2\\1.2&1\end{smallmatrix}\right]\,\mathrm m^2$，分别解释误差方向、改变尺度和线性变换。椭圆按平方马氏距离为 $1$ 绘制。概率章节将用这些教学模型进一步说明协方差的含义。
+
+一般地，预测写成 $\boldsymbol{A}\boldsymbol{x}$ 时，可表示的预测构成 $\boldsymbol{A}$ 的列空间。最优残差应垂直于其中每个列方向，所以 $\boldsymbol{A}^{\mathsf T}(\boldsymbol{y}-\boldsymbol{A}\hat{\boldsymbol{x}})=0$。这给出了正规方程的几何来源；1.1.9 再从求导得到同一结果。这里使用普通欧氏距离，适用于各观测尺度相同、可信度相同的比较。可信度不同时需要改变距离中的权重。
+
+$\boldsymbol{A}\boldsymbol{x}=\boldsymbol{b}$ 有解，当且仅当 $\boldsymbol{b}$ 属于列空间。矩阵的秩确定列空间的维数，右端项的位置决定方程是否相容。有解且零空间非平凡时，解有无穷多个。
+
+无论精确方程有没有解，都可以最小化 $\|\boldsymbol{A}\boldsymbol{x}-\boldsymbol{b}\|_2$；有精确解时，最小残差就是零。所有最小二乘解中，$\boldsymbol{A}^{\dagger}\boldsymbol{b}$ 是欧氏范数最小的一个，$\boldsymbol{A}^{\dagger}$ 为 Moore–Penrose 伪逆。SVD 对非零奇异值取倒数即可构造它；数值实现还需阈值判断哪些奇异值视为零。
+
+<span id="1145-qrcholesky-与数值求解" />
+
+### QR、Cholesky 与数值求解
+
+| 问题 | 适合的计算方式 | 条件与用途 |
+|---|---|---|
+| 可逆方阵线性方程 | `solve(A, b)`，通常使用带选主元的分解 | 不必显式求逆 |
+| 对称正定系统 | Cholesky：$\boldsymbol{A}=\boldsymbol{L}\boldsymbol{L}^{\mathsf T}$，再解两个三角系统 | 普通 Cholesky 要求正定 |
+| 满列秩最小二乘 | 约化 QR：$\boldsymbol{A}=\boldsymbol{Q}\boldsymbol{R}$，解 $\boldsymbol{R}\boldsymbol{x}=\boldsymbol{Q}^{\mathsf T}\boldsymbol{b}$ | $\boldsymbol{Q}$ 的列正交归一 |
+| 秩亏或接近秩亏的最小二乘 | 使用 SVD 的最小二乘或伪逆方法 | 明确奇异值截断阈值 |
+
+正规方程 $\boldsymbol{A}^{\mathsf T}\boldsymbol{A}\boldsymbol{x}=\boldsymbol{A}^{\mathsf T}\boldsymbol{b}$ 适合推导，但满列秩时 $\kappa_2(\boldsymbol{A}^{\mathsf T}\boldsymbol{A})=\kappa_2(\boldsymbol{A})^2$。分解与求解器直接处理原问题，可避免形成条件数更大的正规方程。
+
+最小二乘的投影几何还可以与概率模型联系起来：[1.3 的最大似然估计](/Aerodrome/chapters/01-mathematical-tools/03-statistics/#135-为什么高斯误差会导出平方误差)解释何时应采用平方误差，[2.2 线性模型](/Aerodrome/chapters/02-statistical-learning/02-linear-models/)再讨论特征与模型选择。
+
+<span id="从误差椭圆理解标准化与白化" />
+
+<span id="1146-标准化与白化的矩阵计算" />
+
+### 标准化与白化的矩阵计算
+
+概率章节会用协方差矩阵 $\boldsymbol{\Sigma}$ 描述误差的大小和共同变化。先把一团二维误差点想成沿某个方向拉长的云：将每个坐标分别除以其标准差，能统一横纵轴的尺度，但斜着伸长的趋势可能仍然存在。图中左下角的标准化结果正是如此。
+
+对白化，设误差已减去均值、$\boldsymbol{\Sigma}\succ0$，并作特征分解 $\boldsymbol{\Sigma}=\boldsymbol{Q}\boldsymbol{\Lambda}\boldsymbol{Q}^{\mathsf T}$。先旋转到特征方向，再按各方向标准差缩放：
+
+$$
+\boldsymbol{z}=\boldsymbol{\Lambda}^{-1/2}\boldsymbol{Q}^{\mathsf T}\boldsymbol{e}.
+$$
+
+变换后的协方差是单位阵；原来沿不同方向的伸长程度被消除。若误差联合高斯，其等密度椭圆变成圆。对一般分布，白化使各分量方差为 $1$ 且两两不相关；点云的其余形状特征取决于原分布。给定 $\boldsymbol{\Sigma}=\left[\begin{smallmatrix}4&1.2\\1.2&1\end{smallmatrix}\right]\,\mathrm m^2$，仅按标准差 $2$ 和 $1\,\mathrm m$ 缩放会得到 $\left[\begin{smallmatrix}1&0.6\\0.6&1\end{smallmatrix}\right]$，相关性仍在；白化才会把非对角项也变成零。
+
+白化通过改变坐标来表达和度量同一批误差。1.1.9 中用 Cholesky 分解处理加权最小二乘，是另一种白化方式；数值计算不必先显式构造逆矩阵。先到[零号工程：测量、估计与数学工具算例](/Aerodrome/reference/project-zero/#math-tools)运行同一组投影和协方差计算，再回来核对矩阵如何改变几何形状。
+
+<span id="115-求导前先确定输入输出和形状" />
+
+## 1.1.5 标量、向量与矩阵的导数形状
+
+“对向量求导”可能指不同对象。设 $f:\mathbb R^n\to\mathbb R$，$\boldsymbol{g}:\mathbb R^n\to\mathbb R^m$：
+
+| 对象 | 元素定义 | 形状 |
+|---|---|---|
+| 梯度 | $(\nabla_{\boldsymbol{x}}f)_i=\partial f/\partial x_i$ | $n\times1$ |
+| 雅可比 | $(\boldsymbol{J}_{\boldsymbol{g}})_{ij}=\partial g_i/\partial x_j$ | $m\times n$ |
+| 海森矩阵 | $(\boldsymbol{H}_f)_{ij}=\partial^2f/(\partial x_i\partial x_j)$ | $n\times n$ |
+| 标量目标对矩阵的梯度 | $(\nabla_{\boldsymbol{X}}f)_{ij}=\partial f/\partial X_{ij}$ | 与 $\boldsymbol{X}$ 同形状 |
+
+本手册的梯度是列向量，雅可比是**输出分量排在行，输入分量排在列**。所以标量函数的雅可比是行向量，$\boldsymbol{J}_f=(\nabla_{\boldsymbol{x}}f)^{\mathsf T}$。
+
+不同教材会采用不同布局，有些写 $\partial\boldsymbol{g}/\partial\boldsymbol{x}^{\mathsf T}$ 表示雅可比。阅读这些记号时，可由元素定义确定行列布局。本手册优先使用 $\nabla f$ 和 $\boldsymbol{J}_{\boldsymbol{g}}$ 消除歧义。
+
+“梯度与变量同形状”适用于这里的**标量目标对变量求导**。矩阵输出对矩阵输入的导数是把输入扰动映射到输出扰动的线性算子，逐元素表示时有四个下标。
+
+<span id="116-用微分法识别梯度" />
+
+## 1.1.6 微分、梯度与 Frobenius 内积
+
+<span id="1161-微分是局部线性变化" />
+
+### 微分是局部线性变化
+
+对可微标量函数有
+
+$$
+f(\boldsymbol{x}+\Delta\boldsymbol{x})=f(\boldsymbol{x})
++(\nabla_{\boldsymbol{x}}f)^{\mathsf T}\Delta\boldsymbol{x}
++o(\|\Delta\boldsymbol{x}\|_2).
+$$
+
+小 $o$ 表示余项除以 $\|\Delta\boldsymbol{x}\|_2$ 后趋于零。把线性部分写成微分：
+
+$$
+\boxed{\mathrm{d}f=(\nabla_{\boldsymbol{x}}f)^{\mathsf T}\mathrm{d}\boldsymbol{x}}.
+$$
+
+微分给出改变量的一阶部分，有限改变量与它之间的差由前式中的余项描述。沿方向 $\boldsymbol{v}$ 的方向导数为
+
+$$
+D_{\boldsymbol{v}}f=\left.\frac{\mathrm{d}}{\mathrm{d}\varepsilon}
+f(\boldsymbol{x}+\varepsilon\boldsymbol{v})\right|_{\varepsilon=0}
+=(\nabla f)^{\mathsf T}\boldsymbol{v}.
+$$
+
+方向向量 $\boldsymbol{v}$ 的长度决定参数 $\varepsilon$ 每变化一单位时的位移；取单位向量便得到单位距离上的变化率。由柯西–施瓦茨不等式，在欧氏单位方向中，非零梯度方向使一阶增长最快。对于混合单位的状态，先规定缩放或度量，再谈“最快方向”。
+
+<span id="1162-矩阵使用-frobenius-内积" />
+
+### 矩阵使用 Frobenius 内积
+
+定义 $\langle\boldsymbol{A},\boldsymbol{B}\rangle_F=\operatorname{tr}(\boldsymbol{A}^{\mathsf T}\boldsymbol{B})=\sum_{i,j}A_{ij}B_{ij}$，则
+
+$$
+\boxed{\mathrm{d}f=\operatorname{tr}\bigl((\nabla_{\boldsymbol{X}}f)^{\mathsf T}\mathrm{d}\boldsymbol{X}\bigr)}.
+$$
+
+如果整理出的结果是 $\mathrm{d}f=\operatorname{tr}(\boldsymbol{B}\,\mathrm{d}\boldsymbol{X})$，与定义逐项比较便得到梯度 $\boldsymbol{B}^{\mathsf T}$。
+
+<span id="1163-可重复使用的五个步骤" />
+
+### 可重复使用的五个步骤
+
+1. 写出各量的形状，说明对谁求导、哪些量保持不变。
+2. 对表达式取微分，对每个依赖求导变量的因子使用乘积法则。
+3. 保持矩阵乘法顺序，必要时把标量写成迹。
+4. 整理为 $\boldsymbol{g}^{\mathsf T}\mathrm{d}\boldsymbol{x}$ 或 $\operatorname{tr}(\boldsymbol{G}^{\mathsf T}\mathrm{d}\boldsymbol{X})$。
+5. 读出梯度并检查形状，再用分量展开或数值方向导数核对。
+
+迹允许循环移位：$\operatorname{tr}(\boldsymbol{A}\boldsymbol{B}\boldsymbol{C})=\operatorname{tr}(\boldsymbol{B}\boldsymbol{C}\boldsymbol{A})$，前提是乘积形状适配。它不允许任意交换因子。另一个常用事实是：标量等于自己的转置。
+
+<span id="117-线性函数与二次型的推导" />
+
+## 1.1.7 线性函数与二次型求导
+
+若 $\boldsymbol{a}$ 不依赖 $\boldsymbol{x}$，由 $\mathrm{d}(\boldsymbol{a}^{\mathsf T}\boldsymbol{x})=\boldsymbol{a}^{\mathsf T}\mathrm{d}\boldsymbol{x}$ 可直接读出梯度 $\boldsymbol{a}$。
+
+现在令 $f=\boldsymbol{x}^{\mathsf T}\boldsymbol{A}\boldsymbol{x}$，固定 $\boldsymbol{A}$。左右两处 $\boldsymbol{x}$ 都会变化：
+
+$$
+\begin{aligned}
+\mathrm{d}f
+&=(\mathrm{d}\boldsymbol{x})^{\mathsf T}\boldsymbol{A}\boldsymbol{x}
++\boldsymbol{x}^{\mathsf T}\boldsymbol{A}\,\mathrm{d}\boldsymbol{x}\\
+&=(\boldsymbol{A}\boldsymbol{x})^{\mathsf T}\mathrm{d}\boldsymbol{x}
++(\boldsymbol{A}^{\mathsf T}\boldsymbol{x})^{\mathsf T}\mathrm{d}\boldsymbol{x}.
+\end{aligned}
+$$
+
+所以
+
+$$
+\boxed{\nabla_{\boldsymbol{x}}(\boldsymbol{x}^{\mathsf T}\boldsymbol{A}\boldsymbol{x})
+=(\boldsymbol{A}+\boldsymbol{A}^{\mathsf T})\boldsymbol{x}}.
+$$
+
+只有 $\boldsymbol{A}$ 对称时，才可写成 $2\boldsymbol{A}\boldsymbol{x}$。二次型实际只取决于矩阵的对称部分：$\boldsymbol{x}^{\mathsf T}\boldsymbol{A}\boldsymbol{x}=\boldsymbol{x}^{\mathsf T}(\boldsymbol{A}+\boldsymbol{A}^{\mathsf T})\boldsymbol{x}/2$。
+
+例如
+
+$$
+\boldsymbol{A}=\begin{bmatrix}2&3\\0&1\end{bmatrix},\qquad
+f=2x_1^2+3x_1x_2+x_2^2.
+$$
+
+分量求导给出 $[4x_1+3x_2,\ 3x_1+2x_2]^{\mathsf T}$。在 $\boldsymbol{x}=[1,2]^{\mathsf T}$ 处，正确梯度为 $[10,7]^{\mathsf T}$；误用 $2\boldsymbol{A}\boldsymbol{x}$ 则得到 $[16,4]^{\mathsf T}$。
+
+## 1.1.8 雅可比、链式法则与模型线性化
+
+先看一维情形：在 $x=1$ 附近，$y=x^2$ 可写成 $y\approx1+2(x-1)$。切线描述基点附近的一阶变化，二次余项描述曲线与切线之间的偏离。下图中把扰动缩小到原来的一半，遗漏项就变为原来的四分之一。雅可比把这种局部关系推广到多个输入和多个输出。
+
+<TeachingFigure
+  id="fig-local-linearization"
+  src="/Aerodrome/figures/math-tools/local-linearization.svg"
+  alt="抛物线与切线在 x=1 附近接近，远离后分开；右图显示遗漏项随输入扰动平方增长。"
+  number={"1.1-5"}
+  title="局部线性近似保留了什么"
+  caption="解析教学例 y=x²，输入输出均无量纲。基点为 x=1，线性近似为 1+2(x−1)；右图画真实值减近似值，恰为 (Δx)²。灰色窄带标出用于观察局部近似的基点附近区域。"
+  source="/Aerodrome/figures/sources/math-foundations.json"
+  size="wide"
+/>
+
+对 $\boldsymbol{y}=\boldsymbol{g}(\boldsymbol{x})$，微分关系为
+
+$$
+\mathrm{d}\boldsymbol{y}=\boldsymbol{J}_{\boldsymbol{g}}\,\mathrm{d}\boldsymbol{x}.
+$$
+
+例如 $\boldsymbol{y}=\boldsymbol{A}\boldsymbol{x}+\boldsymbol{b}$ 的雅可比为 $\boldsymbol{A}$。若再计算标量目标 $L(\boldsymbol{y})$，则
+
+$$
+\mathrm{d}L=(\nabla_{\boldsymbol{y}}L)^{\mathsf T}\boldsymbol{J}_{\boldsymbol{g}}\mathrm{d}\boldsymbol{x},
+\qquad
+\boxed{\nabla_{\boldsymbol{x}}L=\boldsymbol{J}_{\boldsymbol{g}}^{\mathsf T}\nabla_{\boldsymbol{y}}L}.
+$$
+
+转置来自列梯度约定：$(n\times m)(m\times1)=n\times1$。如果外层也是向量函数 $\boldsymbol{z}=\boldsymbol{h}(\boldsymbol{y})\in\mathbb R^p$，则
+
+$$
+\boldsymbol{J}_{\boldsymbol{h}\circ\boldsymbol{g}}(\boldsymbol{x})
+=\underbrace{\boldsymbol{J}_{\boldsymbol{h}}(\boldsymbol{g}(\boldsymbol{x}))}_{p\times m}
+\underbrace{\boldsymbol{J}_{\boldsymbol{g}}(\boldsymbol{x})}_{m\times n}.
+$$
+
+雅可比把输入扰动传到输出；它的转置把输出目标的敏感度传回输入。两种方向分别对应后面的 JVP 和 VJP。
+
+如果非线性函数逐元素作用，即 $y_i=\phi(x_i)$，不同分量互不影响，因此 $\boldsymbol{J}=\operatorname{diag}(\phi'(x_1),\ldots,\phi'(x_n))$。若 $\boldsymbol{y}=\phi(\boldsymbol{A}\boldsymbol{x}+\boldsymbol{b})$，令 $\boldsymbol{z}=\boldsymbol{A}\boldsymbol{x}+\boldsymbol{b}$，则 $\boldsymbol{J}_{\boldsymbol{y}}=\operatorname{diag}(\phi'(z_1),\ldots,\phi'(z_m))\boldsymbol{A}$。这条规则连接了线性模型与神经网络中的非线性层。
+
+<span id="1181-时间变化与状态变化要一起计入" />
+
+### 时间变化与状态变化要一起计入
+
+若 $L=L(t,\boldsymbol{x}(t))$，则
+
+$$
+\frac{\mathrm{d}L}{\mathrm{d}t}=\frac{\partial L}{\partial t}
++(\nabla_{\boldsymbol{x}}L)^{\mathsf T}\dot{\boldsymbol{x}}.
+$$
+
+偏导 $\partial L/\partial t$ 保持状态不变，全导数还计入状态沿轨迹变化的影响。
+
+对动力学 $\dot{\boldsymbol{x}}=\boldsymbol{f}(\boldsymbol{x},\boldsymbol{u},t)$，沿满足动力学的参考轨迹定义扰动，得到一阶模型
+
+$$
+\delta\dot{\boldsymbol{x}}\approx\boldsymbol{A}(t)\delta\boldsymbol{x}
++\boldsymbol{B}(t)\delta\boldsymbol{u},
+$$
+
+$$
+A_{ij}=\left.\frac{\partial f_i}{\partial x_j}\right|_{\rm ref},\qquad
+B_{ij}=\left.\frac{\partial f_i}{\partial u_j}\right|_{\rm ref}.
+$$
+
+这一模型围绕满足动力学的参考轨迹展开。若采用任意给定的参考状态与输入，展开式中会出现它们与原动力学之间的常数偏差。扰动增大时，高阶项对结果的影响也会增大；姿态扰动通常在参考姿态附近的局部坐标中表示。
+
+<span id="119-完整算例测量误差与加权最小二乘" />
+
+## 1.1.9 加权最小二乘：推导与求解
+
+前面用几何投影找到了离观测最近的预测。现在给各项残差加上权重，再用刚学过的链式法则求解。设测量 $\boldsymbol{y}\in\mathbb R^m$、固定测量矩阵 $\boldsymbol{H}\in\mathbb R^{m\times n}$、待估状态 $\boldsymbol{x}$。定义残差和目标：
+
+$$
+\boldsymbol{r}=\boldsymbol{H}\boldsymbol{x}-\boldsymbol{y},\qquad
+L=\frac12\boldsymbol{r}^{\mathsf T}\boldsymbol{W}\boldsymbol{r},\qquad
+\boldsymbol{W}=\boldsymbol{W}^{\mathsf T}\succ0.
+$$
+
+固定 $\boldsymbol{W}$，先对残差求导，再经过测量映射：
+
+$$
+\nabla_{\boldsymbol{r}}L=\boldsymbol{W}\boldsymbol{r},\qquad
+\boldsymbol{J}_{\boldsymbol{r}}=\boldsymbol{H},\qquad
+\boxed{\nabla_{\boldsymbol{x}}L=\boldsymbol{H}^{\mathsf T}\boldsymbol{W}(\boldsymbol{H}\boldsymbol{x}-\boldsymbol{y})}.
+$$
+
+$1/2$ 抵消了二次型求导产生的 2。若残差改成 $\boldsymbol{y}-\boldsymbol{H}\boldsymbol{x}$，其雅可比也变成 $-\boldsymbol{H}$，最终目标梯度不变。
+
+取已经无量纲化的两维状态和三项测量：
+
+$$
+\boldsymbol{H}=\begin{bmatrix}1&0\\0&1\\1&1\end{bmatrix},\quad
+\boldsymbol{y}=\begin{bmatrix}1\\2\\2.8\end{bmatrix},\quad
+\boldsymbol{W}=\operatorname{diag}(4,1,2).
+$$
+
+在 $\boldsymbol{x}_0=[0.8,1.9]^{\mathsf T}$ 处，残差为 $[-0.2,-0.1,-0.1]^{\mathsf T}$，目标 $L=0.095$，梯度为 $[-1,-0.3]^{\mathsf T}$。沿 $[1,0]^{\mathsf T}$ 方向的一阶变化率是 $-1$，所以小幅增大第一分量会降低目标。
+
+令梯度为零：
+
+$$
+\begin{bmatrix}6&2\\2&3\end{bmatrix}\hat{\boldsymbol{x}}
+=\begin{bmatrix}9.6\\7.6\end{bmatrix},\qquad
+\hat{\boldsymbol{x}}=\begin{bmatrix}34/35\\66/35\end{bmatrix}
+\approx\begin{bmatrix}0.971429\\1.885714\end{bmatrix}.
+$$
+
+左侧矩阵 $\boldsymbol{H}^{\mathsf T}\boldsymbol{W}\boldsymbol{H}$ 正定，所以解唯一。计算一般加权问题时，若 $\boldsymbol{W}=\boldsymbol{L}_W\boldsymbol{L}_W^{\mathsf T}$，可对 $\boldsymbol{L}_W^{\mathsf T}\boldsymbol{H}$ 与 $\boldsymbol{L}_W^{\mathsf T}\boldsymbol{y}$ 求普通最小二乘。若给的是协方差 $\boldsymbol{\Sigma}=\boldsymbol{L}_{\Sigma}\boldsymbol{L}_{\Sigma}^{\mathsf T}$，则用三角求解形成 $\boldsymbol{L}_{\Sigma}^{-1}\boldsymbol{H}$ 和 $\boldsymbol{L}_{\Sigma}^{-1}\boldsymbol{y}$，无需显式求逆。
+
+## 1.1.10 矩阵变量求导：线性层与控制增益
+
+<details>
+<summary>进阶：矩阵参数如何接收梯度</summary>
+
+<span id="11101-参数矩阵的梯度为什么是外积" />
+
+### 参数矩阵的梯度为什么是外积
+
+对 $\boldsymbol{y}=\boldsymbol{A}\boldsymbol{x}+\boldsymbol{b}$，令 $\boldsymbol{g}=\nabla_{\boldsymbol{y}}L$。允许三项都变化，有
+
+$$
+\mathrm{d}\boldsymbol{y}=(\mathrm{d}\boldsymbol{A})\boldsymbol{x}
++\boldsymbol{A}\,\mathrm{d}\boldsymbol{x}+\mathrm{d}\boldsymbol{b}.
+$$
+
+矩阵项可写成
+
+$$
+\boldsymbol{g}^{\mathsf T}(\mathrm{d}\boldsymbol{A})\boldsymbol{x}
+=\operatorname{tr}(\boldsymbol{x}\boldsymbol{g}^{\mathsf T}\mathrm{d}\boldsymbol{A})
+=\operatorname{tr}\bigl((\boldsymbol{g}\boldsymbol{x}^{\mathsf T})^{\mathsf T}\mathrm{d}\boldsymbol{A}\bigr).
+$$
+
+所以
+
+$$
+\nabla_{\boldsymbol{A}}L=\boldsymbol{g}\boldsymbol{x}^{\mathsf T},\qquad
+\nabla_{\boldsymbol{x}}L=\boldsymbol{A}^{\mathsf T}\boldsymbol{g},\qquad
+\nabla_{\boldsymbol{b}}L=\boldsymbol{g}.
+$$
+
+批量数据按样本求和；若目标是样本平均，还需除以样本数。
+
+<span id="11102-即时控制代价不等于整段轨迹代价" />
+
+### 即时控制代价不等于整段轨迹代价
+
+令 $\boldsymbol{u}=-\boldsymbol{K}\boldsymbol{e}$，其中 $\boldsymbol{K}\in\mathbb R^{m\times n}$，考虑
+
+$$
+L(\boldsymbol{K})=\frac12\boldsymbol{u}^{\mathsf T}\boldsymbol{R}\boldsymbol{u},\qquad
+\boldsymbol{R}=\boldsymbol{R}^{\mathsf T}\succ0.
+$$
+
+**先固定状态误差 $\boldsymbol{e}$。** 因为 $\mathrm{d}\boldsymbol{u}=-(\mathrm{d}\boldsymbol{K})\boldsymbol{e}$，所以
+
+$$
+\nabla_{\boldsymbol{K}}L=-(\boldsymbol{R}\boldsymbol{u})\boldsymbol{e}^{\mathsf T}
+=\boldsymbol{R}\boldsymbol{K}\boldsymbol{e}\boldsymbol{e}^{\mathsf T}.
+$$
+
+这个梯度描述固定状态下，增益 $\boldsymbol{K}$ 变化对当前控制代价的影响。计算整段闭环轨迹的代价时，增益还会通过控制量影响后续状态与误差 $\boldsymbol{e}_k$，因此链式法则会沿状态递推继续展开。
+
+<span id="11103-矩阵到矩阵不必展开四阶数组" />
+
+### 矩阵到矩阵：不必展开四阶数组
+
+若 $\boldsymbol{Y}=\boldsymbol{A}\boldsymbol{X}\boldsymbol{B}$，其中 $\boldsymbol{A}\in\mathbb R^{p\times m}$、$\boldsymbol{X}\in\mathbb R^{m\times n}$、$\boldsymbol{B}\in\mathbb R^{n\times q}$，则
+
+$$
+\mathrm{d}\boldsymbol{Y}=\boldsymbol{A}(\mathrm{d}\boldsymbol{X})\boldsymbol{B},\qquad
+\frac{\partial Y_{ij}}{\partial X_{kl}}=A_{ik}B_{lj}.
+$$
+
+导数把 $m\times n$ 扰动映射成 $p\times q$ 输出扰动。若已知标量目标的输出梯度 $\boldsymbol{G}_Y$，利用迹循环移位可得
+
+$$
+\boxed{\nabla_{\boldsymbol{X}}L=\boldsymbol{A}^{\mathsf T}\boldsymbol{G}_Y\boldsymbol{B}^{\mathsf T}}.
+$$
+
+因此，计算标量目标梯度时通常无需显式存储四阶导数数组。
+
+
+</details>
+
+## 1.1.11 常用规则与适用条件
+
+<details>
+<summary>查阅：公式、适用条件与推导</summary>
+
+下表的常量不依赖求导变量，$\boldsymbol{X}^{-\mathsf T}$ 表示 $(\boldsymbol{X}^{-1})^{\mathsf T}$。
+
+| 表达式 | 微分或梯度 | 条件 |
+|---|---|---|
+| $\boldsymbol{U}\boldsymbol{V}$ | $\mathrm{d}(\boldsymbol{U}\boldsymbol{V})=(\mathrm{d}\boldsymbol{U})\boldsymbol{V}+\boldsymbol{U}\,\mathrm{d}\boldsymbol{V}$ | 两因子可同时变化；顺序不变 |
+| $\boldsymbol{X}^{\mathsf T}$ | $\mathrm{d}(\boldsymbol{X}^{\mathsf T})=(\mathrm{d}\boldsymbol{X})^{\mathsf T}$ | 任意实矩阵 |
+| $\boldsymbol{X}^{-1}$ | $\mathrm{d}(\boldsymbol{X}^{-1})=-\boldsymbol{X}^{-1}(\mathrm{d}\boldsymbol{X})\boldsymbol{X}^{-1}$ | 可逆方阵 |
+| $\operatorname{tr}(\boldsymbol{A}^{\mathsf T}\boldsymbol{X})$ | $\nabla_{\boldsymbol{X}}f=\boldsymbol{A}$ | $\boldsymbol{A}$ 为同形状常量 |
+| $\boldsymbol{a}^{\mathsf T}\boldsymbol{X}\boldsymbol{b}$ | $\nabla_{\boldsymbol{X}}f=\boldsymbol{a}\boldsymbol{b}^{\mathsf T}$ | $\boldsymbol{a},\boldsymbol{b}$ 常量 |
+| $\tfrac12\|\boldsymbol{X}\|_F^2$ | $\nabla_{\boldsymbol{X}}f=\boldsymbol{X}$ | 矩阵元素独立 |
+| $\tfrac12\|\boldsymbol{A}\boldsymbol{X}-\boldsymbol{B}\|_F^2$ | $\nabla_{\boldsymbol{X}}f=\boldsymbol{A}^{\mathsf T}(\boldsymbol{A}\boldsymbol{X}-\boldsymbol{B})$ | $\boldsymbol{A},\boldsymbol{B}$ 常量 |
+| $\log\det\boldsymbol{X}$ | $\nabla_{\boldsymbol{X}}f=\boldsymbol{X}^{-\mathsf T}$ | 实可逆方阵且 $\det\boldsymbol{X}>0$ |
+| $\log\lvert\det\boldsymbol{X}\rvert$ | $\nabla_{\boldsymbol{X}}f=\boldsymbol{X}^{-\mathsf T}$ | 实可逆方阵，不可跨越奇异点 |
+
+逆矩阵规则来自对 $\boldsymbol{X}\boldsymbol{X}^{-1}=\boldsymbol{I}$ 取微分：
+
+$$
+(\mathrm{d}\boldsymbol{X})\boldsymbol{X}^{-1}
++\boldsymbol{X}\,\mathrm{d}(\boldsymbol{X}^{-1})=\boldsymbol{0}.
+$$
+
+左乘 $\boldsymbol{X}^{-1}$ 即得结果。不能写成标量式的 $-\boldsymbol{X}^{-2}\mathrm{d}\boldsymbol{X}$，因为通常不能交换因子。
+
+对数行列式的微分是 $\mathrm{d}\log\det\boldsymbol{X}=\operatorname{tr}(\boldsymbol{X}^{-1}\mathrm{d}\boldsymbol{X})$。后续协方差学习会使用这样的目标（固定 $\boldsymbol{e}$）：
+
+$$
+L(\boldsymbol{\Sigma})=\frac12\log\det\boldsymbol{\Sigma}
++\frac12\boldsymbol{e}^{\mathsf T}\boldsymbol{\Sigma}^{-1}\boldsymbol{e},\qquad\boldsymbol{\Sigma}\succ0.
+$$
+
+应用逆矩阵微分和迹的规则，得到
+
+$$
+\begin{aligned}
+\mathrm{d}L
+&=\tfrac12\operatorname{tr}(\boldsymbol{\Sigma}^{-1}\mathrm{d}\boldsymbol{\Sigma})
+-\tfrac12\boldsymbol{e}^{\mathsf T}\boldsymbol{\Sigma}^{-1}(\mathrm{d}\boldsymbol{\Sigma})\boldsymbol{\Sigma}^{-1}\boldsymbol{e}\\
+&=\tfrac12\operatorname{tr}\left[\left(\boldsymbol{\Sigma}^{-1}
+-\boldsymbol{\Sigma}^{-1}\boldsymbol{e}\boldsymbol{e}^{\mathsf T}\boldsymbol{\Sigma}^{-1}\right)\mathrm{d}\boldsymbol{\Sigma}\right].
+\end{aligned}
+$$
+
+括号内矩阵对称，转置后不变，因而可以读出
+
+$$
+\nabla_{\boldsymbol{\Sigma}}L=\frac12\left(\boldsymbol{\Sigma}^{-1}
+-\boldsymbol{\Sigma}^{-1}\boldsymbol{e}\boldsymbol{e}^{\mathsf T}\boldsymbol{\Sigma}^{-1}\right).
+$$
+
+这是对称扰动下的 Frobenius 梯度。如果用独立参数存储对称矩阵，例如 $\boldsymbol{\Sigma}=\left[\begin{smallmatrix}a&b\\b&c\end{smallmatrix}\right]$，参数 $b$ 同时改变两个矩阵元素，第一处贡献 $G_{12}$，第二处贡献 $G_{21}$，因此 $\partial L/\partial b=G_{12}+G_{21}$。采用 Cholesky 因子等正定参数化时，同样通过链式法则把矩阵梯度转换为参数梯度。
+
+
+</details>
+
+## 1.1.12 海森矩阵与局部二次近似
+
+<details>
+<summary>进阶：曲率与局部近似</summary>
+
+若标量函数二阶连续可微，混合偏导可交换，海森矩阵对称，并且
+
+$$
+f(\boldsymbol{x}+\Delta\boldsymbol{x})=f(\boldsymbol{x})
++\boldsymbol{g}^{\mathsf T}\Delta\boldsymbol{x}
++\frac12\Delta\boldsymbol{x}^{\mathsf T}\boldsymbol{H}_f\Delta\boldsymbol{x}
++o(\|\Delta\boldsymbol{x}\|_2^2).
+$$
+
+梯度描述一阶变化，海森矩阵描述曲率。线性加权最小二乘有 $\boldsymbol{H}_L=\boldsymbol{H}^{\mathsf T}\boldsymbol{W}\boldsymbol{H}$。当 $\boldsymbol{W}\succ0$、$\boldsymbol{H}$ 满列秩时它正定；秩亏时只有半正定。
+
+对非线性残差 $\boldsymbol{r}(\boldsymbol{x})$ 与固定对称权重，结果是
+
+$$
+\nabla L=\boldsymbol{J}_{\boldsymbol{r}}^{\mathsf T}\boldsymbol{W}\boldsymbol{r},
+$$
+
+$$
+\boldsymbol{H}_L=\boldsymbol{J}_{\boldsymbol{r}}^{\mathsf T}\boldsymbol{W}\boldsymbol{J}_{\boldsymbol{r}}
++\sum_i(\boldsymbol{W}\boldsymbol{r})_i\nabla^2 r_i.
+$$
+
+只保留第一项是高斯–牛顿使用的曲率近似。线性残差时第二项为零；残差接近零且二阶导数有界时，第二项可能较小。残差较大或弯曲较强时，第二项可能明显影响曲率。
+
+在无约束光滑目标的内部局部极小点，梯度必须为零；若同时海森矩阵正定，则为严格局部极小点。海森矩阵半正定的驻点可结合高阶项继续判断。1.5 将使用这些局部信息构造优化算法。
+
+
+</details>
+
+<span id="1113-用-jax-核对推导" />
+
+## 1.1.13 自动微分与数值核对
+
+<details>
+<summary>进阶：用自动微分核对推导</summary>
+
+以下代码可独立运行，需要 JAX 和 NumPy，不依赖 Aerodrome 实例。先预测结果，再运行核对。
+
+[下载本页完整示例](/Aerodrome/examples/linear-algebra-checks.py)。
+
+数学列向量在代码中用形状 `(n,)` 的一维数组表示。它没有独立行、列轴，`x.T` 仍是 `(n,)`；外积用 `jnp.outer`，显式列向量用 `x[:, None]`。`@` 表示矩阵乘法，`*` 表示逐元素乘法。
+
+```python
+import jax
+jax.config.update("jax_enable_x64", True)
+import jax.numpy as jnp
+import numpy as np
+
+H = jnp.array([[1., 0.], [0., 1.], [1., 1.]])
+y = jnp.array([1., 2., 2.8])
+W = jnp.diag(jnp.array([4., 1., 2.]))
+x = jnp.array([0.8, 1.9])
+
+def loss(x):
+    r = H @ x - y
+    return 0.5 * r @ W @ r
+
+value, grad = jax.value_and_grad(loss)(x)
+hessian = jax.hessian(loss)(x)
+np.testing.assert_allclose(value, 0.095, atol=1e-12)
+np.testing.assert_allclose(grad, [-1., -0.3], atol=1e-12)
+np.testing.assert_allclose(hessian, H.T @ W @ H, atol=1e-12)
+
+# 对角权重的白化最小二乘，不显式形成正规方程。
+sqrt_w = jnp.sqrt(jnp.diag(W))
+x_hat = jnp.linalg.lstsq(sqrt_w[:, None] * H, sqrt_w * y, rcond=None)[0]
+np.testing.assert_allclose(x_hat, [34./35., 66./35.], atol=1e-12)
+
+# 平面位置映射到距离和方位角；避开原点及角度分支切线。
+def sensor(p):
+    return jnp.array([jnp.linalg.norm(p), jnp.arctan2(p[1], p[0])])
+
+p = jnp.array([3., 4.])
+J = jax.jacfwd(sensor)(p)
+np.testing.assert_allclose(J, [[0.6, 0.8], [-0.16, 0.12]], atol=1e-12)
+v = jnp.array([0.2, -0.1])
+_, jv = jax.jvp(sensor, (p,), (v,))
+_, pullback = jax.vjp(sensor, p)
+u = jnp.array([1., 0.5])
+(jtu,) = pullback(u)
+np.testing.assert_allclose(jv, J @ v, atol=1e-12)
+np.testing.assert_allclose(jtu, J.T @ u, atol=1e-12)
+
+# 中心差分只检查一个方向，无需构造全部差分梯度。
+direction = jnp.array([0.6, -0.8])
+eps = 1e-5
+fd = (loss(x + eps * direction) - loss(x - eps * direction)) / (2 * eps)
+np.testing.assert_allclose(fd, grad @ direction, rtol=1e-8, atol=1e-9)
+
+# 固定状态下，对矩阵控制增益求导。
+e = jnp.array([0.4, -0.2])
+K = jnp.array([[2., -1.], [0.5, 3.]])
+R = jnp.diag(jnp.array([2., 1.]))
+def effort(K):
+    control = -K @ e
+    return 0.5 * control @ R @ control
+
+np.testing.assert_allclose(jax.grad(effort)(K), R @ K @ jnp.outer(e, e), atol=1e-12)
+print("通过：目标、梯度、海森矩阵、最小二乘、雅可比、JVP、VJP、方向差分、矩阵梯度")
+```
+
+`grad` 求标量目标梯度，`jacfwd`、`jacrev` 求雅可比；`jvp` 计算 $\boldsymbol{J}\boldsymbol{v}$，`vjp` 的回传函数计算 $\boldsymbol{J}^{\mathsf T}\boldsymbol{u}$。文献也常用行形式 $\boldsymbol{u}^{\mathsf T}\boldsymbol{J}$ 表示 VJP，两者互为转置。自动微分沿程序组合导数，不通过有限差分近似。[JAX 自动微分说明](https://docs.jax.dev/en/latest/jacobian-vector-products.html)
+
+数值核对中在程序入口统一启用 64 位，以降低舍入误差。[JAX 精度设置](https://docs.jax.dev/en/latest/101/default_dtypes.html)
+
+只需一个方向的敏感度时用 JVP；已知输出目标的梯度、需回传到大量参数时用 VJP。这两种运算直接计算所需乘积，适合雅可比规模很大的问题；可根据输入输出规模和所需导数选择模式。
+
+中心差分的步长较大时，截断误差更明显；步长很小时，浮点相消误差更明显。可以尝试相邻数量级，观察差分与解析方向导数是否在一段步长范围内接近。导数核对之外，物理计算还可以用单位、坐标方向和已知运动解检查模型。若程序包含饱和、碰撞或离散分支，应在相应分段内解释导数，并单独观察切换点；外部 MATLAB 调用则需要提供可供自动微分使用的导数接口。
+
+
+</details>
+
+## 1.1.14 自检与练习
+
+先完成下面两道入门题。后面的梯度练习可在读过进阶材料后再做。
+
+1. 静止位置的两次等精度读数是 $2$ 和 $4\,\mathrm m$。把观测点画在平面上，找出直线 $y_1=y_2$ 上最近的预测点；写出观测减预测的残差，并核对它与 $(1,1)^{\mathsf T}$ 垂直。
+2. 对无量纲映射 $\boldsymbol{A}=\operatorname{diag}(1,0.01)$，输出分别受到扰动 $(0.01,0)^{\mathsf T}$ 和 $(0,0.01)^{\mathsf T}$。反求输入后，两种扰动各变成多大？哪一个方向更难准确估计？
+
+<details>
+<summary>入门题答案</summary>
+
+1. 预测为 $(3,3)^{\mathsf T}\,\mathrm m$，残差为 $(-1,1)^{\mathsf T}\,\mathrm m$，内积 $-1+1=0$。残差平方和为 $2\,\mathrm m^2$。
+2. 输入扰动分别为 $(0.01,0)^{\mathsf T}$ 和 $(0,1)^{\mathsf T}$。第二个方向的输出变化被压得很小，反推时将噪声放大了 $100$ 倍；此处讨论的是已固定尺度的输入与输出。
+
+</details>
+
+<span id="11141-进阶练习" />
+
+### 进阶练习
+
+1. 两次位置测量满足 $\boldsymbol{y}=\left[\begin{smallmatrix}1&0\\1&\Delta t\end{smallmatrix}\right]\boldsymbol{x}_0$。什么时候能唯一确定初始位置和速度？为什么时间间隔很小时速度估计易受噪声影响？
+2. 固定 $\boldsymbol{A},\boldsymbol{b}$，取 $\lambda>0$。求 $L=\tfrac12\|\boldsymbol{A}\boldsymbol{x}-\boldsymbol{b}\|_2^2+\tfrac\lambda2\|\boldsymbol{x}\|_2^2$ 的梯度和海森矩阵。为什么即使 $\boldsymbol{A}$ 秩亏，解仍唯一？
+3. 给定 $\boldsymbol{y}=\boldsymbol{A}\boldsymbol{X}\boldsymbol{b}$、$L=\tfrac12\|\boldsymbol{y}-\boldsymbol{c}\|_2^2$，求 $\nabla_{\boldsymbol{X}}L$ 并标明形状。
+4. 推导代码中距离、方位角传感器的雅可比，并说明哪些位置不满足光滑性前提。
+5. 将控制增益扰动为 $\boldsymbol{K}\pm\varepsilon\boldsymbol{D}$，用中心差分检查是否等于 $\langle\nabla_{\boldsymbol{K}}L,\boldsymbol{D}\rangle_F$。
+
+<details>
+<summary>核对结果与提示</summary>
+
+1. 当 $\Delta t\ne0$ 时矩阵满秩。速度等于位置差除以时间间隔，测量误差也被除以该间隔；数值条件还与状态缩放有关。
+2. 梯度为 $\boldsymbol{A}^{\mathsf T}(\boldsymbol{A}\boldsymbol{x}-\boldsymbol{b})+\lambda\boldsymbol{x}$；海森矩阵为 $\boldsymbol{A}^{\mathsf T}\boldsymbol{A}+\lambda\boldsymbol{I}\succ0$。
+3. 令 $\boldsymbol{r}=\boldsymbol{A}\boldsymbol{X}\boldsymbol{b}-\boldsymbol{c}$，结果为 $\boldsymbol{A}^{\mathsf T}\boldsymbol{r}\boldsymbol{b}^{\mathsf T}$。若 $\boldsymbol{A}$ 是 $p\times m$、$\boldsymbol{X}$ 是 $m\times n$、$\boldsymbol{b}$ 是 $n\times1$，结果为 $m\times n$。
+4. 令 $\rho=\sqrt{p_1^2+p_2^2}$，两行为 $[p_1/\rho,p_2/\rho]$ 和 $[-p_2/\rho^2,p_1/\rho^2]$。原点不可使用；`atan2` 的主值在负横轴有分支跳变，跨越它需角度展开或局部误差表示。
+5. 比较差分与 `jnp.sum(jax.grad(effort)(K) * D)`。逐元素乘再求和才是 Frobenius 内积。
+
+</details>
+
+## 参考与后续阅读
+
+- Kevin P. Murphy, *Probabilistic Machine Learning: An Introduction*, MIT Press, 2022，第 7 章，尤其 §7.4–7.8。本节核对的是所提供 PDF 中标注 **April 18, 2025** 的在线修订版，正文页码 229–274（PDF 文件页码 259–304）。本节的工程算例与逐步推导另行编写，未复用原书插图。
+- JAX 官方文档：[雅可比乘积与自动微分](https://docs.jax.dev/en/latest/jacobian-vector-products.html)、[64 位精度开关](https://docs.jax.dev/en/latest/101/default_dtypes.html)。
+
+返回[数学工具基础总览](/Aerodrome/chapters/01-mathematical-tools/)。在 [1.2 概率论](/Aerodrome/chapters/01-mathematical-tools/02-probability/) 中，我们会把状态和测量视为随机变量。本节的向量、二次型和线性映射，将用于表达均值、不确定性及其传播。

@@ -1,0 +1,31 @@
+---
+/** A teaching figure owns its caption and source link. The shared ImageViewer
+ * reads this rendered markup, so the page and overlay use one caption. */
+interface Props {
+  id: string;
+  src: string;
+  alt: string;
+  title: string;
+  number?: string;
+  caption?: string;
+  source?: string;
+  size?: 'standard' | 'wide' | 'fluid';
+}
+
+const { id, src, alt, title, number, caption, source, size = 'standard' } = Astro.props;
+const label = number ? `图 ${number}　${title}` : title;
+const captionId = `${id}-caption`;
+---
+<figure class="teaching-figure" id={id} data-figure-title={label}>
+  <div class="figure-scroll" role="region" tabindex="0" aria-label={`${label}，可横向滚动`}>
+    <img
+      class={size === 'fluid' ? undefined : `figure-${size}`}
+      src={src} alt={alt} aria-describedby={captionId}
+      data-figure-source={source} loading="lazy" decoding="async"
+    />
+  </div>
+  <figcaption>
+    <div id={captionId} data-figure-caption><strong>{label}。</strong><slot>{caption}</slot></div>
+    {' '}<span data-figure-actions><a href={src}>查看原图</a>（点击图片可放大{size !== 'fluid' && '，窄屏可横向滚动'}）</span>
+  </figcaption>
+</figure>

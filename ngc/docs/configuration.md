@@ -99,10 +99,11 @@ Hydra 1.3.6 用延迟对象提供 shell completion 帮助，Python 3.14 argparse
 |---|---|---|
 | entity | rigid_body | 四元数 / Euler321 六自由度刚体、质量惯量、初值、恒定载荷 |
 | entity | f16_longitudinal | 既有五状态纵向模型、配平和 DLQR，要求 float64 与正向 NED 重力 |
+| entity | f16_6dof | 完整气动六自由度机体、六轴配平、舵面偏置/初始角速度/均匀风，要求 float64 与竖直向下重力 |
 | environment | constant_gravity | NED 重力向量；vacuum 和 earth 为两个预设 |
 | renderer | none / headless | 关闭渲染 / 无窗口后端；通过 every_steps 指定帧采样 |
 
-F-16 仍是纵向教学模型，并未因此成为完整六自由度飞机。当前 F-16 配置工厂尚未提供渲染 Pose 投影，开启渲染会明确报错。
+`f16_longitudinal` 保持原有纵向教学模型，不提供 Pose 投影。新增 `f16_6dof` 支持刚体 Pose 和渲染入口；用 `--overlay scenario/f16_6dof.yaml --overlay environment/earth.yaml` 启动。完整例子及建模范围见 [F-16 六自由度](f16-six-dof.md)。
 
 扩展示例：
 

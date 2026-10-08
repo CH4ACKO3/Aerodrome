@@ -1,0 +1,15 @@
+# @package _global_
+name: f16_six_dof_level_flight
+entities:
+  - id: aircraft
+    model:
+      kind: f16_6dof
+      version: "1"
+      parameters:
+        speed_m_s: 150.0
+        height_m: 3000.0
+        heading_rad: 0.0
+        lef_rad: 0.0
+        wind_ned_m_s: [0.0, 0.0, 0.0]
+        omega_body_rad_s: [0.0, 0.0, 0.0]
+        surface_offset_rad: [0.0, 0.0, 0.0]

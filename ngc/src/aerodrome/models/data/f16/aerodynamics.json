@@ -1,0 +1,108 @@
+{
+  "source": "https://github.com/isrlab/F16-Model-Matlab",
+  "commit": "d019742f2fe7f5f25c521bc7e846519b28b759b3",
+  "source_sha256": "b9ac8d21cfb749c0e9897766d5f7b3cdcfdafc86ef8e948c064aafdc2e453f07",
+  "npz_sha256": "41262908cc668fce506f649488c98befcbad7d5341e9c315a1c00fbeedf6a3e7",
+  "extraction": "MATLAB reshape(order=F); all 43 tables, grouped channels; no resampling",
+  "axis_units": "degrees",
+  "groups": {
+    "longitudinal": {
+      "axes": [
+        "alpha1",
+        "beta1",
+        "dh1"
+      ],
+      "channels": [
+        "Cx",
+        "Cz",
+        "Cm"
+      ]
+    },
+    "lateral": {
+      "axes": [
+        "alpha1",
+        "beta1",
+        "dh2"
+      ],
+      "channels": [
+        "Cl",
+        "Cn"
+      ]
+    },
+    "side_controls": {
+      "axes": [
+        "alpha1",
+        "beta1"
+      ],
+      "channels": [
+        "Cy",
+        "Cy_a20",
+        "Cl_a20",
+        "Cn_a20",
+        "Cy_r30",
+        "Cl_r30",
+        "Cn_r30"
+      ]
+    },
+    "lef": {
+      "axes": [
+        "alpha2",
+        "beta1"
+      ],
+      "channels": [
+        "Cx_lef",
+        "Cy_lef",
+        "Cz_lef",
+        "Cl_lef",
+        "Cm_lef",
+        "Cn_lef",
+        "Cy_a20_lef",
+        "Cl_a20_lef",
+        "Cn_a20_lef"
+      ]
+    },
+    "rates": {
+      "axes": [
+        "alpha1"
+      ],
+      "channels": [
+        "Cxq",
+        "Czq",
+        "Cmq",
+        "Cyp",
+        "Cyr",
+        "Clp",
+        "Clr",
+        "Cnp",
+        "Cnr",
+        "deltaClbeta",
+        "deltaCnbeta",
+        "deltaCm"
+      ]
+    },
+    "lef_rates": {
+      "axes": [
+        "alpha2"
+      ],
+      "channels": [
+        "deltaCxq_lef",
+        "deltaCzq_lef",
+        "deltaCmq_lef",
+        "deltaCyp_lef",
+        "deltaCyr_lef",
+        "deltaClp_lef",
+        "deltaClr_lef",
+        "deltaCnp_lef",
+        "deltaCnr_lef"
+      ]
+    },
+    "elevator": {
+      "axes": [
+        "dh1"
+      ],
+      "channels": [
+        "eta_el"
+      ]
+    }
+  }
+}

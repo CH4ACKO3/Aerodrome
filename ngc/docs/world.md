@@ -1,7 +1,7 @@
 # 静态 ECS 与 World 使用教程
 
 状态：已实现的本地原型。入口为 `examples/world_pitch.py` 和 `examples/hybrid_propulsion.py`。
-F16、真实 MATLAB Engine/FMU 适配器仍未实现；两个示例分别使用二状态俯仰模型和一维推进模型。
+原有两个示例分别使用二状态俯仰模型和一维推进模型。后续已加入 [F16 六自由度机体示例](f16-six-dof.md)；真实 MATLAB Engine/FMU 适配器仍未实现。
 
 新增 [依赖图执行器](dataflow.md)：保留本页纯函数 World 接口，并允许独立实体在宿主任务图上跨 tick 推进，最终返回同一格式的对齐快照。
 
@@ -174,4 +174,4 @@ Scenario 包含 seed、初始条件、外部输入、数值参数和决策步数
 
 测试覆盖原闭环等价、tick/step 时间轴、多速率保持、独立世界 vmap、实体随机流稳定性、异构状态与共享资源、参数梯度对照、联合 RK4 收敛、外部分区遍历顺序独立、通信步收敛、端口错误、失败恢复与关闭，以及资产校验和 Pipeline 依赖校验。
 
-F16 的下一步是在该协议下新增 `models/f16` 和 `F16Assembly`，保留具体公式函数与参考验证；不把六自由度状态强塞进当前 PitchState。
+`models/f16.py` 和 `composition/f16.py` 的 `F16Assembly` 已按此协议接入，复用独立的 `RigidBodyState`。`examples/f16_six_dof.py` 展示配平与三舵面脉冲的 World 批量运行。

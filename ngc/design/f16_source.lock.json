@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "selected-reference-not-integrated",
+  "status": "jax-six-dof-airframe-integrated",
   "model_family": "f16.nasa1538.isrl-airframe",
   "source": {
     "repository": "https://github.com/isrlab/F16-Model-Matlab",
@@ -13,11 +13,17 @@
     "sha256": "b9ac8d21cfb749c0e9897766d5f7b3cdcfdafc86ef8e948c064aafdc2e453f07",
     "interpolation": "linear",
     "extrapolation": "none",
-    "converted_asset": null
+    "converted_asset": "src/aerodrome/models/data/f16/aerodynamics.npz",
+    "converted_manifest": "src/aerodrome/models/data/f16/aerodynamics.json"
   },
   "limitations": [
-    "Deep-stall delta_Cm_ds correction is zero in the source implementation",
-    "Engine dynamic model must be selected and validated separately",
-    "JAX port and numerical validation have not been performed"
+    "Deep-stall delta_Cm_ds correction remains zero",
+    "External thrust and actual surface inputs; no engine or actuator dynamics",
+    "NASA Glenn atmosphere 0..11000 m; common table alpha range -20..45 deg",
+    "Archived Julia initial-motion comparison only; no new MATLAB/Julia full-trajectory run"
+  ],
+  "modeling_choices": [
+    "Cz pitch-rate LEF correction uses deltaCzq_lef instead of upstream static deltaCz_lef",
+    "Inertia tensor off-diagonal is -Ixz, consistent with Julia scalar equations and archived motion"
   ]
 }

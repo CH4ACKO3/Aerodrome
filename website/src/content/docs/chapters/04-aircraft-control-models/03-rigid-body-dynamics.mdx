@@ -1,0 +1,409 @@
+---
+title: "4.3 六自由度刚体动力学"
+description: 从转动坐标系中的向量求导出发，推导完整Newton–Euler状态导数，核算自由落体与偏置力。
+---
+
+import TeachingFigure from '../../../../components/TeachingFigure.astro';
+
+把一股向上的力施加在机身中心，会改变机身的竖直运动；把同样的力移到右翼，机身还会开始滚转。要同时算出这两种变化，需要知道合力、力的作用点以及质量如何分布。六自由度刚体模型把这些信息变成位置、速度、姿态和角速度的变化率，机翼或旋翼提供的载荷都可以接到这组方程上。
+
+## 4.3.1 用质心组织平移和转动
+
+在局部飞行区域内，将固定的 NED 地面系近似为惯性系，重力取 $\boldsymbol g_n=[0,0,g]^{\mathsf T}$，其中 $g=9.80665\,\mathrm{m/s^2}$。机体形状固定，质量 $m$（kg）和关于质心的惯量张量 $I$（$\mathrm{kg\,m^2}$）保持恒定。采用 [4.2 的坐标和姿态约定](/Aerodrome/chapters/04-aircraft-control-models/02-frames-and-attitude/)，状态分为四组：
+
+$$
+\boldsymbol x=(\boldsymbol r_n,\boldsymbol v_b,
+\boldsymbol q_{\mathrm{att}},\boldsymbol\omega_b).
+$$
+
+$\boldsymbol r_n$ 是质心的 NED 位置（m），$\boldsymbol v_b=[u,v,w]^{\mathsf T}$ 是质心对地速度的机体系分量（m/s），$\boldsymbol q_{\mathrm{att}}$ 是 body→NED 单位四元数，$\boldsymbol\omega_b=[p,q,r]^{\mathsf T}$ 是体轴角速度（rad/s）。重力之外的合力记为 $\boldsymbol F_b$（N），关于质心的合力矩记为 $\boldsymbol M_b$（N·m）。
+
+惯量张量把角速度映射成角动量（$\mathrm{kg\,m^2/s}$）：$\boldsymbol H_b=I\boldsymbol\omega_b$。若机体内质量微元到质心的位置为 $\boldsymbol\rho=[x,y,z]^{\mathsf T}$，则
+
+$$
+I=\int\left[(\boldsymbol\rho^{\mathsf T}\boldsymbol\rho)I_3
+-\boldsymbol\rho\boldsymbol\rho^{\mathsf T}\right]\,\mathrm dm.
+$$
+
+例如，$I_{xx}=\int(y^2+z^2)\,\mathrm dm$，说明质量离滚转轴越远，改变滚转角速度就越费力。张量非对角元素为 $I_{xy}=-\int xy\,\mathrm dm$；资料若把 $\int xy\,\mathrm dm$ 称为惯量积，填入张量时带负号。选取主惯量轴后 $I$ 为对角矩阵，一般机体轴则可以保留非对角元素。
+
+## 4.3.2 机体坐标在转动，导数也跟着改变
+
+地面观察到的速度是 $\boldsymbol v_n=R_{nb}\boldsymbol v_b$。对时间求导时，分量和坐标轴都在变化：
+
+$$
+\dot{\boldsymbol v}_n
+=\dot R_{nb}\boldsymbol v_b+R_{nb}\dot{\boldsymbol v}_b
+=R_{nb}\left(\boldsymbol\omega_b\times\boldsymbol v_b
++\dot{\boldsymbol v}_b\right).
+$$
+
+这里使用 $\dot R_{nb}=R_{nb}[\boldsymbol\omega_b]_\times$，其中 $[\boldsymbol\omega_b]_\times\boldsymbol a=\boldsymbol\omega_b\times\boldsymbol a$。交叉项表示坐标轴转动引起的分量变化。同一条固定朝北的速度，放到正在偏航的机体坐标中，前向和侧向分量会不断变化。
+
+Newton 定律给出 $m\dot{\boldsymbol v}_n=R_{nb}\boldsymbol F_b+m\boldsymbol g_n$。代入上式、左乘 $R_{nb}^{\mathsf T}$ 并整理，得到
+
+$$
+\dot{\boldsymbol v}_b
+=\frac{\boldsymbol F_b}{m}+R_{nb}^{\mathsf T}\boldsymbol g_n
+-\boldsymbol\omega_b\times\boldsymbol v_b.
+$$
+
+角动量也按同一求导规则变换。质心处的角动量定理为 $\dot{\boldsymbol H}_n=R_{nb}\boldsymbol M_b$，而 $\boldsymbol H_n=R_{nb}I\boldsymbol\omega_b$。因 $I$ 在机体系中恒定，整理得到
+
+$$
+I\dot{\boldsymbol\omega}_b
+=\boldsymbol M_b-\boldsymbol\omega_b\times(I\boldsymbol\omega_b).
+$$
+
+最后一项体现惯性耦合。即使外力矩为零，非球形刚体的各体轴角速度也可能变化；保持恒定的是地面系角动量。若恰好绕一个主惯量轴转动，$I\boldsymbol\omega_b$ 与 $\boldsymbol\omega_b$ 平行，交叉项为零。
+
+## 4.3.3 四组方程构成完整状态导数
+
+把平移、转动与姿态运动学合起来，可写出直接用于程序的右端函数（RHS）：
+
+$$
+\boxed{\begin{aligned}
+\dot{\boldsymbol r}_n&=R_{nb}\boldsymbol v_b,\\
+\dot{\boldsymbol v}_b&=\boldsymbol F_b/m+R_{nb}^{\mathsf T}\boldsymbol g_n
+-\boldsymbol\omega_b\times\boldsymbol v_b,\\
+\dot{\boldsymbol q}_{\mathrm{att}}&=\tfrac12\boldsymbol q_{\mathrm{att}}
+\otimes[0,\boldsymbol\omega_b],\\
+I\dot{\boldsymbol\omega}_b&=\boldsymbol M_b
+-\boldsymbol\omega_b\times(I\boldsymbol\omega_b).
+\end{aligned}}
+$$
+
+第一行把对地速度转到位置采用的坐标系；第二行相加前先把重力转到机体系；第三行按体轴角速度更新姿态；第四行求角加速度。程序通常解最后一行的线性方程，避免显式构造 $I^{-1}$。
+
+这些行共同依赖当前状态。姿态改变重力在机体系中的分量，也改变推力在地面系中的方向；速度和角速度又参与气动力计算。因此，一个 RHS 调用接收同一时刻的状态与载荷，返回同一时刻全部状态导数。积分器怎样使用这些导数，接在 [4.4](/Aerodrome/chapters/04-aircraft-control-models/04-numerical-simulation/)讨论。
+
+<details>
+<summary>主惯量轴下的一行分量方程</summary>
+
+若 $I=\operatorname{diag}(I_x,I_y,I_z)$，滚转方程为
+
+$$
+\dot p=\frac{M_x+(I_y-I_z)qr}{I_x}.
+$$
+
+俯仰与偏航方程由 $x,y,z$ 和 $p,q,r$ 循环换位得到。即使 $M_x=0$，同时存在的 $q,r$ 仍可通过惯量差产生滚转角加速度。这一分量式与紧凑向量式计算同一个量。
+
+</details>
+
+## 4.3.4 把不同作用点的载荷合到质心
+
+第 $i$ 股力在机体系中为 $\boldsymbol F_{i,b}$，作用点相对质心的杆臂为 $\boldsymbol\rho_{i,b}$，该部件另有力偶矩 $\boldsymbol M_{i,b}^{\mathrm{couple}}$，则
+
+$$
+\boldsymbol F_b=\sum_i\boldsymbol F_{i,b},\qquad
+\boldsymbol M_b=\sum_i\left(
+\boldsymbol M_{i,b}^{\mathrm{couple}}+
+\boldsymbol\rho_{i,b}\times\boldsymbol F_{i,b}\right).
+$$
+
+先把各部件的力和力偶矩旋转到机体系，再作上述合成。载荷若已给成关于质心的力矩，就直接加入 $\boldsymbol M_b$。在均匀重力场中，重力等效作用在质心；它已经由 $R_{nb}^{\mathsf T}\boldsymbol g_n$ 加入平移方程。
+
+例如，取 $m=2\,\mathrm{kg}$、$I=\operatorname{diag}(0.4,0.5,0.6)\,\mathrm{kg\,m^2}$ 的教学刚体。在右翼 $\boldsymbol\rho_b=[0,0.5,0]^{\mathsf T}\,\mathrm m$ 处施加 $\boldsymbol F_b=[0,0,-20]^{\mathsf T}\,\mathrm N$，等效质心力矩为
+
+$$
+\boldsymbol\rho_b\times\boldsymbol F_b
+=\begin{bmatrix}-10\\0\\0\end{bmatrix}\ \mathrm{N\,m}.
+$$
+
+<TeachingFigure
+  id="fig-offset-force"
+  src="/Aerodrome/figures/flight-models/foundations-offset-force.svg"
+  alt="右翼0.5米处20牛向上的力，等效为质心处同样的力加上负10牛米滚转力矩。"
+  number="4.3-1"
+  title="偏置力的质心等效载荷"
+  caption="教学几何；从机尾朝机头看，机体前轴指入纸面。负滚转力矩指向读者，使右翼开始上抬；长度单位m，力N，力矩N·m。"
+  source="/Aerodrome/figures/sources/generate-flight-foundations-figures.py"
+  size="wide"
+/>
+
+若这一瞬间机身水平、速度和角速度均为零，则 $\dot w=-20/2+9.80665=-0.19335\,\mathrm{m/s^2}$，$\dot p=-10/0.4=-25\,\mathrm{rad/s^2}$。前者表示向上的净加速度，后者表示右翼开始上抬。随后姿态和角速度改变，完整 RHS 会随之更新。
+
+## 4.3.5 用解析运动核对程序
+
+先让同一刚体从静止自由落下，初始位置为原点，姿态取单位四元数，外部非重力合力与力矩均为零。角速度保持为零，姿态保持不变，解析解为
+
+$$
+r_D(t)=\tfrac12gt^2,\qquad v_D(t)=gt.
+$$
+
+$t=0.5\,\mathrm s$ 时，向下位移为 $1.22583125\,\mathrm m$，向下速度为 $4.903325\,\mathrm{m/s}$。下面的短程序同时核对自由落体末态和刚才的偏置力初始导数；在 `ngc/` 执行：
+
+```sh
+uv run --locked python - <<'PY'
+import jax
+import jax.numpy as jnp
+from aerodrome.models.rigid_body import (
+    RigidBody6DoF, BodyLoads, mass_properties, force_at_point,
+)
+
+jax.config.update("jax_enable_x64", True)
+body = RigidBody6DoF()
+parameters = mass_properties(2., jnp.diag(jnp.array([.4, .5, .6])))
+initial = body.initialize()
+zero = BodyLoads(jnp.zeros(3), jnp.zeros(3))
+state = initial
+for _ in range(50):
+    state = body.step(state, zero, parameters, .01)
+print("落下位移 m:", state.position_ned_m)
+print("对地速度 m/s:", state.velocity_body_m_s)
+
+loads = force_at_point([0., 0., -20.], [0., .5, 0.])
+derivative = body.rhs(initial, loads, parameters)
+print("机体系速度导数 m/s²:", derivative.velocity_body_m_s)
+print("角加速度 rad/s²:", derivative.omega_body_rad_s)
+PY
+```
+
+`force_at_point` 计算杆臂力矩，`sum_loads` 汇总多个部件载荷，`rhs` 返回上述四组导数。完整说明与运行入口在[零号工程：运动积分与载荷](/Aerodrome/reference/project-zero/#dynamics)。
+
+继续考察无外力矩转动，可在 `ngc/` 执行 `uv run --locked python examples/rigid_body.py`。它用非对角惯量和两组初始角速度运行 10 s，分别采用四元数与欧拉角表示，输出 `artifacts/rigid_body/summary.json` 与 `trajectory.npz`。本次 CPU、float64 运行中，两种表示的最大地面系角动量分量误差分别约为 $2.25\times10^{-14}$、$6.60\times10^{-13}\,\mathrm{kg\,m^2/s}$，最终旋转矩阵元素最大差约为 $8.22\times10^{-13}$。这些量直接检验了转动方程与姿态变换是否配合一致。
+
+## 4.3.6 练习：移动作用点，保留同一合力
+
+将偏置力例子的作用点从右翼改为左翼 $[0,-0.5,0]^{\mathsf T}\,\mathrm m$，再改到质心。分别手算并调用 `rhs` 核对初始平移加速度与滚转角加速度：三种位置的初始平移加速度相同，滚转角加速度依次为 $-25$、$+25$、$0\,\mathrm{rad/s^2}$。随后把滚转惯量从 $0.4$ 改为 $0.8\,\mathrm{kg\,m^2}$，保持其他参数不变，观察角加速度怎样变化。
+
+<span id="faq-dynamics-to-simulation" />
+<span id="437-常见问题不同形式的动力学怎样接成仿真程序" />
+
+## 4.3.7 不同动力学方程的等价变换与符号实现
+
+读不同资料时，常会遇到这样的情况：一组方程把 $u,v,w$ 当作状态，另一组使用空速 $V_a$、迎角 $\alpha$ 和侧滑角 $\beta$；一处写姿态角的导数，另一处写体轴角速度 $p,q,r$。展开后的项数、三角函数和正负号都可能不同。要判断它们是否描述同一个运动，需要从变量的定义和模型假设出发，再把状态及其导数一起变换。
+
+<span id="先把论文中的符号写清楚" />
+
+### 方程的差异从哪里来
+
+第一类差异来自记号、坐标和单位。同一个力可以用地面系或机体系分量表示，角度可以用度或弧度，速度可以记录总量，也可以记录相对配平值的扰动。明确正方向、旋转矩阵的输入输出方向和基准值后，这些差异通过换元消除。例如 $u=u_0+\Delta u$ 恢复总速度，$\alpha_{\mathrm{rad}}=(\pi/180)\alpha_{\mathrm{deg}}$ 恢复弧度。力矩还要对应同一个参考点；换到质心的方法见 4.3.4。
+
+第二类差异来自状态参数化和求导所用的参考系。$(u_a,v_a,w_a)$ 与 $(V_a,\alpha,\beta)$ 表示同一个相对空气速度，但它们的变化率通过一个随状态变化的雅可比矩阵联系。欧拉角描述姿态，体轴角速度描述瞬时转动，两者的关系由 [4.2 的姿态运动学](/Aerodrome/chapters/04-aircraft-control-models/02-frames-and-attitude/#424-角速度怎样改变姿态)给出。转动坐标系中的分量导数还包含坐标轴本身转动的贡献，这正是 4.3.2 中交叉项的来源。
+
+第三类差异来自物理假设或近似。改变气动力模型，就改变了作用在物体上的载荷；允许质量和惯量变化，就改变了动量与角动量的计算；施加平面运动约束或删除自由度，就改变了允许发生的运动。小扰动线性化保留基准轨迹附近的一阶变化，舍去了高阶项。这些操作改变的是模型本身，比较时要把改变的假设一并写出。
+
+在相同的刚体、质量和参考系假设下，Newton–Euler 定律给出的物理关系相同。对于本节固定质量、局部平直地面的刚体模型，各种写法可以围绕位置、速度、姿态、角速度，以及对应的合力和质心合力矩组织。两组状态在所考虑的区域内一一对应，载荷和输入也按相同定义换算时，变换后的连续方程精确等价。如果对应关系只在一个角度分支或非奇异邻域内成立，得到的就是该邻域内的局部精确等价，运动越过边界后可改用另一组坐标。
+
+线性化模型则在基准状态附近给出近似关系：偏离越小，被舍去的二阶及更高阶项通常越小。平面模型若对应完整方程的一个不变子空间，即从平面内出发、载荷和初值都使运动始终留在该平面内，就能精确描述这部分运动；用它忽略实际存在的侧向运动时，得到的是降阶近似。这样的条件解释了两组方程何时能够互相转换，也解释了何时会算出不同轨迹。
+
+四元数提供另一个有用的例子：单位四元数用四个分量及一个单位模约束表示三个姿态自由度，$\boldsymbol q$ 与 $-\boldsymbol q$ 对应同一姿态。它是带约束的冗余表示。与三个欧拉角比较时，应选择局部姿态分支，并通过旋转矩阵和姿态运动学对应物理量；下面的方阵可逆换元公式适用于维数相同的独立状态坐标。
+
+<span id="用状态映射把导数一起换过去" />
+
+### 从状态映射得到新的微分方程
+
+设原状态为 $\boldsymbol x\in\mathbb R^n$，输入为 $\boldsymbol u\in\mathbb R^m$，时间为 $t$，原方程为
+
+$$
+\dot{\boldsymbol x}=\boldsymbol f(\boldsymbol x,\boldsymbol u,t).
+$$
+
+这里粗体 $\boldsymbol u$ 表示输入向量；前文不加粗的 $u$ 表示机体前向速度分量。选择新状态 $\boldsymbol z\in\mathbb R^n$，并给出从新状态到原状态的映射
+
+$$
+\boldsymbol x=\boldsymbol h(\boldsymbol z,t),\qquad
+J_h=\frac{\partial\boldsymbol h}{\partial\boldsymbol z}\in\mathbb R^{n\times n},
+\qquad
+\boldsymbol h_t=\frac{\partial\boldsymbol h}{\partial t}\in\mathbb R^n.
+$$
+
+$J_h$ 的第 $(i,j)$ 项是保持时间和其余状态分量不变时，$h_i$ 对 $z_j$ 的偏导；$\boldsymbol h_t$ 则保持整组 $\boldsymbol z$ 不变，只计算映射对时间的显式依赖。各状态分量可以具有不同单位，$\partial h_i/\partial z_j$ 的单位由相应两分量的单位之比确定。[第一章的雅可比与链式法则](/Aerodrome/chapters/01-mathematical-tools/01-linear-algebra/#1181-时间变化与状态变化要一起计入)于是给出
+
+$$
+\dot{\boldsymbol x}=J_h\dot{\boldsymbol z}+\boldsymbol h_t.
+$$
+
+将原方程中的状态也替换为 $\boldsymbol h(\boldsymbol z,t)$，得到新导数满足的线性方程：
+
+$$
+\boxed{J_h\dot{\boldsymbol z}
+=\boldsymbol f\bigl(\boldsymbol h(\boldsymbol z,t),\boldsymbol u,t\bigr)
+-\boldsymbol h_t.}
+$$
+
+映射连续可微，且某点满足 $\det J_h\ne0$ 时，逆函数定理保证该点附近存在局部逆映射。在这个邻域解上述方程，就得到唯一的新状态导数。$\boldsymbol h_t$ 表示即使新坐标数值固定，原坐标仍因坐标描述随时间变化而产生的变化率。例如移动原点定义 $x=z+bt$，原运动为 $\dot x=a$，其中 $a,b$ 均为恒定速度，则 $J_h=1$、$h_t=b$，所以 $\dot z=a-b$。
+
+若映射包含依赖姿态的旋转矩阵，姿态也是状态的一部分，计算 $J_h$ 时会对这些旋转矩阵元素求导。沿轨迹看，这就是乘积法则中的 $\dot R\boldsymbol v$ 项。[4.3.2 的转动系求导](/Aerodrome/chapters/04-aircraft-control-models/03-rigid-body-dynamics/#432-机体坐标在转动导数也跟着改变)给出了它与角速度交叉项的对应关系。
+
+<span id="俯仰姿态迎角与体轴角速度怎样相连" />
+<span id="一个能直接运行的纵向等价算例" />
+
+### 把速度分量换成空速与气动角
+
+沿用本章风轴约定，相对空气的机体速度分量为
+
+$$
+\begin{bmatrix}u_a\\v_a\\w_a\end{bmatrix}
+=\begin{bmatrix}
+V_a\cos\alpha\cos\beta\\
+V_a\sin\beta\\
+V_a\sin\alpha\cos\beta
+\end{bmatrix}.
+$$
+
+$V_a$ 的单位为 m/s，$\alpha,\beta$ 用 rad。相应雅可比的行列式为 $-V_a^2\cos\beta$；在 $V_a>0$、$|\beta|<\pi/2$ 且选定连续迎角分支时，这组映射局部可逆。反向由 $V_a=\sqrt{u_a^2+v_a^2+w_a^2}$、$\alpha=\operatorname{atan2}(w_a,u_a)$ 和 $\beta=\arcsin(v_a/V_a)$ 求出新状态。对定义求导可得
+
+$$
+\dot V_a=\frac{u_a\dot u_a+v_a\dot v_a+w_a\dot w_a}{V_a},
+\qquad
+\dot\alpha=\frac{u_a\dot w_a-w_a\dot u_a}{u_a^2+w_a^2}.
+$$
+
+第一式取速度变化沿当前速度方向的分量；第二式取垂直于纵向速度的方向变化。无侧滑的纵向运动中，$(u_a,w_a)=(V_a\cos\alpha,V_a\sin\alpha)$，链式法则简化为
+
+$$
+\begin{bmatrix}\dot u_a\\\dot w_a\end{bmatrix}
+=\begin{bmatrix}
+\cos\alpha&-V_a\sin\alpha\\
+\sin\alpha&V_a\cos\alpha
+\end{bmatrix}
+\begin{bmatrix}\dot V_a\\\dot\alpha\end{bmatrix}.
+$$
+
+这也是后面极坐标算例所计算的雅可比形式。俯仰角 $\theta$ 与体轴角速度的关系则是 $\dot\theta=q\cos\phi-r\sin\phi$。在 $\phi=0$、$p=r=0$ 的平面运动中，$\dot\theta=q$；相对空气的航迹角 $\gamma_{\mathrm{air}}$ 以上升为正时，$\theta=\gamma_{\mathrm{air}}+\alpha$，因而 $\dot\alpha=q-\dot\gamma_{\mathrm{air}}$。迎角的变化同时取决于机头方向和速度方向的转动。
+
+<span id="坐标轴在转动风在变化时导数还包含什么" />
+
+<details>
+<summary>有风时，速度定义如何进入导数变换</summary>
+
+记地面系风场为 $\boldsymbol v_{W,n}(\boldsymbol r_n,t)$。相对空气速度与对地速度的关系为
+
+$$
+\boldsymbol v_{a,b}=\boldsymbol v_b-R_{nb}^{\mathsf T}\boldsymbol v_{W,n}.
+$$
+
+对映射中的位置、姿态和时间分别求导，代入 4.3.2 的平移方程，得到
+
+$$
+\begin{aligned}
+\dot{\boldsymbol v}_{a,b}
+&=\boldsymbol F_b/m+R_{nb}^{\mathsf T}\boldsymbol g_n
+-\boldsymbol\omega_b\times\boldsymbol v_{a,b}
+-R_{nb}^{\mathsf T}\frac{\mathrm d\boldsymbol v_{W,n}}{\mathrm dt},\\
+\frac{\mathrm d\boldsymbol v_{W,n}}{\mathrm dt}
+&=\frac{\partial\boldsymbol v_{W,n}}{\partial t}
++\frac{\partial\boldsymbol v_{W,n}}{\partial\boldsymbol r_n}
+\dot{\boldsymbol r}_n.
+\end{aligned}
+$$
+
+空间均匀且恒定的地面系风使最后一个全导数为零；风切变通过沿轨迹的位置变化贡献第二项。恒定地面系风在转动机体系中的分量变化，则已包含在旋转求导中。将相对空气速度及这里得到的导数代入 $\dot V_a,\dot\alpha$，两组状态才对应同一风场下的运动。
+
+</details>
+
+<span id="气动导数怎样恢复成牛顿和牛顿米" />
+
+### 从隐式方程整理出导数系数矩阵
+
+资料中的导数可能同时出现在等号两侧。例如某些载荷表达式包含 $\dot\alpha$，它与其他状态导数形成联立关系。把全部方程移到左侧，可统一记为残差方程
+
+$$
+\boldsymbol F(\boldsymbol x,\dot{\boldsymbol x},\boldsymbol u,t)=\boldsymbol0.
+$$
+
+若共有 $k$ 条方程，则 $\boldsymbol F\in\mathbb R^k$。残差对 $\dot{\boldsymbol x}$ 为仿射函数时，可整理成
+
+$$
+M(\boldsymbol x,\boldsymbol u,t)\dot{\boldsymbol x}
+=\boldsymbol b(\boldsymbol x,\boldsymbol u,t).
+$$
+
+这里 $M\in\mathbb R^{k\times n}$ 是导数的系数矩阵，$\boldsymbol b\in\mathbb R^k$。$M$ 也常称为质量矩阵；一般状态坐标下，其元素的单位取决于各行方程及各列导数。对状态和输入的依赖可以是非线性的。例如 $\dot x+\sin x=0$ 对导数线性，而 $\dot x^2+x=0$ 对导数非线性。前者可提取 $M=1$、$b=-\sin x$，后者求导数时会涉及分支。
+
+将 $\boldsymbol x=\boldsymbol h(\boldsymbol z,t)$ 及其导数同时代入，得到
+
+$$
+\boxed{
+M(\boldsymbol h,\boldsymbol u,t)J_h\dot{\boldsymbol z}
+=\boldsymbol b(\boldsymbol h,\boldsymbol u,t)
+-M(\boldsymbol h,\boldsymbol u,t)\boldsymbol h_t.
+}
+$$
+
+如果原模型有 $n$ 个独立方程和 $n$ 个待求导数，且 $M$ 与 $J_h$ 均可逆，就能求出唯一的显式导数。$J_h$ 奇异时，这条导数关系无法唯一恢复全部新状态导数；$M$ 奇异则表示这些方程在该处无法唯一确定全部原状态导数。后者可能来自重复方程，也可能来自代数约束所形成的微分代数方程（DAE）。例如令 $x,y$ 为平面位置、$L$ 为固定长度、$v$ 为给定速度，$\dot x=v$ 与 $x^2+y^2=L^2$ 联立时，第二条首先限制状态所在的曲线，求速度还需要沿轨迹对约束求导。方程数、导数数目和独立性应结合起来解释；[第一章的秩与奇异值](/Aerodrome/chapters/01-mathematical-tools/01-linear-algebra/#1142-奇异值分解svd与秩)可帮助分析数值工况下哪些方向缺少独立关系。
+
+求得导数后，将它代回原残差。若各分量在声明的定义域内恒等于零，就证明该表达式与输入方程在代数上相容。可逆条件进一步给出导数的唯一性。求逆和约分产生的分母也规定了定义域：例如约去原分母中的 $(x-1)$ 后，所得表达式仍应保留原方程的 $x\ne1$ 条件。三角函数的角分支、正长度以及原表达式中已被约去的分母，也属于模型定义的一部分。
+
+坐标方向、物理量和单位则在建立方程时由作者明示。例如同样记作 $C_{mq}$ 的系数，若定义为对 $q\bar c/(2V_a)$ 求导，就应乘这个无量纲角速度；定义为对 $q$ 求导时，系数本身已包含相应时间尺度。符号计算据这些定义检查所输入的代数关系，物理解释从定义和载荷假设中获得依据。
+
+<span id="接入新模型时按什么顺序做" />
+
+### SymPy 程序怎样实现这条推导
+
+零号工程提供 [符号状态转换示例](/Aerodrome/reference/project-zero/#symbolic-state-conversion)，源码为 `ngc/examples/symbolic_state_conversion.py`，也可[直接下载 Python 文件](/Aerodrome/downloads/symbolic_state_conversion.py)。输入由作者转写成 SymPy 符号和表达式：先声明状态、导数、时间与参数，再给出方程或状态映射。程序接收这些数学对象；资料中的符号含义、单位和坐标方向随转写过程确定。
+
+`solve_derivatives(residuals, derivatives, declared_symbols)` 接收等于零的一列残差、按输出顺序排列的导数符号，以及其余已声明符号。它检查符号是否齐全、方程数是否与导数数相同，再提取导数系数矩阵并求解。`change_coordinates(old_states, old_rhs, new_states, old_from_new, time, parameters=())` 则接收原状态及显式右端、新状态、映射 $\boldsymbol x=\boldsymbol h(\boldsymbol z,t)$、时间和参数符号。它用雅可比和显式时间偏导构造变换后的残差，再调用前一个函数。这个接口采用维数相同的状态映射，代码中的 `parameters` 也可容纳在当前时刻作为独立符号给出的输入量。
+
+能够求得表达式时，返回字典中的 `status` 为 `explicit_on_domain`，表示在所列条件下已求得显式导数；其余字段对应刚才的计算：
+
+| 字段 | 数学含义 |
+| --- | --- |
+| `mass_matrix` | 当前残差对导数的系数矩阵；坐标变换例中就是 $J_h$ |
+| `rhs` | 按 `derivatives` 或 `new_states` 顺序排列的显式状态导数 |
+| `conditions` | 系数矩阵行列式非零，以及当前残差和结果中可见的分母非零条件 |
+| `residual_check` | 把导数代回输入残差并化简后的列向量 |
+| `identity_verified` | 每个残差分量是否都已化简为零 |
+
+程序保留 SymPy 对象，因此可继续代入数值或做符号运算。`identity_verified=False` 表示当前化简尚未证明残差恒等于零，后续可结合假设继续化简或检查剩余表达式；这个值本身不判定方程错误。方程数量不匹配或已判定系数矩阵奇异时，返回 `constraint_analysis_required`；对导数非线性时，返回 `nonlinear_derivative_system`；遇到未声明符号时，抛出带符号名称的 `ValueError`。原始定义域与角分支记录在模型说明中，和程序收集到的代数条件一起使用。
+
+用平面匀速运动可以手算并运行完整过程。设 $\dot x=a$、$\dot y=b$，其中 $x,y$ 用 m，恒定速度 $a,b$ 用 m/s。新状态为极坐标 $(r,\varphi)$，$r$ 用 m、$\varphi$ 用 rad，映射为
+
+$$
+\begin{bmatrix}x\\y\end{bmatrix}
+=\begin{bmatrix}r\cos\varphi\\r\sin\varphi\end{bmatrix},
+\qquad
+J_h=\begin{bmatrix}
+\cos\varphi&-r\sin\varphi\\
+\sin\varphi&r\cos\varphi
+\end{bmatrix},
+\qquad \det J_h=r.
+$$
+
+在 $r>0$、选定局部角度分支后，解 $J_h[\dot r,\dot\varphi]^{\mathsf T}=[a,b]^{\mathsf T}$ 得到
+
+$$
+\dot r=a\cos\varphi+b\sin\varphi,\qquad
+\dot\varphi=\frac{-a\sin\varphi+b\cos\varphi}{r}.
+$$
+
+下面是示例中这次调用的完整输入，可在脚本所在目录导入函数运行：
+
+```python title="直角坐标到极坐标的符号换元"
+import sympy as sp
+from symbolic_state_conversion import change_coordinates
+
+t = sp.Symbol("t", real=True)
+x, y, r, phi, a, b = sp.symbols("x y r phi a b", real=True)
+h = [r * sp.cos(phi), r * sp.sin(phi)]
+result = change_coordinates(
+    [x, y], [a, b], [r, phi], h, t, parameters=[a, b],
+)
+print(result["rhs"])
+print(result["conditions"], result["residual_check"])
+```
+
+程序得到上述两条导数，条件包含 $r\ne0$，残差为 $[0,0]^{\mathsf T}$，`identity_verified` 为 `True`。极坐标定义再取 $r>0$ 并指定角分支。在 $(x,y)=(3,4)\,\mathrm m$、$(a,b)=(2,-1)\,\mathrm{m/s}$ 处，$r=5\,\mathrm m$、$\cos\varphi=3/5$、$\sin\varphi=4/5$，得到
+
+$$
+\dot r=0.4\,\mathrm{m/s},\qquad
+\dot\varphi=-0.44\,\mathrm{rad/s}.
+$$
+
+将结果左乘 $J_h$，恢复的直角坐标速度恰为 $[a,b]^{\mathsf T}$，在该点即 $[2,-1]^{\mathsf T}\,\mathrm{m/s}$。脚本随后计算移动原点 $x=z+bt$，输出 $a-b$，核对显式时间项；末尾还展示缺少方程、方程相关、导数非线性和符号漏写时的诊断结果。
+
+在仓库的 `ngc/` 目录执行：
+
+```sh title="运行符号状态转换示例"
+uv run --no-project --with sympy python examples/symbolic_state_conversion.py
+```
+
+下载独立文件后，在文件所在目录执行 `uv run --no-project --with sympy python symbolic_state_conversion.py`。输出是包含表达式和检查结果的 SymPy 对象字典。读者可先修改映射或原右端，观察雅可比、条件和恢复后的速度怎样变化；再将自己的方程按同样的符号定义转写，逐步接到前文的刚体载荷与状态导数上。
+
+## 参考阅读
+
+转动系导数与载荷运动学参考 [*Aircraft Control and Simulation*，第三版](https://onlinelibrary.wiley.com/doi/book/10.1002/9781119174882)，§1.4–1.5（pp.16–23）；惯量、角动量与局部平直地面六自由度方程见 §1.7（pp.34–43）。变质量、转子角动量和地球自转会引入额外项，可沿原书 §1.7–1.8 继续阅读。
+
+空气速度与气动角的状态映射见同书 §2.3，式 (2.3-6)、(2.3-10)（pp.78、81）；角速度和迎角导数的归一化见式 (2.3-9)、(2.3-11)，俯仰力矩组合见式 (2.3-19)（pp.81–82、95–96）。

@@ -1,0 +1,158 @@
+---
+title: "3.2 从 Bellman 方程到最优反馈控制"
+description: 推导值迭代、策略迭代和线性二次调节器，并用共同速度算例核对 Riccati 递推与输入限幅。
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
+---
+
+import TeachingFigure from '../../../../components/TeachingFigure.astro';
+
+[1.6 动态规划](/Aerodrome/chapters/01-mathematical-tools/06-dynamic-programming/)从终点往前算出了一张值表，用它就能在每个站点选择动作。换成上一节的速度控制，速度偏差可以连续取值，逐格填表就不方便了。在无约束的线性二次问题中，值函数恰好也能写成二次函数，求最优控制就转化为计算其中的系数。由此得到的线性二次调节器（linear quadratic regulator，LQR）既能直接执行，也为后续近似方法提供解析参照。下面先补上没有固定终点时的值函数关系，再展开这项计算。
+
+<span id="321-bellman-方程究竟在比较什么" />
+
+## 3.2.1 Bellman 最优性方程与策略评价
+
+对时间不变的随机系统，记 $x_{k+1}=f(x_k,u_k,d_k)$。状态 $x_k\in\mathbb R^n$、动作 $u_k\in\mathcal U(x_k)\subseteq\mathbb R^m$ 均为列向量；$d_k$ 是本步扰动，$c(x,u,d)$ 是阶段代价。对给定策略 $\pi$，从状态 $x$ 开始的无限时域折扣代价为
+
+$$
+V^\pi(x)=\mathbb E^\pi\!\left[\sum_{j=0}^{\infty}\gamma^j c(x_j,u_j,d_j)\mid x_0=x\right],
+\qquad 0<\gamma<1.
+$$
+
+在代价有界等条件下，这个和定义良好。最优值 $V^*(x)=\inf_\pi V^\pi(x)$。如果动作集合中能取到最小值，当前一步的比较是
+
+$$
+V^*(x)=\min_{u\in\mathcal U(x)}
+\mathbb E\left[c(x,u,d)+\gamma V^*(f(x,u,d))\mid x,u\right].
+$$
+
+右侧括号内是选定当前动作、随后按最优方式行动的代价。比较时先固定动作，再对可能发生的扰动取期望，最后从各动作的期望代价中取最小值。这个最小值给出 $V^*(x)$，达到它的动作组成最优策略。若策略已固定为 $u=\pi(x)$，就直接代入该动作，得到评价方程 $V^\pi(x)=\mathbb E[c(x,\pi(x),d)+\gamma V^\pi(f(x,\pi(x),d))]$。最优性方程用动作比较寻找规则，评价方程用指定规则计算代价。
+
+有限时域用时刻标明剩余任务：$V_T^*(x)=g_T(x)$，$V_k^*(x)=\min_u\mathbb E[c_k(x,u,d)+V_{k+1}^*(f_k(x,u,d))]$，从 $k=T-1$ 倒推。这里采用无折扣累计代价，终端条件给出递推的起点。若任务采用有限时域折扣目标，递推中的后续值也乘相应折扣。这样，目标函数中的终点、时域和折扣都在 Bellman 式中得到对应。
+
+<span id="322-值迭代反复增加看向未来的长度" />
+
+## 3.2.2 值迭代与收敛条件
+
+定义 Bellman 算子 $\mathcal T$：给定候选函数 $W$，令 $(\mathcal TW)(x)=\min_u\mathbb E[c(x,u,d)+\gamma W(f(x,u,d))]$。**值迭代**（value iteration，VI）从 $W_0$ 出发，重复 $W_{j+1}=\mathcal TW_j$。例如有限状态、非负代价问题取 $W_0\equiv0$，$W_1$ 考虑眼前一步，$W_2$ 再把下一步的最小代价纳入。对有界阶段代价的折扣问题，$\mathcal T$ 在最大范数下有 $\gamma$ 的收缩性：两个候选未来值最多差 $\varepsilon$，折扣后每个动作的代价最多差 $\gamma\varepsilon$，取最小值也保持这一上界。因此，以有界 $W_0$ 开始，误差会随迭代缩小，$W_j$ 收敛到唯一不动点 $V^*$。有界代价和 $\gamma<1$ 正是这段收敛推导的条件。
+
+一个两状态玩具例子可手算更新。状态 $A$ 每步可“等待”，代价 $1$ 并留在 $A$，或“完成”，代价 $3$ 并到吸收状态 $B$；$B$ 此后代价为零，$\gamma=0.9$。从 $W_0(A)=W_0(B)=0$ 开始，$W_1(A)=\min(1,3)=1$，$W_2(A)=\min(1+0.9\times1,3)=1.9$，$W_3(A)=2.71$。每多更新一次，就让等待看到了更多未来费用。无限等待代价为 $1/(1-0.9)=10$，所以最终会选择立即完成，$V^*(A)=3$。只看 $W_1$ 会选等待；这正是长期比较的作用。
+
+表格更新遍历各状态、动作及其后继，计算量随这些集合的大小增长。连续或高维状态可用第三节的参数函数表示 $W_j(x)$，将存储量集中到有限参数上。用近似值 $V_w$ 做一步前瞻时，计算还包括预测后继和搜索最小代价动作，因此函数表示与动作搜索共同决定执行开销。
+
+<span id="323-策略迭代先给现有控制律算账" />
+
+## 3.2.3 策略迭代：评价与改进
+
+**策略迭代**（policy iteration，PI）从一个可行策略 $\pi_0$ 开始。评价阶段求它的 $V^{\pi_j}$；改进阶段逐状态选
+
+$$
+\pi_{j+1}(x)\in\operatorname*{arg\,min}_{u\in\mathcal U(x)}
+\mathbb E\left[c(x,u,d)+\gamma V^{\pi_j}(f(x,u,d))\mid x,u\right].
+$$
+
+这个比较先尝试当前动作，再按旧策略计算后续代价。候选集合含有旧动作，所以选出的动作在这次比较中至少与旧动作一样好。对有限状态动作的折扣问题，精确评价和精确改进给出策略改进性质 $V^{\pi_{j+1}}(x)\leq V^{\pi_j}(x)$；当所有状态都没有改进空间时，就满足最优性方程。采样评价和近似优化会引入误差，后文将用轨迹评价这些近似带来的效果。值迭代每轮更新一次未来值，策略迭代每轮先算清当前策略的全部未来代价，再选择第一步；计算量取决于评价方程与动作搜索的难度。
+
+在上面的 $A,B$ 例中，先用“永远等待”，则 $V^{\pi_0}(A)=1+0.9V^{\pi_0}(A)=10$。改进时，“等待”的一步比较仍是 $1+0.9\times10=10$，“完成”为 $3$，于是新策略立即完成。再评价得到 $V^{\pi_1}(A)=3$，改进不会再改变动作。这个例子把策略评价中的“固定旧规则”与改进中的“只换第一步”区分开。后文 [Rollout](/Aerodrome/chapters/03-reinforcement-learning/04-rollout-and-mpc/)正是使用一个基础策略的后续代价做一次这样的前瞻。
+
+<span id="324-标量-bellman-式如何变为-riccati-式" />
+
+## 3.2.4 标量 LQR 与 Riccati 递推
+
+先取无量纲标量系统 $x_{k+1}=a x_k+b u_k$，其中 $b\ne0$；阶段代价 $qx^2+ru^2$，$q>0,r>0$，输入暂不设限。这里讨论无折扣的无限时域总代价，并假设我们要寻找使状态趋零、代价有限的策略。尝试值函数 $V(x)=Px^2$，$P\geq0$。代入 Bellman 式得
+
+$$
+Px^2=\min_u\{qx^2+ru^2+P(ax+bu)^2\}.
+$$
+
+将右侧按 $u$ 展开，得到 $(r+b^2P)u^2+2abP xu+(q+a^2P)x^2$。因为 $r+b^2P>0$，它是关于 $u$ 的严格凸二次式。对 $u$ 求导并令零：
+
+$$
+2(r+b^2P)u+2abPx=0,
+\qquad u^*(x)=-Kx,\quad K=\frac{abP}{r+b^2P}.
+$$
+
+把这个最优动作代回去，或者完成平方，最小值为 $\left(q+a^2P-\dfrac{a^2b^2P^2}{r+b^2P}\right)x^2$。因方程对所有 $x$ 成立，二次项系数相等，得到标量代数 Riccati 方程
+
+$$
+P=q+a^2P-\frac{a^2b^2P^2}{r+b^2P}
+=q+\frac{a^2rP}{r+b^2P}.
+$$
+
+最后一个等号来自 $a^2P[1-b^2P/(r+b^2P)]=a^2rP/(r+b^2P)$。Bellman 更新把一个二次值函数变成另一个二次值函数，Riccati 方程就是系数 $P$ 的不动点条件。在无量纲例 $a=b=q=r=1$ 中，$P=1+P/(1+P)$ 化成 $P^2-P-1=0$。由于总代价非负，取非负根 $P=(1+\sqrt5)/2\approx1.618034$，得到 $K=P/(1+P)\approx0.618034$。闭环因子 $a-bK\approx0.381966$，因此从 $x_0=1$ 出发，状态逐步趋零。
+
+<span id="325-用同一速度任务核对每一步" />
+
+## 3.2.5 速度控制的 LQR 算例
+
+回到 [3.1 的速度任务](/Aerodrome/chapters/03-reinforcement-learning/01-control-and-learning/)，先求其无约束、无限时域、无折扣的解析解。$x$ 以 $\mathrm{m/s}$ 计，$u$ 以 $\mathrm{m/s^2}$ 计；将 $x/v_{\rm scale}$ 和 $u/a_{\rm scale}$ 作为无量纲数值输入后，一步更新与阶段代价的系数为 $a=1,b=0.1,q=0.1,r=0.02$。其中 $b$ 由采样间隔 $\Delta t=0.1\,\mathrm s$ 以及速度、加速度尺度共同确定。
+
+标量 Riccati 式化为 $0.01P^2-0.001P-0.002=0$，两个根是 $0.5$ 与 $-0.4$；取非负解 $P=0.5$，于是
+
+$$
+K=\frac{0.1\times0.5}{0.02+0.01\times0.5}=2,
+\qquad u_k=-2x_k,\quad x_{k+1}=0.8x_k.
+$$
+
+若 $x_0=1$，第一步 $u_0=-2$，$x_1=0.8$；阶段代价 $0.1(1)^2+0.02(-2)^2=0.18$。此后每步状态与动作都乘 $0.8$，代价乘 $0.8^2=0.64$，因此无穷总代价为 $0.18/(1-0.64)=0.5=P x_0^2$。几何级数给出的轨迹代价与 Bellman 值一致。若 $x_0=2$，无约束首步动作为 $-4\,\mathrm{m/s^2}$，相应总代价为 $P x_0^2=2$；共同任务的 $|u|\leq3$ 会把首步输入截到 $-3$，由此产生另一条轨迹及其代价。
+
+<span id="326-有限时域为何需要倒推一个增益序列" />
+
+## 3.2.6 有限时域增益与终端代价
+
+共同实验实际只有 $T=50$ 步，并有终端代价 $g_T(x)=x^2$（这里 $x$ 是以 $v_{\rm scale}$ 无量纲化后的数值）。先暂时去掉限幅，设第 $k$ 步最优剩余代价为 $V_k(x)=P_kx^2$，终端 $P_{50}=1$。将 $V_{k+1}=P_{k+1}x^2$ 放入有限时域 Bellman 式，逐步重复上一段的求导，得到**Riccati 倒推**：
+
+$$
+\begin{aligned}
+K_k&=\frac{abP_{k+1}}{r+b^2P_{k+1}},\\
+P_k&=q+a^2P_{k+1}
+-\frac{a^2b^2P_{k+1}^2}{r+b^2P_{k+1}},
+\qquad k=49,48,\ldots,0.
+\end{aligned}
+$$
+
+在 $k=49$，$P_{50}=1$，故 $K_{49}=0.1/(0.02+0.01)=10/3\approx3.333333$，$P_{49}=0.1+1-0.01/0.03=0.766667$。继续得到 $K_{48}\approx2.771084$、$P_{48}\approx0.654217$。临近终点时，终端偏差的额外代价使增益高于无限时域参照 $K=2$；离终点较远时，倒推系数逐渐接近长期解。整个有限时域反馈由 $P_k,K_k$ 的时间序列确定。终端权重决定递推起点，时域决定倒推步数，折扣决定后续值的权重，这些条件共同确定增益序列。
+
+有输入限幅时，有限时域 Bellman 式对 $u\in[-3,3]$ 求最小。如果下一步值为 $P_{k+1}x^2$，本步比较的最小动作就是将 $-K_kx$ 截到区间内。饱和区和非饱和区采用不同动作表达式，得到的本步值函数通常也成为分段函数；精确受限倒推要保留这一结构。“先求无约束 LQR 再截断”因此提供了一种计算简便的候选控制器。以无限时域增益 $K=2$ 为例，$x_0=1$ 时首步位于线性区；$x_0=2$ 时首步 $-4$ 被截为 $-3$，下一偏差为 $1.7$，高于无约束轨迹的 $0.8x_0=1.6$。限幅延缓了纠偏，也改变了后续代价。
+
+<TeachingFigure
+  id="fig-riccati-horizon"
+  src="/Aerodrome/figures/reinforcement-learning/riccati-horizon.svg"
+  number="3.2-1"
+  title="终端要求沿 Bellman 递推传回更早时刻"
+  alt="有限时域值系数与反馈增益在末端偏离无限时域的常数值。"
+  caption="无输入限幅的解析参照；50步、每步0.1 s，终端系数为1。左图是归一化状态的二次值系数，右图增益单位为每秒；虚线为无限时域解。"
+  source="/Aerodrome/figures/sources/reinforcement-learning.json"
+  size="wide"
+/>
+
+<span id="327-多维-lqr-的矩阵式从哪里来" />
+
+## 3.2.7 多维 LQR 与矩阵 Riccati 方程
+
+令 $x\in\mathbb R^n$、$u\in\mathbb R^m$，无扰动线性系统为 $x_{k+1}=Ax_k+Bu_k$，其中 $A\in\mathbb R^{n\times n}$、$B\in\mathbb R^{n\times m}$。无约束二次阶段代价为 $x^{\mathsf T}Qx+u^{\mathsf T}Ru$，状态权重 $Q\in\mathbb R^{n\times n}$ 对称半正定，输入权重 $R\in\mathbb R^{m\times m}$ 对称正定；终端代价为 $x_T^{\mathsf T}P_Tx_T$。状态和动作按各自尺度无量纲化后，各二次项可以直接相加；使用原物理量时，则由权重中的相应倒数单位完成尺度换算。
+
+设 $V_{k+1}(x)=x^{\mathsf T}P_{k+1}x$ 且 $P_{k+1}$ 对称半正定。Bellman 右侧对 $u$ 的二次项、交叉项分别是 $u^{\mathsf T}(R+B^{\mathsf T}P_{k+1}B)u$ 与 $2u^{\mathsf T}B^{\mathsf T}P_{k+1}Ax$。记 $H_k=R+B^{\mathsf T}P_{k+1}B\succ0$；[1.1 矩阵变量求导](/Aerodrome/chapters/01-mathematical-tools/01-linear-algebra/#1110-矩阵变量求导线性层与控制增益)给出对列向量 $u$ 的梯度 $2H_ku+2B^{\mathsf T}P_{k+1}Ax$。令其为零，得
+
+$$
+\begin{aligned}
+u_k^*&=-K_kx_k,\qquad K_k=H_k^{-1}B^{\mathsf T}P_{k+1}A
+\quad (m\times n),\\
+P_k&=Q+A^{\mathsf T}P_{k+1}A
+-A^{\mathsf T}P_{k+1}B H_k^{-1}B^{\mathsf T}P_{k+1}A.
+\end{aligned}
+$$
+
+数值程序通过解线性方程 $H_kK_k=B^{\mathsf T}P_{k+1}A$ 计算增益。无限时域、时间不变时，令 $P_k=P_{k+1}=P$，得到代数 Riccati 方程。在 $(A,B)$ 可稳定、状态代价能检测不稳定模态等条件下，其稳定化解给出有限的最优代价和稳定反馈。这里的推导采用已知线性动力学、二次代价和无约束输入；输入限幅可按上一小节处理，非线性和模型学习则在后文展开。以 [3.1 的共同速度实验](/Aerodrome/chapters/03-reinforcement-learning/01-control-and-learning/)核对时，$n=m=1$，这些矩阵全部退化为前面的标量。
+
+## 3.2.8 运行与练习
+
+[零号工程的动态规划与控制运行入口](/Aerodrome/reference/project-zero/#reinforcement-learning)提供共同速度任务的数值对照；从仓库 `ngc/` 目录按[运行说明](/Aerodrome/reference/reinforcement-learning/#dp-control)执行，重点核对终端 $P_{50}=1$、末步 $P_{49}=0.766667$、$K_{49}=3.333333$，以及受限动作是否落在 $[-3,3]$。还可将 Riccati 递推与[三站点动态规划程序](/Aerodrome/chapters/01-mathematical-tools/06-dynamic-programming/#169-用短程序复现整张表)对照：前者更新二次函数的系数，后者更新各状态的表项，两者都从后续值计算当前值。
+
+练习一：保持 $a=1,b=0.1,q=0.1$，把 $r$ 从 $0.02$ 改为 $0.08$。用标量 Riccati 固定点式求非负 $P$ 和 $K$，预期增益减小；用 $u=-Kx$ 的闭环因子验证是否比原先更慢。提示：固定点可化为 $b^2P^2-qb^2P-qr=0$。
+
+练习二：取共同任务的 $x_0=2$，比较 $K=2$ 控制律的无约束轨迹和限幅轨迹的前两步状态，并计算各步 $c(x,u)$。受限首步 $u=-3$、$x_1=1.7$；第二步仍取 $-3$，$x_2=1.4$。将这两步与无约束递推对照，说明状态与阶段代价怎样变化，以及解析值 $Px_0^2$ 对应哪条轨迹。
+
+本节的无限时域 VI/PI 和一维 Riccati 线索参照 Bertsekas 的 [*A Course in Reinforcement Learning*（第二版）](https://www.mit.edu/~dimitrib/books.htm)第 1 章 1.4–1.5 节；矩阵推导与有限时域速度数值在本页按统一设定展开。

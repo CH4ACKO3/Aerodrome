@@ -85,6 +85,18 @@ class F16Options:
 
 
 @dataclass
+class F16SixDoFOptions:
+    speed_m_s: float = 150.
+    height_m: float = 3000.
+    heading_rad: float = 0.
+    lef_rad: float = 0.
+    wind_ned_m_s: List[float] = field(default_factory=lambda:[0.,0.,0.])
+    omega_body_rad_s: List[float] = field(default_factory=lambda:[0.,0.,0.])
+    # Held offsets from the solved trim, ordered elevator, aileron, rudder.
+    surface_offset_rad: List[float] = field(default_factory=lambda:[0.,0.,0.])
+
+
+@dataclass
 class GravityOptions:
     gravity_ned_m_s2: List[float] = field(default_factory=lambda:[0.,0.,0.])
 

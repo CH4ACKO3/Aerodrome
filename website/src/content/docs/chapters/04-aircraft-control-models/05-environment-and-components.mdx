@@ -1,0 +1,131 @@
+---
+title: "4.5 环境、执行器与测量模型"
+description: 从风速和舵机响应出发，把环境、实际载荷、采样测量接入飞行器状态方程。
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
+---
+
+import TeachingFigure from '../../../../components/TeachingFigure.astro';
+
+飞机以相同地速飞行，迎风时机翼受到的载荷可能更大；控制器发出相同舵偏指令，慢一些的舵机又会让响应晚半拍。要把这些现象放进仿真，刚体方程两侧都要接上部件：输入侧从环境和实际执行器状态计算载荷，输出侧把真实运动转换成按时送达的测量。
+
+## 4.5.1 重力和空气密度从哪里来
+
+沿用局部 NED 地面系和 FRD 机体系。取局部原点对应海平面，高度为 $h=-p_D$，单位为米；重力加速度取 $\mathbf g_n=[0,0,g]^{\mathsf T}$，其中 $g=9.80665\,\mathrm{m/s^2}$。在[刚体方程](/Aerodrome/chapters/04-aircraft-control-models/03-rigid-body-dynamics/)中加入 $R_{nb}^{\mathsf T}\mathbf g_n$，机翼、旋翼和发动机输出非重力载荷。这样，倾斜机体时重力的体轴分量也随姿态变化。
+
+空气密度把空速转换为动压。为了与现有 F-16 示例相接，采用 [NASA Glenn 米制对流层拟合](https://www.grc.nasa.gov/www/k-12/airplane/atmosmet.html)，高度范围为 $0$—$11000\,\mathrm m$：
+
+$$
+\begin{aligned}
+T_C&=15.04-0.00649h,\\
+p_{\rm atm,kPa}&=101.29\left(\frac{T_C+273.1}{288.08}\right)^{5.256},\\
+\rho&=\frac{p_{\rm atm,kPa}}{0.2869(T_C+273.1)}.
+\end{aligned}
+$$
+
+$T_C$ 的数值单位是摄氏度，$p_{\rm atm,kPa}$ 为千帕，$\rho$ 为 $\mathrm{kg/m^3}$；式中常数保留原拟合的单位约定。代入 $h=3000\,\mathrm m$ 得 $\rho\approx0.910735\,\mathrm{kg/m^3}$。同一空速下，密度降低会使动压及给定气动系数对应的力减小。
+
+局部定重力适合本章的短时、局部飞行例子。经纬高转换、湿空气与分层大气见[零号环境入口](/Aerodrome/reference/project-zero/#environment)。当前 F-16 仍使用上面的对流层拟合；它的默认重力为 $9.806\,\mathrm{m/s^2}$，复现实验时沿用该配置。
+
+## 4.5.2 先减去风，再求气动角
+
+风速 $\mathbf w_n$ 表示空气团相对地面的 NED 速度，单位为 $\mathrm{m/s}$。机体轴表示的地速为 $\mathbf v_b$，则相对空气速度为
+
+$$
+\mathbf v_{a,b}=\mathbf v_b-R_{nb}^{\mathsf T}\mathbf w_n
+=[u_a,v_a,w_a]^{\mathsf T}.
+$$
+
+$R_{nb}$ 将机体系向量变换到 NED。天气预报的“北风”表示风从北方来，因此它对应负的北向速度。由相对空气速度计算
+
+$$
+\begin{aligned}
+V_a&=\sqrt{u_a^2+v_a^2+w_a^2},\\
+\alpha&=\operatorname{atan2}(w_a,u_a),\qquad
+\beta=\operatorname{atan2}\!\left(v_a,\sqrt{u_a^2+w_a^2}\right),\\
+\bar q&=\tfrac12\rho V_a^2.
+\end{aligned}
+$$
+
+迎角 $\alpha$、侧滑角 $\beta$ 使用弧度，动压 $\bar q$ 使用帕。速度为零时气动角没有定义，旋翼悬停直接使用旋翼自己的流动与推力模型。动压中的速度是相对空气的速度；位置更新继续使用地速。
+
+例如机头朝北、机翼水平，地速为向北 $25\,\mathrm{m/s}$，取近海平面教学密度 $1.225\,\mathrm{kg/m^3}$。空气团向北运动 $5\,\mathrm{m/s}$ 时，空速为 $20\,\mathrm{m/s}$、动压为 $245\,\mathrm{Pa}$；向南运动同样快时，空速为 $30\,\mathrm{m/s}$、动压为 $551.25\,\mathrm{Pa}$。在气动系数不变的条件下，两者载荷相差 $2.25$ 倍。
+
+部件安装点也会改变局部来流。若点 $P$ 相对质心的机体坐标为 $\mathbf r_{P,b}$，单位为米，则均匀风场中
+
+$$
+\mathbf v_{a,P,b}=\mathbf v_{a,b}
++\boldsymbol\omega_b\times\mathbf r_{P,b}.
+$$
+
+因此，转动中的翼尖、尾翼和旋翼看到的空速可能不同。螺旋桨后方的尾翼还会受到滑流影响；用部件模型时，在该位置增加局部空气速度，再求相对速度和载荷。
+
+## 4.5.3 指令怎样变成实际舵偏
+
+令 $\delta_c$ 为舵偏指令，$\delta$ 为实际舵偏，单位均为弧度。一个含幅值和速率限制的一阶舵机为
+
+$$
+\begin{aligned}
+\delta_*&=\operatorname{clip}(\delta_c,\delta_{\min},\delta_{\max}),\\
+\dot\delta&=\operatorname{clip}\!\left(
+\frac{\delta_*-\delta}{\tau_\delta},
+-\dot\delta_{\max},\dot\delta_{\max}\right).
+\end{aligned}
+$$
+
+$\tau_\delta>0$ 为时间常数，单位为秒；$\dot\delta_{\max}$ 为最大舵速，单位为 $\mathrm{rad/s}$。实际舵偏是一个新增状态，气动力使用当前 $\delta$。连续方程从幅值范围内的初值出发，会向限幅后的目标运动；离散推进的步长选择见[数值仿真](/Aerodrome/chapters/04-aircraft-control-models/04-numerical-simulation/)。
+
+看一个可以手算的阶跃：初始舵偏为零，指令为 $10^\circ$，幅值上限为 $20^\circ$，时间常数为 $0.1\,\mathrm s$。只考虑一阶动态时，$\delta(t)=10^\circ(1-e^{-t/0.1})$，在 $0.1\,\mathrm s$ 达到 $6.32^\circ$。若再取舵速上限 $40^\circ/\mathrm s$，初始所需舵速 $100^\circ/\mathrm s$ 会触及限速：前 $0.15\,\mathrm s$ 按恒定舵速运动，达到 $6^\circ$ 后进入指数段。因此在 $0.1\,\mathrm s$，实际舵偏只有 $4^\circ$。
+
+<TeachingFigure
+  id="fig-actuator-step"
+  src="/Aerodrome/figures/flight-models/aircraft-actuator-step.svg"
+  alt="相同十度指令下，限速舵机先直线爬升，再进入指数响应，早期舵偏小于单纯一阶模型。"
+  number="4.5-1"
+  title="限速改变舵机的早期响应"
+  caption="教学参数；两条曲线均为分段解析解，时间常数 0.1 s，橙色虚线的最大舵速为 40°/s，幅值限制未触发。"
+  source="/Aerodrome/figures/sources/generate-flight-aircraft-figures.py"
+/>
+
+电机也可以用一阶转速状态 $\dot\Omega=(\Omega_c-\Omega)/\tau_m$，其中 $\Omega$ 为 $\mathrm{rad/s}$。更细的电机模型从轴转矩出发：$J_r\dot\Omega=Q_m-Q_a$，$J_r$ 为旋转部件惯量，$Q_m,Q_a$ 分别为驱动转矩和空气阻转矩。部件状态与机体状态联立积分时，每个 RK 子阶段都用该阶段的舵偏或转速重算载荷；数字指令可在控制采样之间保持。
+
+## 4.5.4 测量什么，什么时候送到
+
+理想传感器先定义观测函数，再加入测量误差。例如，陀螺仪测体轴角速度；GNSS 的速度输出通常在地面坐标系；空速管经压力换算得到空气数据。位于质心、轴向与机体一致的理想加速度计测量比力：
+
+$$
+\mathbf f_b=R_{nb}^{\mathsf T}(\mathbf a_n-\mathbf g_n)
+=\frac{\mathbf F_b}{m}.
+$$
+
+这里 $\mathbf a_n$ 是质心相对局部地面的加速度，$\mathbf F_b$ 是全部非重力合力。水平静止且有支撑时读数为 $[0,0,-g]^{\mathsf T}$；自由落体时为零。若加速度计偏离质心 $\mathbf r_{P,b}$，还要在比力中加入
+
+$$
+\dot{\boldsymbol\omega}_b\times\mathbf r_{P,b}
++\boldsymbol\omega_b\times
+ (\boldsymbol\omega_b\times\mathbf r_{P,b}),
+$$
+
+分别来自角加速度和向心加速度。安装轴与机体轴不一致时，再转到传感器坐标系。
+
+以一个标量通道为例，时刻 $t_k=k\Delta t_s$ 采样，固定延迟 $d$ 秒后送达：
+
+$$
+y_k=h_m(x(t_k))+b_k+\sigma\epsilon_k,\qquad
+\epsilon_k\sim\mathcal N(0,1).
+$$
+
+$h_m$ 给出理想读数，$b_k$ 为偏置，$\sigma$ 为每次采样的标准差，三者与 $y_k$ 使用相同单位。例如角速度通道的 $\sigma=0.01\,\mathrm{rad/s}$、采样周期 $0.01\,\mathrm s$，表示每秒产生 100 个这样的随机读数。若偏置采用随机游走，可写成 $b_{k+1}=b_k+\sigma_b\sqrt{\Delta t_s}\eta_k$，其中 $\eta_k$ 是独立标准正态数，$\sigma_b$ 的单位为“测量单位除以 $\sqrt{\mathrm s}$”。
+
+采样时刻决定测量对应哪一个状态，送达时刻决定控制器何时能用到它。仿真把采样时间随读数一并记录，两个采样之间保持最近读数。改变采样周期后，每次采样噪声与连续噪声谱密度的换算取决于传感器带宽；这里直接给定每次采样标准差。现有离散传感器包含偏置、随机游走、噪声与固定延迟，接线见[零号观测与估计入口](/Aerodrome/reference/project-zero/#estimation)。
+
+## 4.5.5 把链条接起来并改一个参数
+
+一次状态导数计算依次取得当前高度与姿态，求空气密度、相对空气速度和气动角，再用实际执行器状态求载荷。载荷推动真实状态；采样任务从真实状态生成观测，延迟后交给控制器。这条计算链把物理响应和测量时序连接起来。
+
+练习：把图 4.5-1 的最大舵速从 $40^\circ/\mathrm s$ 改为 $80^\circ/\mathrm s$，保持指令和时间常数不变。先求离开限速段的时刻，再算 $0.1\,\mathrm s$ 的实际舵偏，并用图源码核对。提示：转折条件为 $\delta_*-\delta=\tau_\delta\dot\delta_{\max}$；本题转折时刻为 $0.025\,\mathrm s$。
+
+## 参考阅读
+
+[Stevens、Lewis、Johnson，*Aircraft Control and Simulation*，第三版，2016](https://onlinelibrary.wiley.com/doi/book/10.1002/9781119174882)：§1.6，印刷页 31—34 讨论重力和加速度计；§2.3、§2.5 连接空气数据与载荷；§7.5，页 612—616 讨论执行器饱和；§8.4，页 645—648 给出轴转速和电机转矩模型。选读电机电流、功率与电池电压耦合时，从轴转矩方程继续增加电气状态；导航滤波的概率工具见[1.3 统计](/Aerodrome/chapters/01-mathematical-tools/03-statistics/)。

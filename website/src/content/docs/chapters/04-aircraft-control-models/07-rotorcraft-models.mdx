@@ -1,0 +1,178 @@
+---
+title: "4.7 旋翼与多旋翼飞行器建模"
+description: 从单桨推力出发，推导四旋翼的推力与力矩映射，核算悬停、差动输入及倾斜加速。
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
+---
+
+import TeachingFigure from '../../../../components/TeachingFigure.astro';
+
+四旋翼向右飞之前，通常会先向右倾斜。要把这个过程算出来，需要回答两件事：哪几个电机改变转速会让机体倾斜，倾斜后的推力又怎样产生水平加速度？从一只旋翼开始，把它的推力、安装位置和旋向写清楚，就能把四个电机接到前面的六自由度刚体上。
+
+## 4.7.1 一只旋翼怎样产生载荷
+
+对固定桨距旋翼，在给定空气密度和悬停附近的低速来流条件下，采用准稳态关系
+
+$$
+T_i=k_T\Omega_i^2,\qquad Q_i=k_Q\Omega_i^2.
+$$
+
+$\Omega_i\geq0$ 为第 $i$ 个旋翼的转速大小，单位为 $\mathrm{rad/s}$；$T_i$ 是推力大小，单位为 N；$Q_i$ 是空气阻转矩大小，单位为 $\mathrm{N\,m}$。系数单位分别为 $\mathrm{N/(rad/s)^2}$、$\mathrm{N\,m/(rad/s)^2}$。若转速用 rpm 表示，先用 $\Omega=2\pi n_{\rm rpm}/60$ 转换，再代入这里的系数。
+
+记旋翼半径为 $R$，单位为米。平方关系可以从量纲理解：在相似流动条件下，桨叶局部速度随 $\Omega R$ 变化，动压随其平方变化，桨盘面积又与 $R^2$ 成正比，因而推力尺度为 $\rho\Omega^2R^4$，转矩尺度为 $\rho\Omega^2R^5$。本节把固定密度、固定几何和相应气动系数合入 $k_T,k_Q$；实际取值可由测力台记录转速、推力和转矩后拟合。
+
+FRD 机体的 $z_b$ 向下，水平安装的旋翼推力为 $\mathbf F_{i,b}=[0,0,-T_i]^{\mathsf T}$。稳定转速下，电机克服空气阻转矩，机体受到与桨叶旋向相反的反扭矩。以下主算例采用刚性、平行桨轴，忽略旋翼转动惯量对机体的耦合和桨间尾流干扰；机体仍有完整的平移和转动动力学。
+
+## 4.7.2 用位置和旋向写出四旋翼映射
+
+采用“十字形”布局，质心到每个旋翼中心的距离为 $\ell$。按前、右、后、左编号，它们的机体坐标为
+
+$$
+\mathbf r_1=[\ell,0,0]^{\mathsf T},\quad
+\mathbf r_2=[0,\ell,0]^{\mathsf T},\quad
+\mathbf r_3=[-\ell,0,0]^{\mathsf T},\quad
+\mathbf r_4=[0,-\ell,0]^{\mathsf T}.
+$$
+
+从机体上方向下看，1、3 号桨逆时针转，2、4 号桨顺时针转。正偏航力矩 $N$ 沿 $+z_b$，俯视时使机体顺时针转，所以 1、3 号的机体反扭矩为正。
+
+<TeachingFigure
+  id="fig-quadrotor-layout"
+  src="/Aerodrome/figures/flight-models/aircraft-quadrotor-layout.svg"
+  alt="十字形四旋翼俯视布局：前后桨逆时针转并产生正机体偏航反扭矩，左右桨顺时针转并产生负反扭矩；前轴向上，右轴向右，下轴指入纸面。"
+  number="4.7-1"
+  title="旋翼旋向与机体反扭矩"
+  caption="原创教学布局；编号和旋向用于本节全部方程，杆臂长 0.20 m。圆弧箭头表示桨叶旋向，文字中的 ±N 表示机体反扭矩符号。"
+  source="/Aerodrome/figures/sources/generate-flight-aircraft-figures.py"
+/>
+
+推力在质心产生的力矩由叉积直接得到。任一桨的位置为 $[x_i,y_i,0]^{\mathsf T}$ 时，
+
+$$
+\mathbf r_i\times\mathbf F_i
+=[-y_iT_i,x_iT_i,0]^{\mathsf T}.
+$$
+
+例如右侧桨有 $y_i>0$，向上的推力使右侧抬起，对应负滚转力矩。令 $s_i=\Omega_i^2$，总推力大小为 $T$，机体三轴力矩为 $[\tau_x,\tau_y,\tau_z]^{\mathsf T}$，其中 $\tau_z=N$。四个贡献相加得
+
+$$
+\begin{bmatrix}T\\\tau_x\\\tau_y\\\tau_z\end{bmatrix}
+=
+\begin{bmatrix}
+k_T&k_T&k_T&k_T\\
+0&-\ell k_T&0&\ell k_T\\
+\ell k_T&0&-\ell k_T&0\\
+k_Q&-k_Q&k_Q&-k_Q
+\end{bmatrix}
+\begin{bmatrix}s_1\\s_2\\s_3\\s_4\end{bmatrix}.
+$$
+
+合力为 $[0,0,-T]^{\mathsf T}$。这个矩阵对转速平方是线性的；求得 $s_i$ 后，以 $\Omega_i=\sqrt{s_i}$ 转成转速指令。可实现载荷要求 $0\leq s_i\leq\Omega_{\max}^2$。若改成 X 形布局，各杆臂在前、右方向的投影都参与力矩，按实际 $x_i,y_i$ 重算第二、第三行即可。
+
+## 4.7.3 悬停转速和一次差动输入
+
+取教学参数
+
+$$
+\begin{aligned}
+m&=1.2\,\mathrm{kg},\quad g=9.80665\,\mathrm{m/s^2},
+\quad\ell=0.20\,\mathrm m,\\
+k_T&=1.5\times10^{-5}\,\mathrm{N/(rad/s)^2},\\
+k_Q&=2.0\times10^{-7}\,\mathrm{N\,m/(rad/s)^2},\\
+I&=\operatorname{diag}(0.02,0.02,0.04)\,\mathrm{kg\,m^2}.
+\end{aligned}
+$$
+
+在静止空气中水平悬停，四桨等速且 $T=mg$，三个力矩同时为零。因此
+
+$$
+s_h=\frac{mg}{4k_T}=196133\,(\mathrm{rad/s})^2,\qquad
+\Omega_h=\sqrt{s_h}\approx442.869\,\mathrm{rad/s}
+\approx4229.09\,\mathrm{rpm}.
+$$
+
+现在令左桨的转速平方增加 $d=0.1s_h$，右桨减少相同量，即 $s_4=s_h+d$、$s_2=s_h-d$，前后桨保持 $s_h$。由于两只被调整的桨旋向相同，偏航反扭矩增量相互抵消，得到
+
+$$
+T=mg,\qquad
+\tau_x=2\ell k_Td=0.1176798\,\mathrm{N\,m},\qquad
+\tau_y=\tau_z=0.
+$$
+
+左、右桨实际转速分别约为 $464.485$ 和 $420.142\,\mathrm{rad/s}$。零角速度初态下，初始滚转角加速度为 $\dot p=\tau_x/I_{xx}=5.88399\,\mathrm{rad/s^2}$，方向为右侧机臂向下。这里增减的是转速平方的 10%；若直接把转速加减 10%，平方后总推力也会改变。
+
+下面的 NumPy 短程序只计算已给定的载荷映射，可保存为 `quadrotor_loads.py`，用 `python quadrotor_loads.py` 运行：
+
+```python title="quadrotor_loads.py · 悬停与差动输入"
+import numpy as np
+
+mass, gravity, arm = 1.2, 9.80665, 0.20
+k_thrust, k_torque = 1.5e-5, 2.0e-7
+mix = np.array([
+    [k_thrust, k_thrust, k_thrust, k_thrust],
+    [0, -arm*k_thrust, 0, arm*k_thrust],
+    [arm*k_thrust, 0, -arm*k_thrust, 0],
+    [k_torque, -k_torque, k_torque, -k_torque],
+])
+s_hover = mass * gravity / (4 * k_thrust)
+s = s_hover * np.array([1.0, 0.9, 1.0, 1.1])
+print("转速 rad/s:", np.sqrt(s))
+print("推力 N、三轴力矩 N m:", mix @ s)
+```
+
+第二行输出约为 `[11.76798, 0.1176798, 0, 0]`。把载荷接到刚体方程后，才得到持续变化的姿态、速度和位置。[零号旋翼入口](/Aerodrome/reference/project-zero/#rotorcraft)记录完整旋翼模型的接线进度；当前框架中的四旋翼动力学、电机与姿态控制组合仍待扩展。
+
+## 4.7.4 倾斜怎样变成水平加速度
+
+忽略机身气动阻力，NED 加速度由推力旋转到地面系后得到：
+
+$$
+\dot{\mathbf v}_n
+=\begin{bmatrix}0\\0\\g\end{bmatrix}
++\frac1mR_{nb}\begin{bmatrix}0\\0\\-T\end{bmatrix}.
+$$
+
+若航向和俯仰为零，仅有正滚转角 $\phi$，则 $R_{nb}=R_x(\phi)$，所以
+
+$$
+a_E=\frac{T}{m}\sin\phi,\qquad
+ a_D=g-\frac{T}{m}\cos\phi.
+$$
+
+正滚转让推力向东偏斜。保持竖直加速度为零需要 $T=mg/\cos\phi$，此时 $a_E=g\tan\phi$。例如固定 $\phi=10^\circ$，所需推力约为 $11.9495\,\mathrm N$，向东加速度约为 $1.7292\,\mathrm{m/s^2}$。实际机体从水平开始，要先靠差动力矩建立倾角；若倾斜后总推力仍等于 $mg$，竖直分量变小，便会向下加速。
+
+姿态状态采用[4.2 的 Hamilton 四元数](/Aerodrome/chapters/04-aircraft-control-models/02-frames-and-attitude/)保存 body→NED 姿态，通过 $R_{nb}$ 求推力方向。上述欧拉角关系用于手算一个单轴姿态。
+
+## 4.7.5 电机响应改变载荷的到达时间
+
+若电机与转速控制器采用一阶模型，新增四个状态：
+
+$$
+\dot\Omega_i=\frac{\Omega_{c,i}-\Omega_i}{\tau_m},
+\qquad T_i=k_T\Omega_i^2.
+$$
+
+$\Omega_{c,i}$ 为指令转速，$\tau_m$ 为秒单位的时间常数。阶跃指令下，$\Omega_i(t)=\Omega_{c,i}+(\Omega_i(0)-\Omega_{c,i})e^{-t/\tau_m}$，推力随这个结果的平方变化。因而从停转启动时，推力的上升曲线与转速曲线形状不同。固定采样周期更新指令后，电机状态与机体状态按[4.4](/Aerodrome/chapters/04-aircraft-control-models/04-numerical-simulation/)联立推进，每个子阶段用当时转速求推力和反扭矩。
+
+更细的模型显式保留桨叶惯量 $J_r$，用 $J_r\dot\Omega_i=Q_{m,i}-Q_i$ 求轴加速，机体接收电机转矩的反作用；旋翼总角动量还会带来陀螺耦合。这个层次适合研究快速变速、较大旋翼或不平衡旋转部件的影响。电机的可用转矩与电源电压、转速和功率限制相连，详细模型见原书 §8.4。
+
+## 4.7.6 直升机把哪些部件加了进来
+
+常规直升机的主旋翼由调速系统维持近似恒定转速。总距同时改变各桨叶桨距，用来调节平均推力；周期变距让桨距随方位角变化，经桨叶挥舞改变桨尖轨迹平面，进而倾斜主旋翼推力。尾桨通过侧向推力平衡主旋翼反扭矩，并产生偏航控制力矩。尾桨的侧向力还会影响机体平移，因此悬停配平需要同时处理力与力矩。
+
+旋翼会向下加速空气。悬停、均匀诱导流的理想动量模型给出 $T=2\rho A v_i^2$，于是
+
+$$
+v_i=\sqrt{\frac{T}{2\rho A}},\qquad P_i=Tv_i,
+$$
+
+其中 $A$ 是桨盘面积，$v_i$ 是桨盘处向下的诱导速度，单位为 $\mathrm{m/s}$；$P_i$ 是理想诱导功率，单位为 W。在相同空气密度下，同样推力配合更大的桨盘，对应更小的诱导速度和诱导功率。真实轴功率还包含桨叶型阻和传动损耗。
+
+进入前飞后，前行桨叶和后行桨叶的来流不同，挥舞改变桨盘方向，并与机体滚转、俯仰耦合。需要描述这一过程时，可在刚体状态之外增加纵向、横向挥舞角及其动态；更精细的叶素模型再沿桨叶半径和方位角积分。主旋翼、尾桨、机身和尾翼各自在安装点求载荷，最后统一移到质心。
+
+练习：在悬停转速平方上，让 1、3 号各增加 $d=0.05s_h$，2、4 号各减少 $d$。计算总推力和三个力矩，说明机体俯视旋转方向；预期只有偏航力矩为正，大小为 $4k_Qd\approx0.0078453\,\mathrm{N\,m}$。再把同一载荷目标的杆臂长度增加一倍，比较实现滚转力矩所需的左右推力差怎样变化。
+
+## 参考阅读
+
+[Stevens、Lewis、Johnson，*Aircraft Control and Simulation*，第三版，2016](https://onlinelibrary.wiley.com/doi/book/10.1002/9781119174882)：§8.2，页 630—639 讨论推力、诱导速度、轴转矩和陀螺效应；§8.3，页 640—645 讨论挥舞；§8.4，页 645—648 讨论电机；§8.6—§8.7，页 654—660 展示四旋翼与小型直升机的部件组合。叶素积分、动态入流与挥舞耦合可作为完成本节手算后的选读。
