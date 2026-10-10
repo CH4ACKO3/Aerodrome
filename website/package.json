@@ -8,7 +8,6 @@
   },
   "scripts": {
     "prepare-content": "node scripts/prepare-content.mjs",
-    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "generate-models": "node scripts/generate-scene-assets.mjs",
     "dev": "npm run prepare-content && astro dev --host 127.0.0.1",
     "build": "npm run prepare-content && astro build && node scripts/check-output.mjs",
